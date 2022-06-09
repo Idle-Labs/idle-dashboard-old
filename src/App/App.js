@@ -2,8 +2,8 @@ import Web3 from "web3";
 import jQuery from "jquery";
 import theme from "../theme";
 import themeDark from "../theme-dark";
-import connectors from "./connectors";
 import Web3Provider from "web3-react";
+import Web3Connectors from "./connectors"
 import { Web3Consumer } from "web3-react";
 import Multicall from '../utilities/Multicall';
 import RimbleWeb3 from "../utilities/RimbleWeb3";
@@ -64,6 +64,8 @@ class App extends Component {
   // Utils
   multiCall = null;
   functionsUtil = null;
+  web3Connectors = null;
+
   loadUtils() {
     const newProps = {
       ...this.props,
@@ -76,14 +78,18 @@ class App extends Component {
       this.functionsUtil = new FunctionsUtil(newProps);
     }
 
-
     if (!this.multiCall){
       this.multiCall = new Multicall();
+    }
+
+    if (!this.web3Connectors){
+      this.web3Connectors = new Web3Connectors();
     }
 
     if (this.state.network){
       const requiredNetworkId = this.state.network.required.id;
       this.multiCall.setNetwork(requiredNetworkId);
+      this.web3Connectors.setNetwork(requiredNetworkId);
     }
 
     if (this.state.web3){
@@ -775,6 +781,8 @@ class App extends Component {
         />
       </Flex>
     );
+
+    const connectors = this.web3Connectors.getConnectors();
 
     return (
       <Router>

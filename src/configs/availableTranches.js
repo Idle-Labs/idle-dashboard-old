@@ -4,17 +4,18 @@ import IdleStrategy from '../contracts/IdleStrategy.json';
 import IdleCDOPolygon from '../contracts/IdleCDOPolygon.json';
 import IdleCDOTrancheRewards from '../contracts/IdleCDOTrancheRewards.json';
 import TrancheStakingRewards from '../contracts/TrancheStakingRewards.json';
+import QuickswapLiquidityPool from "../abis/quickswap/QuickswapLiquidityPool.json";
 const availableTranches = {
   137:{
     quickswap:{
       CXETHWETH:{
-        abi:ERC20,
         decimals:18,
         token:'CXETHWETH',
         protocol:'quickswap',
         blockNumber:28501471,
         referralEnabled:true,
         autoFarming:['WMATIC'],
+        abi:QuickswapLiquidityPool,
         address:'0xda7cd765DF426fCA6FB5E1438c78581E4e66bFe7',
         CDO:{
           decimals:18,
@@ -37,10 +38,10 @@ const availableTranches = {
             stake:'stake',
             unstake:'exit',
             rewards:'earned',
+            rewardsRate:null,
             claim:'getReward',
             deposit:'depositAA',
             withdraw:'withdrawAA',
-            rewardsRate:'rewardRate',
             stakedBalance:'balanceOf',
             periodFinish:'periodFinish',
           },
@@ -72,10 +73,10 @@ const availableTranches = {
             stake:'stake',
             unstake:'exit',
             rewards:'earned',
+            rewardsRate:null,
             claim:'getReward',
             deposit:'depositBB',
             withdraw:'withdrawBB',
-            rewardsRate:'rewardRate',
             stakedBalance:'balanceOf',
             periodFinish:'periodFinish'
           },
