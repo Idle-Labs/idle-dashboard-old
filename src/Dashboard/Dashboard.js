@@ -678,10 +678,12 @@ class Dashboard extends Component {
 
     // Remove dashboard route
     if (isDashboard) {
-      section = section.replace(this.state.baseRoute + '/', '');
+      var replace = `^${this.state.baseRoute}/`;
+      var re = new RegExp(replace);
+      section = section.replace(re, '');
     }
 
-    const newRoute = isDashboard ? this.state.baseRoute + '/' + section : section;
+    const newRoute = isDashboard ? `${this.state.baseRoute}/` + section : section;
     
     window.location.hash = newRoute;
 

@@ -17,8 +17,8 @@ const ModalCard = ({children, closeFunc, ...props}) => (
   >
     <Box
       top={'0'}
-      zIndex={1}
       right={'0'}
+      zIndex={999}
       position={"absolute"}
     >
       <Button.Text

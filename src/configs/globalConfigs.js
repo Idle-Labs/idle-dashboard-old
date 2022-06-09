@@ -88,9 +88,9 @@ const env = process.env;
 
 const globalConfigs = {
   appName: "Idle",
-  version: "v6.8",
+  version: "v6.9",
   baseToken: "ETH",
-  baseURL: "https://idle.finance",
+  baseURL: "https://app.idle.finance",
   forumURL: "https://gov.idle.finance",
   telegramURL: "https://t.me/idlefinance",
   discordURL: "https://discord.gg/mpySAJp",
@@ -105,7 +105,7 @@ const globalConfigs = {
   environments: {
     live: {
       requiredNetwork: 1,
-      url: "https://idle.finance"
+      url: "https://app.idle.finance"
     },
     beta: {
       requiredNetwork: 1,
