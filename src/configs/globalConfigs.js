@@ -1655,6 +1655,7 @@ const globalConfigs = {
       aavev2WithStkAAVE: {
         enabled: true,
         label: "Aave V2 + stkAAVE",
+        endTimestamp:"2022-05-22 23:59:59",
         startTimestamp: "2021-05-08 14:30:00",
         // tokensProps:{
         //   WETH:{

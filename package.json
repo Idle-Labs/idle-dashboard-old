@@ -111,7 +111,8 @@
     "start": "node --max-old-space-size=8192 scripts/start.js",
     "build": "node --max-old-space-size=8192 scripts/build.js",
     "test": "node scripts/test.js",
-    "deploy": "echo 'app.idle.finance\nwww.app.idle.finance' > build/CNAME;gh-pages -b gh-pages -d build --remote origin"
+    "deploy": "echo 'app.idle.finance\nwww.app.idle.finance' > build/CNAME;gh-pages -b gh-pages -d build --remote origin",
+    "deploy-beta": "echo 'beta.idle.finance\nwww.beta.idle.finance' > build/CNAME;gh-pages -b gh-pages -d build --remote beta"
   },
   "eslintConfig": {
     "extends": "react-app"

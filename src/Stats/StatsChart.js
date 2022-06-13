@@ -83,6 +83,7 @@ class StatsChart extends Component {
     let idleChartData = null;
     let firstIdleBlock = null;
     let axisBottomMaxValues = 12;
+    let apiResults_filtered = {};
 
     const seniorTrancheName = this.functionsUtil.capitalize(tranchesConfig.AA.baseName);
     const juniorTrancheName = this.functionsUtil.capitalize(tranchesConfig.BB.baseName);
@@ -1943,11 +1944,13 @@ class StatsChart extends Component {
           }
 
           const rateField = protocolInfo.rateField ? protocolInfo.rateField : 'rate';
+
+          apiResults_filtered = apiResults.filter( d => (!protocolInfo.startTimestamp || moment(protocolInfo.startTimestamp).isSameOrBefore(moment(d.timestamp*1000))) && (!protocolInfo.endTimestamp || this.functionsUtil.strToMoment(protocolInfo.endTimestamp).isSameOrAfter(moment(d.timestamp*1000))) );
           
           chartData.push({
             id:protocolInfo.label,
             color:'hsl('+globalConfigs.stats.protocols[p.name].color.hsl.join(',')+')',
-            data:apiResults.map((d,i) => {
+            data:apiResults_filtered.map((d,i) => {
               return d.protocolsData.filter((protocolAllocation,x) => {
                   return protocolAllocation.protocolAddr.toLowerCase() === p.address.toLowerCase()
               })
@@ -2492,7 +2495,7 @@ class StatsChart extends Component {
           avgApy = this.functionsUtil.BNify(0);
           startBalance = this.functionsUtil.BNify(1);
           currentBalance = this.functionsUtil.BNify(1);
-          const apiResults_filtered = apiResults.filter( d => (!protocolInfo.startTimestamp || moment(protocolInfo.startTimestamp).isSameOrBefore(moment(d.timestamp*1000))) );
+          apiResults_filtered = apiResults.filter( d => (!protocolInfo.startTimestamp || moment(protocolInfo.startTimestamp).isSameOrBefore(moment(d.timestamp*1000))) && (!protocolInfo.endTimestamp || this.functionsUtil.strToMoment(protocolInfo.endTimestamp).isSameOrAfter(moment(d.timestamp*1000))) );
 
           apiResults_filtered.forEach( (d,i) => {
 
@@ -2518,6 +2521,7 @@ class StatsChart extends Component {
                 protocolRate = protocolRate.plus(this.functionsUtil.BNify(protocolData.aaveAdditionalAPR));
               }
 
+              const mDate = moment(d.timestamp*1000);
               const protocolPaused = protocolRate.eq(0);
               if (!protocolPaused){
 
@@ -2525,7 +2529,7 @@ class StatsChart extends Component {
 
                 let y = 0;
                 let apy = 0;
-                const x = moment(d.timestamp*1000).format("YYYY/MM/DD HH:mm");
+                const x = mDate.format("YYYY/MM/DD HH:mm");
                 const apr = this.functionsUtil.fixTokenDecimals(protocolRate,18).div(100);
 
                 avgApy = avgApy.plus(apr.times(100));
