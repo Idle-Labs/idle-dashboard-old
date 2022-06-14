@@ -282,6 +282,7 @@ class TrancheField extends Component {
 
   render(){
     let output = null;
+    let formattedValue = null;
     const fieldInfo = this.props.fieldInfo;
     const showLoader = fieldInfo.showLoader === undefined || fieldInfo.showLoader;
     const loader = showLoader ? (<Loader size="20px" />) : null;
@@ -466,6 +467,38 @@ class TrancheField extends Component {
           </CountUp>
         ) : loader
       break;
+      case 'trancheAPRSplitRatio':
+        if (this.props.tokenConfig.adaptiveYieldSplitEnabled){
+          output = (
+            <Tooltip
+              placement={'top'}
+              message={this.functionsUtil.getGlobalConfig(['messages','aysShort'])}
+            >
+              <Image src={`images/ays.svg`} height={['1.4em','2em']} {...fieldProps} />
+            </Tooltip>
+          );
+        } else {
+          output = this.state[fieldInfo.name];
+          formattedValue = this.state[fieldInfo.name];
+          if (this.state[fieldInfo.name] && this.state[fieldInfo.name]._isBigNumber){
+            formattedValue = this.state[fieldInfo.name].toFixed(decimals);
+          }
+
+          output = this.state[fieldInfo.name] ? (
+            <Text {...fieldProps} dangerouslySetInnerHTML={{__html:formattedValue}}></Text>
+          ) : (this.state[fieldInfo.name] === undefined ? loader : null)
+        }
+      break;
+      case 'trancheAYS':
+        output = (
+          <Tooltip
+            placement={'top'}
+            message={this.functionsUtil.getGlobalConfig(['messages','aysShort'])}
+          >
+            <Image src={`images/ays.svg`} height={['1.4em','2em']} {...fieldProps} />
+          </Tooltip>
+        );
+      break;
       case 'trancheApyWithTooltip':
         if (this.state[fieldInfo.name]){
           let tooltipMessage = [`${this.props.token}: ${this.state[fieldInfo.name].baseApy.toFixed(decimals)+'%'}`];
@@ -548,7 +581,7 @@ class TrancheField extends Component {
         ) : loader
       break;
       default:
-        let formattedValue = this.state[fieldInfo.name];
+        formattedValue = this.state[fieldInfo.name];
         if (this.state[fieldInfo.name] && this.state[fieldInfo.name]._isBigNumber){
           formattedValue = this.state[fieldInfo.name].toFixed(decimals);
         }

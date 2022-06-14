@@ -221,6 +221,7 @@ const globalConfigs = {
     totalProfitPerc: "Total percentage profit generated on your balance",
     tokenPrice: "The token price is calculated using Uniswap spot prices.",
     cheapRedeem: "Amount of unlent funds available for low gas fees redeem",
+    aysShort: "This strategy automatically adjusts the yield split between tranches",
     aprRatio:"The % share of the underlying yield this tranche is currently receiving",
     gaugeBoost: "Increase the boost by staking your IDLE tokens and increasing your voting power",
     curveBonusSlippage: "Slippage or bonus depending on if the coin is low or high in the Curve Pool",

@@ -594,12 +594,12 @@ class TrancheDetails extends Component {
               <TrancheField
                 {...this.props}
                 fieldInfo={{
-                  name:'trancheAPRRatio',
                   props:{
                     fontWeight:3,
                     fontSize:[1,2],
                     color:'copyColor'
-                  }
+                  },
+                  name:this.props.tokenConfig.adaptiveYieldSplitEnabled ? 'trancheAYS' : 'trancheAPRRatio'
                 }}
                 token={this.props.selectedToken}
                 tranche={this.props.selectedTranche}

@@ -855,11 +855,11 @@ class TrancheDetails extends Component {
                         <TrancheField
                           {...this.props}
                           fieldInfo={{
-                            name:'trancheAPRRatio',
                             props:{
                               fontSize:[1,2],
                               color:'copyColor'
-                            }
+                            },
+                            name:this.props.tokenConfig.adaptiveYieldSplitEnabled ? 'trancheAYS' : 'trancheAPRRatio'
                           }}
                           token={this.props.selectedToken}
                           tranche={this.props.selectedTranche}
@@ -968,8 +968,8 @@ class TrancheDetails extends Component {
                                   fontWeight={2}
                                   fontSize={'15px'}
                                   textAlign={'justify'}
+                                  dangerouslySetInnerHTML={{__html:this.props.tokenConfig.description}}
                                 >
-                                  {this.props.tokenConfig.description}
                                 </Text>
                               </Flex>
                             </Flex>

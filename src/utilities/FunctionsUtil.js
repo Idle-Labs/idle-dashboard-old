@@ -5405,7 +5405,7 @@ class FunctionsUtil {
       case 'trancheAPRSplitRatio':
         output = await this.genericContractCallCachedTTL(tokenConfig.CDO.name,'trancheAPRSplitRatio',3600);
         output= output/1000;
-        output= output.toString()+"/"+(100-output).toString();
+        output= output.toFixed(0)+"/"+(100-output).toFixed(0);
       break;
       case 'trancheAPRRatio':
         output = await this.genericContractCallCachedTTL(tokenConfig.CDO.name,'trancheAPRSplitRatio',3600);
