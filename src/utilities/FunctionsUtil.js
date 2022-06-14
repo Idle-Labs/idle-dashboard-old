@@ -5402,6 +5402,20 @@ class FunctionsUtil {
       case 'AAIDLEDistribution':
         output = this.abbreviateNumber('1234',decimals,maxPrecision,minPrecision)+` IDLE/day`;
       break;
+      case 'seniorCoverage':
+        const [
+          seniorPool,
+          juniorPool
+        ] = await Promise.all([
+          this.loadTrancheFieldRaw('tranchePool', fieldProps, protocol, token, 'AA', tokenConfig, tokenConfig.AA, account, addGovTokens, formatValue, false),
+          this.loadTrancheFieldRaw('tranchePool', fieldProps, protocol, token, 'BB', tokenConfig, tokenConfig.BB, account, addGovTokens, formatValue, false),
+        ]);
+
+        output = '0%';
+        if (seniorPool && juniorPool){
+          output = this.BNify(juniorPool).div(seniorPool).times(100).toFixed(0)+'%';
+        }
+      break;
       case 'trancheAPRSplitRatio':
         output = await this.genericContractCallCachedTTL(tokenConfig.CDO.name,'trancheAPRSplitRatio',3600);
         output= output/1000;

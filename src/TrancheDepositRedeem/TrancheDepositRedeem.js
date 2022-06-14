@@ -911,7 +911,7 @@ class TrancheDetails extends Component {
                         color={'primary'}
                         fontFamily={'titles'}
                       >
-                        Limit Cap
+                        Senior Coverage
                       </Text>
                       <Flex
                         mt={1}
@@ -921,7 +921,7 @@ class TrancheDetails extends Component {
                         <TrancheField
                           {...this.props}
                           fieldInfo={{
-                            name:'trancheLimit',
+                            name:'seniorCoverage',
                             props:{
                               decimals:3,
                               fontSize:[1,2],
@@ -954,7 +954,7 @@ class TrancheDetails extends Component {
                             >
                               <Text
                                 fontSize={[1,2]}
-                                color={'cellText'}
+                                color={'primary'}
                                 fontWeight={[2,3]}
                               >
                                 Strategy Description

@@ -997,7 +997,7 @@ const availableTranches = {
           abi:IdleStrategy,
           name:'IdleStrategy_euler_USDC'
         },
-        description:'This strategy deploys funds in the <a href="https://app.euler.finance/market/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48" class="link" rel="nofollow noopener noreferrer" target="_blank">Euler USDC pool</a>. The APR is dinamically adjusted based on the tranches TVL thanks to the Adaptive Yield Split.',
+        description:'This strategy deploys funds in the <a href="https://app.euler.finance/market/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48" class="link" rel="nofollow noopener noreferrer" target="_blank">Euler USDC pool</a>. The APR is dynamically adjusted according to the coverage provided to the counterpart Senior tranche thanks to the <a href="https://medium.com/idle-finance/adaptive-yield-split-foster-pyts-liquidity-scalability-a796fa17ea35" class="link" rel="nofollow noopener noreferrer" target="_blank">Adaptive Yield Split</a>.',
         AA:{
           abi:ERC20,
           decimals:6,
