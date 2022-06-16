@@ -5092,6 +5092,7 @@ class FunctionsUtil {
           this.loadTrancheField('tranchePrice', fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens)
         ]);
 
+
         output = this.BNify(0);
         if (!this.BNify(virtualPrice).isNaN() && !this.BNify(totalSupply).isNaN()) {
           output = this.fixTokenDecimals(totalSupply, tokenConfig.CDO.decimals).times(virtualPrice);
@@ -5407,13 +5408,40 @@ class FunctionsUtil {
           seniorPool,
           juniorPool
         ] = await Promise.all([
-          this.loadTrancheFieldRaw('tranchePool', fieldProps, protocol, token, 'AA', tokenConfig, tokenConfig.AA, account, addGovTokens, formatValue, false),
-          this.loadTrancheFieldRaw('tranchePool', fieldProps, protocol, token, 'BB', tokenConfig, tokenConfig.BB, account, addGovTokens, formatValue, false),
+          this.loadTrancheFieldRaw('tranchePoolConverted', fieldProps, protocol, token, 'AA', tokenConfig, tokenConfig.AA, account, addGovTokens, formatValue, false),
+          this.loadTrancheFieldRaw('tranchePoolConverted', fieldProps, protocol, token, 'BB', tokenConfig, tokenConfig.BB, account, addGovTokens, formatValue, false),
         ]);
 
         output = '0%';
         if (seniorPool && juniorPool){
-          output = this.BNify(juniorPool).div(seniorPool).times(100).toFixed(0)+'%';
+          // output = this.BNify(juniorPool).div(seniorPool).times(100).toFixed(0)+'%';
+          // output = '$'+this.abbreviateNumber(juniorPool, decimals, maxPrecision, minPrecision)
+          const coverage = juniorPool.div(seniorPool);
+
+          if (formatValue){
+            output = '$1 is covered by $'+this.abbreviateNumber(coverage, decimals, maxPrecision, minPrecision)
+          } else {
+            output = this.BNify(juniorPool).div(seniorPool).times(100).toFixed(0)+'%';
+          }
+        }
+      break;
+      case 'apyBoost':
+        const [
+          seniorApy,
+          juniorApy
+        ] =  await Promise.all([
+          this.loadTrancheFieldRaw('trancheApy', fieldProps, protocol, token, 'AA', tokenConfig, tokenConfig.AA, account, addGovTokens, formatValue, false),
+          this.loadTrancheFieldRaw('trancheApy', fieldProps, protocol, token, 'BB', tokenConfig, tokenConfig.BB, account, addGovTokens, formatValue, false),
+        ]);
+
+        if (tranche==='AA'){
+          output = this.BNify(seniorApy).div(this.BNify(juniorApy));
+        } else {
+          output = this.BNify(juniorApy).div(this.BNify(seniorApy));
+        }
+
+        if (formatValue){
+          output = output.toFixed(1)+'x';
         }
       break;
       case 'trancheAPRSplitRatio':

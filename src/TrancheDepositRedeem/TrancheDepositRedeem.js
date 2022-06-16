@@ -679,6 +679,7 @@ class TrancheDetails extends Component {
                             props:{
                               decimals:2,
                               fontSize:[1,2],
+                              minPrecision:2,
                               color:'copyColor'
                             }
                           }}
@@ -844,7 +845,7 @@ class TrancheDetails extends Component {
                           fontWeight:[2,3],
                           fontFamily:'ctas',
                         }}
-                        text={'Apr Ratio'}
+                        text={'APY Ratio'}
                         message={this.functionsUtil.getGlobalConfig(['messages','aprRatio'])}
                       />
                       <Flex
@@ -911,7 +912,9 @@ class TrancheDetails extends Component {
                         color={'primary'}
                         fontFamily={'titles'}
                       >
-                        Senior Coverage
+                        {
+                          this.props.selectedTranche === 'AA' ? 'Senior Coverage' : 'APY Boost'
+                        }
                       </Text>
                       <Flex
                         mt={1}
@@ -921,12 +924,13 @@ class TrancheDetails extends Component {
                         <TrancheField
                           {...this.props}
                           fieldInfo={{
-                            name:'seniorCoverage',
                             props:{
-                              decimals:3,
+                              decimals:2,
+                              minPrecision:2,
                               fontSize:[1,2],
                               color:'copyColor'
-                            }
+                            },
+                            name:this.props.selectedTranche === 'AA' ? 'seniorCoverage' : 'apyBoost'
                           }}
                           token={this.props.selectedToken}
                           tranche={this.props.selectedTranche}

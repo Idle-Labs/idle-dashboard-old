@@ -437,6 +437,7 @@ class TrancheDetails extends Component {
                   props:{
                     decimals:2,
                     fontSize:[1,2],
+                    minPrecision:2,
                     color:'copyColor'
                   }
                 }}
@@ -586,7 +587,7 @@ class TrancheDetails extends Component {
                   color:'primary',
                   fontFamily:'titles'
                 }}
-                text={'Apr Ratio'}
+                text={'APY Ratio'}
                 tooltipProps={{
                   message:this.functionsUtil.getGlobalConfig(['messages','aprRatio'])
                 }}
@@ -639,42 +640,46 @@ class TrancheDetails extends Component {
                 trancheConfig={this.props.trancheConfig}
               />
             </Flex>
-            {
-              (this.props.tokenConfig.experimental || !this.props.isMobile) && (
-                <Flex
-                  mb={3}
-                  width={[0.5,0.33]}
-                  flexDirection={'column'}
-                  alignItems={'flex-start'}
-                >
-                  <Text
-                    fontWeight={3}
-                    fontSize={[1,2]}
-                    color={'primary'}
-                    fontFamily={'titles'}
-                  >
-                    Limit Cap
-                  </Text>
-                  <TrancheField
-                    {...this.props}
-                    fieldInfo={{
-                      name:'trancheLimit',
-                      props:{
-                        decimals:3,
-                        fontWeight:3,
-                        fontSize:[1,2],
-                        color:'copyColor'
-                      }
-                    }}
-                    token={this.props.selectedToken}
-                    tranche={this.props.selectedTranche}
-                    tokenConfig={this.props.tokenConfig}
-                    protocol={this.props.selectedProtocol}
-                    trancheConfig={this.props.trancheConfig}
-                  />
-                </Flex>
-              )
-            }
+            <Flex
+              mb={3}
+              width={[0.5,0.33]}
+              flexDirection={'column'}
+              alignItems={'flex-start'}
+            >
+              <Text
+                fontWeight={3}
+                fontSize={[1,2]}
+                color={'primary'}
+                fontFamily={'titles'}
+              >
+                {
+                  this.props.selectedTranche === 'AA' ? 'Senior Coverage' : 'APY Boost'
+                }
+              </Text>
+              <Flex
+                mt={1}
+                alignItems={'center'}
+                flexDirection={'row'}
+              >
+                <TrancheField
+                  {...this.props}
+                  fieldInfo={{
+                    props:{
+                      decimals:2,
+                      minPrecision:2,
+                      fontSize:[1,2],
+                      color:'copyColor'
+                    },
+                    name:this.props.selectedTranche === 'AA' ? 'seniorCoverage' : 'apyBoost'
+                  }}
+                  token={this.props.selectedToken}
+                  tranche={this.props.selectedTranche}
+                  tokenConfig={this.props.tokenConfig}
+                  protocol={this.props.selectedProtocol}
+                  trancheConfig={this.props.trancheConfig}
+                />
+              </Flex>
+            </Flex>
           </Flex>
           {
             this.props.showSelectButton ? (
