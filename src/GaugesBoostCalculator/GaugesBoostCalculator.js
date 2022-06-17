@@ -149,24 +149,23 @@ class GaugesBoostCalculator extends Component {
         const stakedBalance = depositAmount.div(tokenConversionRate).div(trancheVirtualPrice);
 
         let [
+          gaugeWeight,
           gaugeNextWeight,
           rewardsTokens,
           gaugeTotalSupply,
           userBoostInfo,
-          gaugeWorkingSupply,
-          gaugeWeight
         ] = await Promise.all([
+          this.functionsUtil.getGaugeWeight(gaugeConfig),
           this.functionsUtil.getGaugeNextWeight(gaugeConfig),
           this.functionsUtil.getGaugeRewardsTokens(gaugeConfig),
           this.functionsUtil.getTokenTotalSupply(gaugeConfig.name),
           this.functionsUtil.calculateGaugeBoost(gaugeToken,stakedBalance,veTokenBalance),
-          this.functionsUtil.genericContractCallCached(gaugeConfig.name,'working_supply'),
-          this.functionsUtil.genericContractCallCached('GaugeController','gauge_relative_weight',[gaugeConfig.address])
         ]);
 
         // console.log(gaugeConfig.name,tokenConversionRate,trancheVirtualPrice,stakedBalance.toFixed(),veTokenBalance.toFixed());
 
         const userWorkingBalance = userBoostInfo.workingBalance;
+        const gaugeWorkingSupply = userBoostInfo.workingSupply;
 
         const claimableRewardsTokens = Object.keys(rewardsTokens).reduce( (claimableRewards,token) => {
           const tokenConfig = rewardsTokens[token];
@@ -181,11 +180,13 @@ class GaugesBoostCalculator extends Component {
 
         const gaugeUserShare = stakedBalance.div(gaugeTotalSupply.plus(stakedBalance));
 
-        const userBoostedShare = this.functionsUtil.BNify(userWorkingBalance).div(gaugeWorkingSupply);
+        const userBoostedShare = this.functionsUtil.BNify(userWorkingBalance).div(this.functionsUtil.BNify(gaugeWorkingSupply).plus(userWorkingBalance));
         let userBoostedDistribution = gaugeDistributionRate.times(userBoostedShare);
         if (userBoostedDistribution.gt(gaugeDistributionRate)){
           userBoostedDistribution = gaugeDistributionRate;
         }
+
+        // console.log(gaugeToken,gaugeWeight.toFixed(),userBoostInfo,this.functionsUtil.BNify(userWorkingBalance).toFixed(),this.functionsUtil.BNify(gaugeWorkingSupply).toFixed(),userBoostedShare.toFixed());
 
         const claimableTokens = Object.keys(claimableRewardsTokens).length ? Object.keys(claimableRewardsTokens).map( token => {
           let text = ``;

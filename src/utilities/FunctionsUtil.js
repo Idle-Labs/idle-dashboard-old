@@ -4837,7 +4837,8 @@ class FunctionsUtil {
 
     return {
       boost,
-      workingBalance:lim
+      workingBalance:lim,
+      workingSupply:working_supply
     };
   }
   getGaugeWeight = async (gaugeConfig) => {
