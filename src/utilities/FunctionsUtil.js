@@ -1198,6 +1198,15 @@ class FunctionsUtil {
 
     return harvestsList;
   }
+  loadTrancheStrategyContract = async (tokenConfig) => {
+    const strategyConfig = tokenConfig.Strategy;
+    const idleStrategyAddress = strategyConfig.address || await this.genericContractCallCachedTTL(tokenConfig.CDO.name, 'strategy', 3600);
+    if (idleStrategyAddress){
+      await this.props.initContract(strategyConfig.name, idleStrategyAddress, strategyConfig.abi);
+      return idleStrategyAddress;
+    }
+    return false;
+  }
   getTrancheLastHarvest = async (tokenConfig,trancheConfig) => {
     const strategyConfig = tokenConfig.Strategy;
     const harvestEnabled = strategyConfig.harvestEnabled === undefined ? true : strategyConfig.harvestEnabled;
@@ -1208,10 +1217,9 @@ class FunctionsUtil {
     }
     
     // Create Tranche Strategy contract
-    const idleStrategyAddress = await this.genericContractCallCachedTTL(tokenConfig.CDO.name, 'strategy', 3600);
+    const idleStrategyAddress = await this.loadTrancheStrategyContract(tokenConfig);
 
     if (idleStrategyAddress) {
-      await this.props.initContract(strategyConfig.name, idleStrategyAddress, strategyConfig.abi);
       let limit = null;
       let startBlock = tokenConfig.blockNumber;
       let latestHarvestBlock = await this.genericContractCall(strategyConfig.name,'latestHarvestBlock');
@@ -5033,10 +5041,7 @@ class FunctionsUtil {
     const show_idle_apy = internal_view && parseInt(internal_view) === 1;
     
     // Create Tranche Strategy contract
-    const idleStrategyAddress = await this.genericContractCallCachedTTL(tokenConfig.CDO.name, 'strategy', 3600);
-    if (idleStrategyAddress) {
-      await this.props.initContract(strategyConfig.name, idleStrategyAddress, strategyConfig.abi);
-    }
+    await this.loadTrancheStrategyContract(tokenConfig);
 
     const idleGovTokenConfig = this.getGlobalConfig(['govTokens', 'IDLE']);
     switch (field) {
@@ -5426,23 +5431,30 @@ class FunctionsUtil {
           }
         }
       break;
+      case 'strategyApr':
+        output = await this.genericContractCallCached(tokenConfig.Strategy.name,'getApr');
+        if (!output){
+          output = 0;
+        }
+        output = this.fixTokenDecimals(output,18);
+        if (formatValue){
+          output = output.toFixed(decimals) + '%';
+        }
+      break;
       case 'apyBoost':
-        const [
-          seniorApy,
-          juniorApy
+        let strategyApr = 0;
+        [
+          trancheApy,
+          strategyApr
         ] =  await Promise.all([
-          this.loadTrancheFieldRaw('trancheApy', fieldProps, protocol, token, 'AA', tokenConfig, tokenConfig.AA, account, addGovTokens, formatValue, false),
-          this.loadTrancheFieldRaw('trancheApy', fieldProps, protocol, token, 'BB', tokenConfig, tokenConfig.BB, account, addGovTokens, formatValue, false),
+          this.loadTrancheFieldRaw('trancheApy', fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens, formatValue, false),
+          this.loadTrancheFieldRaw('strategyApr', fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens, formatValue, false),
         ]);
 
-        if (tranche==='AA'){
-          output = this.BNify(seniorApy).div(this.BNify(juniorApy));
-        } else {
-          output = this.BNify(juniorApy).div(this.BNify(seniorApy));
-        }
+        output = this.BNify(trancheApy).div(this.BNify(strategyApr));
 
         if (formatValue){
-          output = output.toFixed(1)+'x';
+          output = `${output.toFixed(1)}x`;// (${strategyApr.toFixed(2)}%)`;
         }
       break;
       case 'trancheAPRSplitRatio':

@@ -325,6 +325,7 @@ class TrancheDetails extends Component {
               mb={3}
               width={[0.5,0.33]}
               flexDirection={'column'}
+              minHeight={['auto','60px']}
             >
               <Text
                 mb={1}
@@ -373,6 +374,7 @@ class TrancheDetails extends Component {
               mb={3}
               width={[0.5,0.33]}
               flexDirection={'column'}
+              minHeight={['auto','60px']}
             >
               <Text
                 mb={1}
@@ -421,6 +423,7 @@ class TrancheDetails extends Component {
               mb={3}
               width={[0.5,0.33]}
               flexDirection={'column'}
+              minHeight={['auto','60px']}
             >
               <Text
                 fontWeight={3}
@@ -452,6 +455,7 @@ class TrancheDetails extends Component {
               mb={3}
               width={[0.5,0.33]}
               flexDirection={'column'}
+              minHeight={['auto','60px']}
               alignItems={'flex-start'}
             >
               <TooltipText
@@ -485,6 +489,7 @@ class TrancheDetails extends Component {
               mb={3}
               width={[0.5,0.33]}
               flexDirection={'column'}
+              minHeight={['auto','60px']}
             >
               <TooltipText
                 flexProps={{
@@ -520,6 +525,7 @@ class TrancheDetails extends Component {
               mb={3}
               width={[0.5,0.33]}
               flexDirection={'column'}
+              minHeight={['auto','60px']}
             >
               <TooltipText
                 text={'APY'}
@@ -580,6 +586,7 @@ class TrancheDetails extends Component {
               mb={3}
               width={[0.5,0.33]}
               flexDirection={'column'}
+              minHeight={['auto','60px']}
               alignItems={'flex-start'}
             >
               <TooltipText
@@ -613,6 +620,7 @@ class TrancheDetails extends Component {
               mb={3}
               width={[0.5,0.33]}
               flexDirection={'column'}
+              minHeight={['auto','60px']}
               alignItems={'flex-start'}
             >
               <Text
@@ -644,6 +652,7 @@ class TrancheDetails extends Component {
               mb={3}
               width={[0.5,0.33]}
               flexDirection={'column'}
+              minHeight={['auto','60px']}
               alignItems={'flex-start'}
             >
               <Text

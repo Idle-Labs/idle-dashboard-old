@@ -33,7 +33,7 @@ export default class WalletLinkConnector extends Connector {
   }
 
   getProvider(){
-    if (!this.provider){
+    if (!this.provider && this.walletLink){
       this.provider = this.walletLink.makeWeb3Provider(this.infuraUrl, this.chainId);
     }
     return this.provider;

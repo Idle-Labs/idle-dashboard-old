@@ -665,12 +665,13 @@ class RimbleTransaction extends React.Component {
 
     const currentNetworkId = this.state.network.current.id;
     const biconomyInfo = globalConfigs.network.providers.biconomy;
+    const biconomyEnabled = biconomyInfo && biconomyInfo.enabled && biconomyInfo.supportedNetworks.includes(currentNetworkId) && (!walletProvider || !biconomyInfo.disabledWallets.includes(walletProvider.toLowerCase()));
 
-    // console.log('initWeb3',initWeb3Index,connectorName,web3,context,web3Provider);
+    // console.log('initWeb3',initWeb3Index,biconomyEnabled,connectorName,web3,context,web3Provider,'UPDATE',web3 !== this.state.web3);
 
     // console.log('check biconomy enabled',this.state.network,currentNetworkId,biconomyInfo.supportedNetworks.includes(currentNetworkId));
 
-    if (connectorName !== 'Infura' && biconomyInfo && biconomyInfo.enabled && biconomyInfo.supportedNetworks.includes(currentNetworkId) && (!walletProvider || !biconomyInfo.disabledWallets.includes(walletProvider.toLowerCase()))){
+    if (connectorName !== 'Infura' && biconomyEnabled){
 
       const biconomyWeb3Provider = web3Provider ? web3Provider : new Web3.providers.HttpProvider(web3Host);
       if (this.state.biconomy === null || this.state.biconomy.currentProvider !== biconomyWeb3Provider ){
@@ -685,10 +686,10 @@ class RimbleTransaction extends React.Component {
 
           web3 = new Web3(biconomy);
           biconomy.onEvent(biconomy.READY, () => {
-            if (this.componentUnmounted || this.state.biconomy === false || (this.state.biconomy === biconomy && web3 !== this.state.web3)){
-              // console.log('biconomy already loaded',biconomyWeb3Provider,this.state.biconomy===biconomy);
-              return false;
-            }
+            // if (this.componentUnmounted || this.state.biconomy === false || (this.state.biconomy === biconomy && web3 !== this.state.web3)){
+            //   console.log('biconomy already loaded',biconomyWeb3Provider,this.state.biconomy===biconomy);
+            //   return false;
+            // }
             
             const permitClient = biconomy.permitClient;
             const erc20ForwarderClient = biconomy.erc20ForwarderClient;
@@ -1052,8 +1053,6 @@ class RimbleTransaction extends React.Component {
       return false;
     }
 
-    // console.log('initializeContracts',this.state.web3Providers);
-
     // console.log(this.functionsUtil.strToMoment().format('HH:mm:ss'),'initializeContracts - START',this.state.network.required.id,this.props.availableStrategies,this.props.availableStrategiesNetworks);
 
     const contracts = [];
@@ -1189,6 +1188,11 @@ class RimbleTransaction extends React.Component {
               contracts.push(this.initContractWithoutSet(tokenConfig.CDO.name,tokenConfig.CDO.address,tokenConfig.CDO.abi));
               contracts.push(this.initContractWithoutSet(tokenConfig.AA.CDORewards.name,tokenConfig.AA.CDORewards.address,tokenConfig.AA.CDORewards.abi));
               contracts.push(this.initContractWithoutSet(tokenConfig.BB.CDORewards.name,tokenConfig.BB.CDORewards.address,tokenConfig.BB.CDORewards.abi));
+
+              const strategyConfig = tokenConfig.Strategy;
+              if (strategyConfig.address){
+                contracts.push(this.initContractWithoutSet(tokenConfig.Strategy.name,strategyConfig.address,strategyConfig.abi));
+              }
             }
 
             if (tokenConfig.abi){

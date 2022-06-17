@@ -119,7 +119,8 @@ const availableTranches = {
         },
         Strategy:{
           abi:IdleStrategy,
-          name:'IdleStrategy_idleDAIYield'
+          name:'IdleStrategy_idleDAIYield',
+          address:'0x48a48c6694168093A3dEE02E9e8AC5a14169a652'
         },
         description:'This strategy accrue additional interest after an harvest is done. The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
         messages:{
@@ -205,7 +206,8 @@ const availableTranches = {
         },
         Strategy:{
           abi:IdleStrategy,
-          name:'IdleStrategy_idleFEIYield'
+          name:'IdleStrategy_idleFEIYield',
+          address:'0x73A44027bDAF5D71296d2C73cfb13e561c76a916'
         },
         AA:{
           abi:ERC20,
@@ -285,7 +287,8 @@ const availableTranches = {
         Strategy:{
           abi:IdleStrategy,
           harvestEnabled:false,
-          name:'IdleStrategy_lido_stETH'
+          name:'IdleStrategy_lido_stETH',
+          address:'0x0cac674ebD77bBD899f6079932768f6d59Da089A'
         },
         messages:{
           buyInstructions:'To get stETH token your have to deposit first into <a class="link" rel="nofollow noopener noreferrer" target="_blank" href="https://stake.lido.fi">Lido ETH staking</a>.',
@@ -448,7 +451,8 @@ const availableTranches = {
         },
         Strategy:{
           abi:IdleStrategy,
-          name:'IdleStrategy_convex_frax3crv'
+          name:'IdleStrategy_convex_frax3crv',
+          address:'0xBc1707D16541108b7035E52e1DAeb27ca4B6B79F'
         },
         description:'This strategy accrue interest only after an harvest is done. The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
         messages:{
@@ -526,7 +530,8 @@ const availableTranches = {
         },
         Strategy:{
           abi:IdleStrategy,
-          name:'IdleStrategy_convex_mim3crv'
+          name:'IdleStrategy_convex_mim3crv',
+          address:'0x35168324dC1981aDDc3bC915788e200BeDF77865'
         },
         description:'This strategy accrue interest only after an harvest is done. The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
         messages:{
@@ -604,7 +609,8 @@ const availableTranches = {
         },
         Strategy:{
           abi:IdleStrategy,
-          name:'IdleStrategy_convex_steCRV'
+          name:'IdleStrategy_convex_steCRV',
+          address:'0x3bCbA0AfD36C9B350f46c570f89ab70817D122CB'
         },
         description:'This strategy accrue interest only after an harvest is done. The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
         messages:{
@@ -681,7 +687,8 @@ const availableTranches = {
         },
         Strategy:{
           abi:IdleStrategy,
-          name:'IdleStrategy_convex_alusd3crv'
+          name:'IdleStrategy_convex_alusd3crv',
+          address:'0xDb7306Ddba67DD9d5aF08204E314F4DE6c29e20d'
         },
         description:'This strategy accrue interest only after an harvest is done. The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
         messages:{
@@ -758,7 +765,8 @@ const availableTranches = {
         },
         Strategy:{
           abi:IdleStrategy,
-          name:'IdleStrategy_convex_3eur'
+          name:'IdleStrategy_convex_3eur',
+          address:'0x4Ae60BC9A3eFc160AE2EbA70947a9b47Ad2b9094'
         },
         description:'This strategy accrue interest only after an harvest is done. The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
         messages:{
@@ -835,7 +843,8 @@ const availableTranches = {
         },
         Strategy:{
           abi:IdleStrategy,
-          name:'IdleStrategy_convex_musd3crv'
+          name:'IdleStrategy_convex_musd3crv',
+          address:'0x271cE5dED4cCbD28833bddF8a8093517299920f0'
         },
         description:'This strategy accrue interest only after an harvest is done. The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
         messages:{
@@ -913,7 +922,8 @@ const availableTranches = {
         },
         Strategy:{
           abi:IdleStrategy,
-          name:'IdleStrategy_convex_pbtccrv'
+          name:'IdleStrategy_convex_pbtccrv',
+          address:'0x0198792f2849397908C092b6B57654e1a57a4CDC'
         },
         description:'This strategy accrue interest only after an harvest is done. The returns from an harvest are linearly released in 24 hours, so you should wait 24 hours after an harvest to see all the interests you are eligible for.',
         messages:{
@@ -995,7 +1005,8 @@ const availableTranches = {
         },
         Strategy:{
           abi:IdleStrategy,
-          name:'IdleStrategy_euler_USDC'
+          name:'IdleStrategy_euler_USDC',
+          address:'0x5DaD2eEF80a8cdFD930aB8f0353cA13Bd48c4346'
         },
         description:'This strategy deploys funds in the <a href="https://app.euler.finance/market/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48" class="link" rel="nofollow noopener noreferrer" target="_blank">Euler USDC pool</a>. The APR is dynamically adjusted according to the coverage provided to the counterpart Senior tranche thanks to the <a href="https://medium.com/idle-finance/adaptive-yield-split-foster-pyts-liquidity-scalability-a796fa17ea35" class="link" rel="nofollow noopener noreferrer" target="_blank">Adaptive Yield Split</a>.',
         AA:{
@@ -1072,7 +1083,8 @@ const availableTranches = {
         },
         Strategy:{
           abi:IdleStrategy,
-          name:'IdleStrategy_euler_DAI'
+          name:'IdleStrategy_euler_DAI',
+          address:'0xc7F1B9C72B8230E470420A4b69af7c50781A3f44'
         },
         AA:{
           abi:ERC20,
@@ -1148,7 +1160,8 @@ const availableTranches = {
         },
         Strategy:{
           abi:IdleStrategy,
-          name:'IdleStrategy_euler_USDT'
+          name:'IdleStrategy_euler_USDT',
+          address:'0x3d1775dA27Dd9c6d936795Ac21b94CDeD8baBD69'
         },
         AA:{
           abi:ERC20,
