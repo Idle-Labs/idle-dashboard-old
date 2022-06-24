@@ -783,7 +783,7 @@ class RimbleTransaction extends React.Component {
       const contract = new web3Provider.eth.Contract(abi, address);
       const contractInfo = {name, contract};
 
-      this.setState(prevState => {
+      await this.setState(prevState => {
         // Remove old contract
         const contracts = prevState.contracts.filter( c => c.name !== contractInfo.name );
         // Insert updated contract

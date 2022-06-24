@@ -30,6 +30,7 @@ class FunctionsUtil {
 
   // Methods
   setProps = props => {
+    // console.log('setProps',props.contracts);
     this.props = props;
   }
   trimEth = eth => {
@@ -65,16 +66,24 @@ class FunctionsUtil {
   customLogError = (...props) => { if (globalConfigs.logs.errorsEnabled) console.error(moment().format('HH:mm:ss'), ...props); }
   getContractByName = (contractName, networkId = null) => {
     networkId = networkId || this.props.network.required.id;
-    let contract = this.props.contracts.find(c => c && c.name && c.name === contractName);
+    let contract = this.props.contracts.find(c => c && c.name && c.name.toLowerCase() === contractName.toLowerCase());
     if (this.props.network && this.props.network.required && this.props.network.current && (!this.props.network.isCorrectNetwork || networkId !== this.props.network.current.id) && this.props.contractsNetworks && this.props.contractsNetworks[networkId]) {
-      contract = this.props.contractsNetworks[networkId].find(c => c && c.name && c.name === contractName);
+      contract = this.props.contractsNetworks[networkId].find(c => c && c.name && c.name.toLowerCase() === contractName.toLowerCase());
     } else {
-      contract = this.props.contracts.find(c => c && c.name && c.name === contractName);
+      contract = this.props.contracts.find(c => c && c.name && c.name.toLowerCase() === contractName.toLowerCase());
     }
     if (!contract) {
       return false;
     }
     return contract.contract;
+  }
+  initContract = async (contractName,address,abi) => {
+    const contractInfo = await this.props.initContract(contractName, address, abi);
+    const contractFound = this.getContractByName(contractName);
+    if (!contractFound && contractInfo){
+      this.props.contracts.push(contractInfo);
+    }
+    return contractInfo;
   }
   normalizeSimpleIDNotification = (n) => {
     return n.replace(/<\/p><p>/g, "\n")
@@ -1202,7 +1211,7 @@ class FunctionsUtil {
     const strategyConfig = tokenConfig.Strategy;
     const idleStrategyAddress = strategyConfig.address || await this.genericContractCallCachedTTL(tokenConfig.CDO.name, 'strategy', 3600);
     if (idleStrategyAddress){
-      await this.props.initContract(strategyConfig.name, idleStrategyAddress, strategyConfig.abi);
+      await this.initContract(strategyConfig.name, idleStrategyAddress, strategyConfig.abi);
       return idleStrategyAddress;
     }
     return false;
@@ -4804,7 +4813,7 @@ class FunctionsUtil {
     // Init veToken contract
     const veTokenContract = this.getContractByName(veTokenConfig.token);
     if (!veTokenContract){
-      await this.props.initContract(veTokenConfig.token, veTokenConfig.address, veTokenConfig.abi);
+      await this.initContract(veTokenConfig.token, veTokenConfig.address, veTokenConfig.abi);
     }
 
     const aggcalls = await Promise.all([
@@ -4910,20 +4919,23 @@ class FunctionsUtil {
 
     // Add multiRewards tokens
     const rewardContractAddress = await this.genericContractCallCached(gaugeConfig.name,'reward_contract');
+
     if (rewardContractAddress && rewardContractAddress !== '0x0000000000000000000000000000000000000000'){
       const multiRewardsContractName = `${gaugeConfig.name}_multireward_${rewardContractAddress}`;
 
       const multiRewardsConfig = this.getGlobalConfig(['tools','gauges','props','contracts','MultiRewards']);
 
       const MultirewardsAbi = multiRewardsConfig.abi;
-      await this.props.initContract(multiRewardsContractName, rewardContractAddress, MultirewardsAbi);
+      await this.initContract(multiRewardsContractName, rewardContractAddress, MultirewardsAbi);
 
-      const tokenIndexes = Array.from(Array(multiRewardsConfig.maxRewards).keys());
-      await this.asyncForEach(tokenIndexes,async (tokenIndex) => {
+      for (let tokenIndex=0; tokenIndex<multiRewardsConfig.maxRewards; tokenIndex++){
+      // await this.asyncForEach(tokenIndexes,async (tokenIndex) => {
         try {
           const rewardTokenAddress = await this.genericContractCallCachedNoMulticall(multiRewardsContractName,'rewardTokens',[tokenIndex]);
+
           if (rewardTokenAddress){
             const tokenConfig = this.getTokenConfigByAddress(rewardTokenAddress);
+
             if (tokenConfig){
               const [
                 rewardData,
@@ -4949,8 +4961,6 @@ class FunctionsUtil {
                 const gaugeUnderlyingTokenConfig = this.getTokenConfig(gaugeConfig.underlyingToken);
                 const gaugeTotalSupplyUnderlying = this.fixTokenDecimals(gaugeTotalSupply,18).times(this.fixTokenDecimals(trancheTokenPrice,18));
 
-                // console.log('gaugeTotalSupplyUnderlying',tokenConfig.token,gaugeTotalSupplyUnderlying,gaugeUnderlyingTokenConfig);
-
                 rewardTokens.push(tokenConfig.token);
                 const rewardTokenApr = await this.getGovTokenApr(tokenConfig.token,gaugeUnderlyingTokenConfig,gaugeTotalSupplyUnderlying,tokensPerSecond);
                 rewardTokenInfo[tokenConfig.token] = {
@@ -4964,7 +4974,7 @@ class FunctionsUtil {
         } catch (err) {
 
         }
-      });
+      };
     }
 
     return rewardTokens ? rewardTokens.reduce( (rewardTokens,rewardToken) => {
@@ -6170,7 +6180,7 @@ class FunctionsUtil {
         const coverageTokens = coverage.tokens;
         const tokenConfig = coverageTokens[token];
         // Initialize coverage contract
-        await this.props.initContract(tokenConfig.name, tokenConfig.address, tokenConfig.abi);
+        await this.initContract(tokenConfig.name, tokenConfig.address, tokenConfig.abi);
         // Take balance
         const balance = await this.getTokenBalance(tokenConfig.name, account);
         if (balance && balance.gt(0)) {
@@ -6385,7 +6395,7 @@ class FunctionsUtil {
     await this.asyncForEach(Object.keys(availableTokens), async (token) => {
       const tokenConfig = availableTokens[token];
       const migrationContract = tokenConfig.migrationContract;
-      await this.props.initContract(migrationContract.name, migrationContract.address, migrationContract.abi);
+      await this.initContract(migrationContract.name, migrationContract.address, migrationContract.abi);
       const currBatchIndex = await this.genericContractCall(migrationContract.name, 'currBatch');
       for (let batchIndex = 0; batchIndex <= parseInt(currBatchIndex); batchIndex++) {
         let [
@@ -6495,7 +6505,7 @@ class FunctionsUtil {
     if (!tokenContract){
       const tokenConfig = this.getTokenConfig(contractName);
       if (tokenConfig){
-        await this.props.initContract(contractName, tokenConfig.address, ERC20);
+        await this.initContract(contractName, tokenConfig.address, ERC20);
       } else {
         return false;
       }
@@ -7566,7 +7576,7 @@ class FunctionsUtil {
     if (depositContractInfo) {
       let curveDepositContract = this.getContractByName(depositContractInfo.name);
       if (!curveDepositContract && depositContractInfo.abi) {
-        curveDepositContract = await this.props.initContract(depositContractInfo.name, depositContractInfo.address, depositContractInfo.abi);
+        curveDepositContract = await this.initContract(depositContractInfo.name, depositContractInfo.address, depositContractInfo.abi);
       }
     }
     return depositContractInfo;
@@ -7576,7 +7586,7 @@ class FunctionsUtil {
     if (zapContractInfo) {
       let curveZapContract = this.getContractByName(zapContractInfo.name);
       if (!curveZapContract && zapContractInfo.abi) {
-        curveZapContract = await this.props.initContract(zapContractInfo.name, zapContractInfo.address, zapContractInfo.abi);
+        curveZapContract = await this.initContract(zapContractInfo.name, zapContractInfo.address, zapContractInfo.abi);
       }
     }
     return zapContractInfo;
@@ -7586,7 +7596,7 @@ class FunctionsUtil {
     if (poolContractInfo) {
       let curvePoolContract = this.getContractByName(poolContractInfo.name);
       if (!curvePoolContract && poolContractInfo.abi) {
-        curvePoolContract = await this.props.initContract(poolContractInfo.name, poolContractInfo.address, poolContractInfo.abi);
+        curvePoolContract = await this.initContract(poolContractInfo.name, poolContractInfo.address, poolContractInfo.abi);
       }
     }
     return poolContractInfo;
@@ -7596,7 +7606,7 @@ class FunctionsUtil {
     if (migrationContractInfo) {
       let migrationContract = this.getContractByName(migrationContractInfo.name);
       if (!migrationContract && migrationContractInfo.abi) {
-        migrationContract = await this.props.initContract(migrationContractInfo.name, migrationContractInfo.address, migrationContractInfo.abi);
+        migrationContract = await this.initContract(migrationContractInfo.name, migrationContractInfo.address, migrationContractInfo.abi);
       }
     }
     return migrationContractInfo;
@@ -7806,7 +7816,7 @@ class FunctionsUtil {
     }
 
     const IAaveIncentivesController_name = `IAaveIncentivesController_${aaveIncentivesController_address}`;
-    await this.props.initContract(IAaveIncentivesController_name, aaveIncentivesController_address, IAaveIncentivesController);
+    await this.initContract(IAaveIncentivesController_name, aaveIncentivesController_address, IAaveIncentivesController);
 
     let [
       aTokenTotalSupply,
@@ -9226,7 +9236,7 @@ class FunctionsUtil {
         }
         let tokenContract = this.getContractByName(tokenConfig.token);
         if (!tokenContract && tokenConfig.abi) {
-          tokenContract = await this.props.initContract(tokenConfig.token, tokenConfig.address, tokenConfig.abi);
+          tokenContract = await this.initContract(tokenConfig.token, tokenConfig.address, tokenConfig.abi);
         }
         if (tokenContract) {
           const tokenBalance = await this.getTokenBalance(tokenConfig.token, this.props.account);
