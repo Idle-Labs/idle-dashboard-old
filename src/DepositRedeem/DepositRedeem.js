@@ -1143,7 +1143,7 @@ class DepositRedeem extends Component {
 
             // Send Google Analytics event
             const eventData = {
-              eventCategory: `Redeem_partial`,
+              eventCategory: `Redeem`,
               eventAction: this.props.selectedToken,
               eventLabel: tx.status,
               eventValue: parseInt(inputValue)

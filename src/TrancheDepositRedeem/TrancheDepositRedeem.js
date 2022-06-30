@@ -21,6 +21,7 @@ import ExecuteTransaction from '../ExecuteTransaction/ExecuteTransaction';
 class TrancheDetails extends Component {
 
   state = {
+    eventData:{},
     infoText:null,
     modalApy:null,
     trancheAPY:null,
@@ -169,6 +170,9 @@ class TrancheDetails extends Component {
 
   loadActionData(){
     let infoBox = null;
+    let eventData = {
+      eventAction:this.props.trancheConfig.token
+    };
     let balanceProp = null;
     let tokenConfig = null;
     let contractInfo = null;
@@ -186,6 +190,9 @@ class TrancheDetails extends Component {
         contractInfo = this.props.cdoConfig;
         tokenConfig = this.props.tokenConfig;
         balanceProp = this.state.tokenBalance;
+
+        // Set data for ga custom event
+        eventData.eventCategory = 'Deposit';
         
         if (gaugeConfig && gaugeConfig.trancheToken.token.toLowerCase() === this.props.tokenConfig[this.props.selectedTranche].token.toLowerCase() && this.state.trancheBalance && this.state.trancheBalance.gt(0)){
           infoText = `Stake your ${gaugeConfig.trancheToken.token} in the Liquidity Gauge and get rewarded!`;
@@ -198,6 +205,10 @@ class TrancheDetails extends Component {
         } else {
           infoText = null;
         }
+
+        // Set data for ga custom event
+        eventData.eventCategory = this.functionsUtil.capitalize(this.state.selectedStakeAction);
+
         switch (this.state.selectedStakeAction){
           case 'stake':
             // Disable staking deposit if gaugeConfig is set
@@ -232,6 +243,9 @@ class TrancheDetails extends Component {
         tokenConfig = this.props.tokenConfig;
         balanceProp = this.state.trancheBalance ? this.state.trancheBalance.times(this.state.tranchePrice) : null;
 
+        // Set data for ga custom event
+        eventData.eventCategory = 'Redeem';
+
         // console.log('balanceProp',this.state.trancheBalance,this.state.tranchePrice,balanceProp);
 
         if (!this.state.canWithdraw){
@@ -252,11 +266,10 @@ class TrancheDetails extends Component {
 
     const approveDescription = tokenConfig ? `To ${this.state.selectedAction} your <strong>${tokenConfig.token}</strong> you need to approve the Smart-Contract first.` : null;
 
-    // console.log('loadActionData',approveEnabled);
-
     this.setState({
       infoBox,
       infoText,
+      eventData,
       actionLabel,
       gaugeConfig,
       tokenConfig,
@@ -276,7 +289,7 @@ class TrancheDetails extends Component {
 
   }
 
-  getTransactionParams(amount,selectedPercentage){
+  getTransactionParams = (amount,selectedPercentage) => {
     let methodName = null;
     let methodParams = null;
     const _referral = this.getReferralAddress();
@@ -1380,6 +1393,7 @@ class TrancheDetails extends Component {
                             }
                           }}
                           action={'Unstake'}
+                          eventData={this.state.eventData}
                           contractName={this.state.contractInfo.name}
                           callback={this.transactionSucceeded.bind(this)}
                           methodName={this.props.trancheConfig.functions.unstake}
@@ -1394,6 +1408,7 @@ class TrancheDetails extends Component {
                         width:[1,0.45]
                       }}
                       permitEnabled={false}
+                      eventData={this.state.eventData}
                       tokenConfig={this.state.tokenConfig}
                       tokenBalance={this.state.balanceProp}
                       contractInfo={this.state.contractInfo}

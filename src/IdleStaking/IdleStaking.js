@@ -21,6 +21,7 @@ class IdleStaking extends Component {
     steps:null,
     maxApr:null,
     infoBox:null,
+    eventData:{},
     globalStats:[],
     lockPeriods:[
       {
@@ -137,7 +138,32 @@ class IdleStaking extends Component {
     const increaseActionChanged = prevState.increaseAction !== this.state.increaseAction;
     if (lockPeriodChanged || increaseActionChanged || selectedActionChanged){
       if (increaseActionChanged){
+
+        let eventData = {};
+        switch (this.state.increaseAction){
+          case 'time':
+            // Set data for ga custom event
+            eventData = {
+              eventAction:'IDLE',
+              eventCategory:'Staking_IncreaseTime',
+              eventValue:this.state.lockPeriodInput
+            };
+          break;
+          case 'amount':
+            // Set data for ga custom event
+            eventData = {
+              eventAction:'IDLE',
+              eventCategory:'Staking_IncreaseAmount'
+            };
+          break;
+          default:
+          break;
+        }
+
+        // console.log('eventData',eventData);
+
         this.setState({
+          eventData,
           internalInfoBox:null
         });
       } else if (lockPeriodChanged){
@@ -242,22 +268,39 @@ class IdleStaking extends Component {
   }
 
   getTransactionParams(amount){
+    let eventData = {};
     let methodName = null;
     let methodParams = [];
     const _value = this.functionsUtil.toBN(amount);
     let _unlock_time = parseInt(this.state.lockPeriodTimestamp);
     switch (this.state.selectedAction){
       case 'Lock':
+        // Set data for ga custom event
+        eventData = {
+          eventAction:'IDLE',
+          eventCategory:'Staking_Lock',
+          eventLabel:_unlock_time
+        };
         methodName = 'create_lock';
         methodParams = [_value,_unlock_time];
       break;
       case 'Increase Lock':
+        // Set data for ga custom event
+        eventData = {
+          eventAction:'IDLE',
+          eventCategory:'Staking_IncreaseAmount'
+        };
         methodName = 'increase_amount';
         methodParams = [_value];
       break;
       default:
       break;
     }
+
+    this.setState({
+      eventData
+    });
+
     return {
       methodName,
       methodParams
@@ -634,6 +677,10 @@ class IdleStaking extends Component {
     } else if (selectedAction==='Increase Lock' && !newState.increaseAction && !this.state.increaseAction){
       newState.increaseAction = 'time';
     }
+
+    // if (newState.increaseAction !== this.state.increaseAction){
+    //   this.setIncreaseAction(newState.increaseAction);
+    // }
 
     // Select Withdraw if the lock has expired
     if (selectedAction==='Increase Lock' && newState.lockExpired){
@@ -1219,6 +1266,7 @@ class IdleStaking extends Component {
                                             value:'Increase Time',
                                           }}
                                           action={'Increase Time'}
+                                          eventData={this.state.eventData}
                                           methodName={'increase_unlock_time'}
                                           contractName={this.props.contractInfo.name}
                                           callback={this.transactionSucceeded.bind(this)}
@@ -1255,6 +1303,7 @@ class IdleStaking extends Component {
                         action={txAction}
                         steps={this.state.steps}
                         infoBox={this.state.infoBox}
+                        eventData={this.state.eventData}
                         tokenConfig={this.props.tokenConfig}
                         tokenBalance={this.state.balanceProp}
                         contractInfo={this.props.contractInfo}
@@ -1369,6 +1418,10 @@ class IdleStaking extends Component {
                                 }}
                                 action={'Withdraw'}
                                 methodName={'withdraw'}
+                                eventData={{
+                                  eventCategory:'Staking_Withdraw',
+                                  eventAction:this.props.selectedToken
+                                }}
                                 contractName={this.props.contractInfo.name}
                                 callback={this.transactionSucceeded.bind(this)}
                               />
@@ -1444,6 +1497,11 @@ class IdleStaking extends Component {
                                   }}
                                   action={'Claim'}
                                   methodName={'claim'}
+                                  eventData={{
+                                    eventCategory:'Staking_Claim',
+                                    eventValue:this.state.claimable.toFixed(8),
+                                    eventAction:this.props.contractInfo.rewardToken
+                                  }}
                                   callback={this.transactionSucceeded.bind(this)}
                                   contractName={this.props.tokenConfig.feeDistributor.name}
                                 />

@@ -47,6 +47,7 @@ class FastBalanceSelector extends Component {
         isInteractive={true}
         cardProps={cardProps}
         isActive={this.props.isActive}
+        handleClick={this.props.handleClick}
       >
         <Text 
           {...textProps}
