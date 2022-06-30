@@ -154,9 +154,9 @@ class SendTxWithBalance extends Component {
       const callbackApprove = (tx,error) => {
         // Send Google Analytics event
         const eventData = {
-          eventAction: 'approve',
-          eventCategory: 'CurveDeposit',
-          eventLabel: tx ? tx.status : null
+          eventCategory: 'Approve',
+          eventLabel: tx ? tx.status : null,
+          eventAction: this.props.tokenConfig.token
         };
 
         const txSucceeded = tx && tx.status === 'success';
@@ -234,64 +234,6 @@ class SendTxWithBalance extends Component {
 
     // console.log('executeTx',params);
 
-    const callback = (tx,error) => {
-
-      const txSucceeded = tx && tx.status === 'success';
-
-      // Send Google Analytics event
-      if (tx){
-        const eventData = {
-          eventLabel: tx.status,
-          eventCategory: `CurveDeposit`,
-          eventValue: inputValue.toFixed(),
-          eventAction: this.props.tokenConfig.token,
-        };
-
-        if (error){
-          eventData.eventLabel = this.functionsUtil.getTransactionError(error);
-        }
-
-        // Send Google Analytics event
-        if (error || eventData.status !== 'error'){
-          this.functionsUtil.sendGoogleAnalyticsEvent(eventData);
-        }
-      }
-
-      this.setState({
-        txSucceeded,
-        processing: {
-          txHash:null,
-          loading:false
-        }
-      });
-
-      if (txSucceeded){
-        // Reset input
-        this.changeInputValue({
-          target:{
-            value:0
-          }
-        },false);
-        this.setState({
-          showPermitBox:false
-        });
-        // Call upper component callback
-        if (typeof this.props.callback === 'function'){
-          this.props.callback(tx,_amount,params);
-        }
-      }
-    };
-
-    const callbackReceipt = (tx) => {
-      const txHash = tx.transactionHash;
-      this.setState((prevState) => ({
-        processing: {
-          ...prevState.processing,
-          txHash
-        }
-      }));
-    };
-
     let params = null;
 
     // Check contract approved without permit
@@ -321,6 +263,72 @@ class SendTxWithBalance extends Component {
 
       const value = params.value || null;
       contractName = params.contractName || this.props.contractInfo.name;
+
+      // console.log(this.props.eventData,{
+      //   eventCategory: methodName,
+      //   eventValue: inputValue.toFixed(),
+      //   eventAction: this.props.tokenConfig.token,
+      //   ...this.props.eventData
+      // });
+
+      const callback = (tx,error) => {
+
+        const txSucceeded = tx && tx.status === 'success';
+
+        // Send Google Analytics event
+        if (tx){
+          const eventData = {
+            eventLabel: tx.status,
+            eventCategory: methodName,
+            eventValue: inputValue.toFixed(),
+            eventAction: this.props.tokenConfig.token,
+            ...this.props.eventData
+          };
+
+          if (error){
+            eventData.eventLabel = this.functionsUtil.getTransactionError(error);
+          }
+
+          // Send Google Analytics event
+          if (error || eventData.status !== 'error'){
+            this.functionsUtil.sendGoogleAnalyticsEvent(eventData);
+          }
+        }
+
+        this.setState({
+          txSucceeded,
+          processing: {
+            txHash:null,
+            loading:false
+          }
+        });
+
+        if (txSucceeded){
+          // Reset input
+          this.changeInputValue({
+            target:{
+              value:0
+            }
+          },false);
+          this.setState({
+            showPermitBox:false
+          });
+          // Call upper component callback
+          if (typeof this.props.callback === 'function'){
+            this.props.callback(tx,_amount,params);
+          }
+        }
+      };
+
+      const callbackReceipt = (tx) => {
+        const txHash = tx.transactionHash;
+        this.setState((prevState) => ({
+          processing: {
+            ...prevState.processing,
+            txHash
+          }
+        }));
+      };
 
       // console.log('SendTxWithBalance',contractName, methodName, methodParams, value);
 
@@ -353,15 +361,19 @@ class SendTxWithBalance extends Component {
 
   async checkContractApproved(checkPermit=true){
 
+    let contractApproved = false;
+
     if (checkPermit && this.props.permitEnabled && this.state.permitEnabled){
-      return true;
+      contractApproved = true;
     }
 
     if (this.props.approveEnabled !== undefined && !this.props.approveEnabled){
-      return true;
+      contractApproved = true;
     }
-    
-    const contractApproved = await this.functionsUtil.checkTokenApproved(this.props.tokenConfig.token,this.props.contractInfo.address,this.props.account);
+      
+    if (!contractApproved){
+      contractApproved = await this.functionsUtil.checkTokenApproved(this.props.tokenConfig.token,this.props.contractInfo.address,this.props.account);
+    }
 
     // console.log('checkContractApproved',this.props.tokenConfig.token,this.props.contractInfo.address,this.props.account,contractApproved);
 

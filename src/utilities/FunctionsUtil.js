@@ -4655,7 +4655,7 @@ class FunctionsUtil {
       this.getTokenBalance(contractName, walletAddr, false),
       this.getAllowance(contractName, contractAddr, walletAddr)
     ]);
-    this.customLog('checkTokenApproved', contractName, this.BNify(allowance).toFixed(), this.BNify(balance).toFixed(), (allowance && this.BNify(allowance).gte(this.BNify(balance))));
+    // console.log('checkTokenApproved', contractName, contractAddr, walletAddr, this.BNify(allowance).toFixed(), this.BNify(balance).toFixed(), (allowance && this.BNify(allowance).gte(this.BNify(balance))));
     return allowance && this.BNify(allowance).gte(this.BNify(balance));
   }
   getAllowance = async (contractName, contractAddr, walletAddr) => {

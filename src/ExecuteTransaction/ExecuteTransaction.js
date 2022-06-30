@@ -44,13 +44,21 @@ class ExecuteTransaction extends Component {
 
   async execute(){
 
+    // console.log(this.props.eventData,{
+    //   eventCategory: 'Transaction',
+    //   eventLabel: this.props.methodName,
+    //   eventAction: this.props.contractName,
+    //   ...this.props.eventData
+    // });
+
     const callback = (tx,error) => {
 
       // Send Google Analytics event
       const eventData = {
         eventCategory: 'Transaction',
         eventLabel: this.props.methodName,
-        eventAction: this.props.contractName
+        eventAction: this.props.contractName,
+        ...this.props.eventData
       };
 
       if (error){

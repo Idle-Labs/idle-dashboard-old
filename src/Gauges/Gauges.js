@@ -18,6 +18,7 @@ class Gauges extends Component {
   state = {
     canVote:true,
     infoBox:null,
+    eventData:{},
     claimText:null,
     unlockDate:null,
     inputValue:null,
@@ -281,6 +282,9 @@ class Gauges extends Component {
     const trancheTokenConfig = gaugeConfig.trancheToken;
 
     let canVote = true;
+    let eventData = {
+      eventAction:trancheTokenConfig.token
+    };
     let unlockDate = null;
     let balanceProp = null;
     let tokenConfig = null;
@@ -308,6 +312,9 @@ class Gauges extends Component {
 
         unlockDate = nextUnlockTime ? this.functionsUtil.strToMoment(nextUnlockTime*1000).utc().format('YYYY-MM-DD HH:mm') : null;
 
+        // Set data for ga custom event
+        eventData.eventCategory = 'Gauge_Vote';
+
         // Unlock total voting balance if nextUnlockTime reached
         // if (canVote && this.state.votingPowerUsed.gte(1)){
         //   balanceProp = this.state.veTokenBalance.times(this.state.availableVotingPower);
@@ -329,10 +336,26 @@ class Gauges extends Component {
               tooltip:this.functionsUtil.getGlobalConfig(['messages','gaugeBoost']),
               text:`Boost: <span style="color:${this.props.theme.colors.transactions.status.completed}">${boost.toFixed(2)}x</span>`,
             };
+
+            // Set data for ga custom event
+            eventData.eventCategory = 'Gauge_Deposit';
           break;
           case 'claim':
             approveEnabled = false;
             contractInfo = this.functionsUtil.getGlobalConfig(['contracts',1,'GaugeDistributor']);
+
+            // Set data for ga custom event
+            eventData.eventCategory = 'Gauge_Claim';
+
+            switch (this.state.claimToken){
+              case 'additional':
+                eventData.eventLabel = (this.state.claimableRewardsTokens && Object.keys(this.state.claimableRewardsTokens).length>0) ? Object.keys(this.state.claimableRewardsTokens).join('_') : 'multi_rewards';
+              break;
+              default:
+              case 'default':
+                eventData.eventLabel = this.props.toolProps.veToken.rewardToken;
+              break;
+            }
           break;
           case 'withdraw':
             approveEnabled = false;
@@ -340,6 +363,9 @@ class Gauges extends Component {
             tokenConfig = trancheTokenConfig;
             balanceProp = this.state.stakedBalance;
             noFundsText = `You don't have any <strong>${tokenConfig.token}</strong> in the Gauge contract to withdraw.`;
+
+            // Set data for ga custom event
+            eventData.eventCategory = 'Gauge_Redeem';
           break;
           default:
           break;
@@ -349,8 +375,11 @@ class Gauges extends Component {
       break;
     }
 
+    // console.log('eventData',eventData);
+
     this.setState({
       canVote,
+      eventData,
       unlockDate,
       noFundsText,
       tokenConfig,
@@ -557,6 +586,8 @@ class Gauges extends Component {
       this.setState({
         claimToken,
         claimSucceded:null
+      },() => {
+        this.loadTokenData();
       });
     }
   }
@@ -1000,6 +1031,7 @@ class Gauges extends Component {
                       {...this.props}
                       permitEnabled={false}
                       infoBox={this.state.infoBox}
+                      eventData={this.state.eventData}
                       tokenConfig={this.state.tokenConfig}
                       tokenBalance={this.state.balanceProp}
                       contractInfo={this.state.contractInfo}
@@ -1118,6 +1150,7 @@ class Gauges extends Component {
                                 }}
                                 action={'Claim'}
                                 methodName={'distribute'}
+                                eventData={this.state.eventData}
                                 contractName={'GaugeDistributorProxy'}
                                 callback={this.transactionSucceeded.bind(this)}
                                 getTransactionParams={ e => [this.props.toolProps.availableGauges[this.state.selectedToken].address] }
@@ -1190,6 +1223,7 @@ class Gauges extends Component {
                                 }}
                                 action={'Claim'}
                                 methodName={'claim_rewards'}
+                                eventData={this.state.eventData}
                                 contractName={this.state.gaugeConfig.name}
                                 callback={this.transactionSucceeded.bind(this)}
                               />
