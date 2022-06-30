@@ -740,7 +740,7 @@ class SendTxWithBalance extends Component {
                             <FastBalanceSelector
                               percentage={percentage}
                               key={`selector_${percentage}`}
-                              onMouseDown={()=>this.setFastBalanceSelector(percentage)}
+                              handleClick={()=>this.setFastBalanceSelector(percentage)}
                               isActive={this.state.fastBalanceSelector === parseInt(percentage)}
                             />
                           ))
