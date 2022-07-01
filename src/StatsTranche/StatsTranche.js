@@ -272,13 +272,16 @@ class StatsTranche extends Component {
     const aum_bb = this.functionsUtil.fixTokenDecimals(lastResult_bb.contractValue,this.props.tokenConfig.decimals);
     const aum = await this.functionsUtil.convertTrancheTokenBalance(aum_aa.plus(aum_bb),this.props.tokenConfig);
 
+    const days_aa = (lastResult_aa.timeStamp-firstResult_aa.timeStamp)/86400;
+    const days_bb = (lastResult_bb.timeStamp-firstResult_bb.timeStamp)/86400;
+
     const firstAAPrice = this.functionsUtil.fixTokenDecimals(firstResult_aa.virtualPrice,this.props.tokenConfig.decimals);
     const lastAAPrice = this.functionsUtil.fixTokenDecimals(lastResult_aa.virtualPrice,this.props.tokenConfig.decimals);
-    const seniorTrancheApy = lastAAPrice.div(firstAAPrice).minus(1).times(100).toFixed(2);
+    const seniorTrancheApy = lastAAPrice.div(firstAAPrice).minus(1).times(100).times(365).div(days_aa).toFixed(2);
 
     const firstBBPrice = this.functionsUtil.fixTokenDecimals(firstResult_bb.virtualPrice,this.props.tokenConfig.decimals);
     const lastBBPrice = this.functionsUtil.fixTokenDecimals(lastResult_bb.virtualPrice,this.props.tokenConfig.decimals);
-    const juniorTrancheApy = lastBBPrice.div(firstBBPrice).minus(1).times(100).toFixed(2);
+    const juniorTrancheApy = lastBBPrice.div(firstBBPrice).minus(1).times(100).times(365).div(days_bb).toFixed(2);
 
     const seniorTrancheConverage = Math.min(aum_bb.div(aum_aa).times(100),100).toFixed(2);
 
