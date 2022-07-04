@@ -1406,6 +1406,18 @@ const globalConfigs = {
         },
         address: '0x090185f2135308bad17527004364ebcc2d37e5f6'
       },
+      CPOOL: {
+        decimals: 18,
+        enabled: true,
+        label: 'CPOOL',
+        token: 'CPOOL',
+        color: {
+          hex: '#5F73F4',
+          rgb: [95, 115, 244],
+          hsl: ["232", "87%", "66%"]
+        },
+        address: '0x66761fa41377003622aee3c7675fc7b5c1c2fac5'
+      },
       MATIC: {
         decimals: 18,
         enabled: true,
@@ -1615,6 +1627,21 @@ const globalConfigs = {
         },
         address: '0x956f47f50a910163d8bf957cf5846d573e7f87ca',
       },
+      AGEUR: {
+        decimals: 18,
+        enabled: true,
+        token: 'AGEUR',
+        color: {
+          hex: '#fbcea9',
+          rgb: [251, 206, 169],
+          hsl: ['27', '91%', '82%']
+        },
+        conversionRateField: 'ageurDAIPrice',
+        chart: {
+          labelTextColorModifiers: ['darker', 4]
+        },
+        address: '0x1a7e4e63778b4f12a199c062f3efdd288afcbce8',
+      },
       WMATIC: {
         decimals: 18,
         enabled: true,
@@ -1784,6 +1811,24 @@ const globalConfigs = {
         color: {
           rgb: [228, 97, 94],
           hsl: ["1", "71%", "63%"]
+        }
+      },
+      wintermute: {
+        legend: false,
+        enabled: true,
+        label: "Wintermute",
+        color: {
+          rgb: [163, 236, 38],
+          hsl: ["82", "84%", "54%"]
+        }
+      },
+      clearpool: {
+        legend: false,
+        enabled: true,
+        label: "Clearpool",
+        color: {
+          rgb: [95, 115, 244],
+          hsl: ["232", "87%", "66%"]
         }
       },
       fuse: {

@@ -683,7 +683,7 @@ class IdleStaking extends Component {
     // }
 
     // Select Withdraw if the lock has expired
-    if (selectedAction==='Increase Lock' && newState.lockExpired){
+    if (['Increase Lock','Lock'].includes(selectedAction) && newState.lockExpired){
       selectedAction = 'Withdraw';
       newState.selectedAction = selectedAction;
     }
@@ -842,7 +842,24 @@ class IdleStaking extends Component {
               justifyContent={'space-between'}
             >
               {
-                this.state.lockedEnd === null ? (
+                this.state.lockExpired ? (
+                  <ImageButton
+                    buttonProps={{
+                      mx:0
+                    }}
+                    width={[1,'32%']}
+                    caption={'Withdraw'}
+                    imageSrc={'images/upload.svg'}
+                    isMobile={this.props.isMobile}
+                    // subcaption={'withdraw LP tokens'}
+                    imageProps={{
+                      mb:[0,2],
+                      height:this.props.isMobile ? '42px' : '52px'
+                    }}
+                    isActive={isUnstake}
+                    handleClick={ e => this.setAction('Withdraw') }
+                  />
+                ) : this.state.lockedEnd === null ? (
                   <ImageButton
                     buttonProps={{
                       mx:0
@@ -859,7 +876,7 @@ class IdleStaking extends Component {
                     isActive={isLock}
                     handleClick={ e => this.setAction('Lock') }
                   />
-                ) : !this.state.lockExpired ? (
+                ) : (
                   <ImageButton
                     buttonProps={{
                       mx:0
@@ -874,23 +891,6 @@ class IdleStaking extends Component {
                       height:this.props.isMobile ? '42px' : '54px'
                     }}
                     handleClick={ e => this.setAction('Increase Lock') }
-                  />
-                ) : (
-                  <ImageButton
-                    buttonProps={{
-                      mx:0
-                    }}
-                    width={[1,'32%']}
-                    caption={'Withdraw'}
-                    imageSrc={'images/upload.svg'}
-                    isMobile={this.props.isMobile}
-                    // subcaption={'withdraw LP tokens'}
-                    imageProps={{
-                      mb:[0,2],
-                      height:this.props.isMobile ? '42px' : '52px'
-                    }}
-                    isActive={isUnstake}
-                    handleClick={ e => this.setAction('Withdraw') }
                   />
                 )
               }

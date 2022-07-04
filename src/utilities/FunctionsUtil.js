@@ -5429,10 +5429,14 @@ class FunctionsUtil {
         ]);
 
         output = '0%';
-        if (seniorPool && juniorPool){
+        if (this.BNify(seniorPool).gt(0) && this.BNify(juniorPool).gt(0)){
           // output = this.BNify(juniorPool).div(seniorPool).times(100).toFixed(0)+'%';
           // output = '$'+this.abbreviateNumber(juniorPool, decimals, maxPrecision, minPrecision)
-          const coverage = juniorPool.div(seniorPool);
+          let coverage = juniorPool.div(seniorPool);
+          
+          if (this.BNify(coverage).isNaN()){
+            coverage = this.BNify(0);
+          }
 
           if (formatValue){
             output = '$1 is covered by $'+this.abbreviateNumber(coverage, decimals, maxPrecision, minPrecision)
