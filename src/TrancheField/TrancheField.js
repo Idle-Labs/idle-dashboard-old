@@ -340,7 +340,7 @@ class TrancheField extends Component {
       break;
       case 'experimentalBadge':
         output = null;
-        if (this.state.experimentalBadge && this.functionsUtil.BNify(this.state.experimentalBadge).gt(0)){
+        if (this.functionsUtil.BNify(this.state.experimentalBadge).gt(0) && this.functionsUtil.BNify(this.state.experimentalBadge).lte(5000000)){
           const limitCap = this.functionsUtil.abbreviateNumber(this.state.experimentalBadge, 2, maxPrecision, 0) + ` ${this.props.token}`;
           output = (
             <Tooltip
@@ -360,7 +360,7 @@ class TrancheField extends Component {
         if (!this.state.statusBadge){
           output = loader;
         } else {
-          if (this.functionsUtil.BNify(this.state.statusBadge).gt(0)){
+          if (this.functionsUtil.BNify(this.state.statusBadge).gt(0) && this.functionsUtil.BNify(this.state.statusBadge).lte(5000000)){
             badgeText = 'Experimental';
             badgeColor = 'experimental';
           } else {

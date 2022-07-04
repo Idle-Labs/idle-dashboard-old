@@ -24,6 +24,7 @@ class TrancheDetails extends Component {
     eventData:{},
     infoText:null,
     modalApy:null,
+    trancheFee:null,
     trancheAPY:null,
     canUnstake:null,
     canWithdraw:null,
@@ -50,6 +51,7 @@ class TrancheDetails extends Component {
     approveDescription:null,
     gaugeStakedBalance:null,
     selectedAction:'deposit',
+    balanceSelectorInfo:null,
     selectedTrancheOption:null,
     selectedStakeAction:'stake',
     userHasAvailableFunds:false
@@ -97,6 +99,7 @@ class TrancheDetails extends Component {
       lastHarvest,
       gaugeStakedBalance,
       stakedBalance,
+      trancheFee,
       trancheAPY,
       tranchePrice,
       trancheBaseApy
@@ -107,6 +110,7 @@ class TrancheDetails extends Component {
       this.functionsUtil.getTrancheLastHarvest(this.props.tokenConfig,this.props.trancheConfig),
       gaugeConfig ? this.functionsUtil.getTokenBalance(gaugeConfig.name,this.props.account) : null,
       this.functionsUtil.getTrancheStakedBalance(this.props.trancheConfig.CDORewards.name,this.props.account,this.props.trancheConfig.CDORewards.decimals,this.props.trancheConfig.functions.stakedBalance),
+      this.functionsUtil.loadTrancheField('trancheFee',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account),
       this.functionsUtil.loadTrancheFieldRaw('trancheApy',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account),
       this.functionsUtil.loadTrancheFieldRaw('tranchePrice',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account),
       this.functionsUtil.loadTrancheFieldRaw('trancheBaseApy',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account),
@@ -146,6 +150,7 @@ class TrancheDetails extends Component {
 
     this.setState({
       trancheAPY,
+      trancheFee,
       canUnstake,
       canWithdraw,
       lastHarvest,
@@ -170,14 +175,15 @@ class TrancheDetails extends Component {
 
   loadActionData(){
     let infoBox = null;
-    let eventData = {
-      eventAction:this.props.trancheConfig.token
-    };
     let balanceProp = null;
     let tokenConfig = null;
     let contractInfo = null;
     let approveEnabled = null;
     let buttonDisabled = false;
+    let balanceSelectorInfo = null;
+    let eventData = {
+      eventAction:this.props.trancheConfig.token
+    };
 
     let actionLabel = this.state.selectedAction;
     const trancheDetails = this.functionsUtil.getGlobalConfig(['tranches',this.props.selectedTranche]);
@@ -193,6 +199,13 @@ class TrancheDetails extends Component {
 
         // Set data for ga custom event
         eventData.eventCategory = 'Deposit';
+
+        if (this.state.trancheFee){
+          balanceSelectorInfo = {
+            text:`Performance fee: ${this.state.trancheFee}`,
+            tooltip:this.functionsUtil.getGlobalConfig(['messages', 'performanceFee'])
+          }
+        }
         
         if (gaugeConfig && gaugeConfig.trancheToken.token.toLowerCase() === this.props.tokenConfig[this.props.selectedTranche].token.toLowerCase() && this.state.trancheBalance && this.state.trancheBalance.gt(0)){
           infoText = `Stake your ${gaugeConfig.trancheToken.token} in the Liquidity Gauge and get rewarded!`;
@@ -277,7 +290,8 @@ class TrancheDetails extends Component {
       contractInfo,
       buttonDisabled,
       approveEnabled,
-      approveDescription
+      approveDescription,
+      balanceSelectorInfo
     })
   }
 
@@ -1417,6 +1431,7 @@ class TrancheDetails extends Component {
                       buttonDisabled={this.state.buttonDisabled}
                       callback={this.transactionSucceeded.bind(this)}
                       approveDescription={this.state.approveDescription}
+                      balanceSelectorInfo={this.state.balanceSelectorInfo}
                       changeInputCallback={this.changeInputCallback.bind(this)}
                       contractApproved={this.contractApprovedCallback.bind(this)}
                       getTransactionParams={this.getTransactionParams.bind(this)}

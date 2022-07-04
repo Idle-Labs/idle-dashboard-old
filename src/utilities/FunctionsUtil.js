@@ -5139,7 +5139,15 @@ class FunctionsUtil {
       case 'trancheFee':
         output = await this.genericContractCallCachedTTL(tokenConfig.CDO.name, 'fee', 3600);
         if (output) {
-          output = this.BNify(output).div(this.BNify(100000));
+          output = this.fixTokenDecimals(output, 5);
+        }
+
+        if (this.BNify(output).isNaN()) {
+          output = this.BNify(0);
+        }
+
+        if (formatValue){
+          output = output.times(100)+'%';
         }
       break;
       case 'trancheRealPrice':
@@ -5494,7 +5502,7 @@ class FunctionsUtil {
       case 'experimentalBadge':
         output = await this.genericContractCallCachedTTL(tokenConfig.CDO.name,'limit',3600);
         if (output){
-          output = this.fixTokenDecimals(output, tokenConfig.CDO.decimals);
+          output = this.fixTokenDecimals(output, tokenConfig.decimals);
 
           if (field === 'trancheLimit'){
             if (output.gt(0)){
