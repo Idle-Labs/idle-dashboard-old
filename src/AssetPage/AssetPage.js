@@ -111,7 +111,7 @@ class AssetPage extends Component {
 
     // console.log('govTokensBalance',newState.govTokensBalance);
     // console.log('availableGovTokens',newState.availableGovTokens);
-    // console.log('govTokensUserBalances',newState.govTokensUserBalances);
+    // console.log('govTokensUserBalances',govTokenAvailableTokens,newState.govTokensUserBalances);
 
     newState.componentMounted = true;
     newState.userHasFunds = this.props.account && newState.idleTokenBalance[token] && this.functionsUtil.BNify(newState.idleTokenBalance[token]).gt(0);

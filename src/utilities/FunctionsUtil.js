@@ -5557,7 +5557,7 @@ class FunctionsUtil {
         // Add hard-coded tokens
         if (tokenConfig[field] && typeof tokenConfig[field].forEach === 'function'){
           tokenConfig[field].forEach( govToken => {
-            const govTokenConfig = this.getGlobalConfig(['stats','tokens',govToken.toUpperCase()]);
+            const govTokenConfig = this.getTokenConfig(govToken);
             if (govTokenConfig){
               output[govToken] = govTokenConfig;
             }
@@ -8665,7 +8665,7 @@ class FunctionsUtil {
       return false;
     }
     const govTokens = this.getGlobalConfig(['govTokens']);
-    return Object.values(govTokens).find(tokenConfig => (tokenConfig.enabled && tokenConfig.address && tokenConfig.address.toLowerCase() === address.toLowerCase()));
+    return Object.values(govTokens).find(tokenConfig => (/*tokenConfig.enabled && */tokenConfig.address && tokenConfig.address.toLowerCase() === address.toLowerCase()));
   }
   getGovTokensUserTotalBalance = async (account = null, availableTokens = null, convertToken = null, checkShowBalance = true) => {
     // Check for cached data
@@ -8763,7 +8763,7 @@ class FunctionsUtil {
               // Get gov token conversion rate
               let tokenConversionRate = null;
               if (convertToken) {
-                const fromTokenConfig = this.getGlobalConfig(['stats', 'tokens', convertToken.toUpperCase()]);
+                const fromTokenConfig = this.getTokenConfig(convertToken);
                 if (fromTokenConfig) {
                   try {
                     tokenConversionRate = await this.getUniswapConversionRate(fromTokenConfig, govTokenConfig);

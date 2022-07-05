@@ -2809,7 +2809,7 @@ class DepositRedeem extends Component {
                                                             }}
                                                             percentage={slippage}
                                                             key={`selector_${slippage}`}
-                                                            onMouseDown={() => this.setMaxSlippage(slippage)}
+                                                            handleClick={() => this.setMaxSlippage(slippage)}
                                                             isActive={this.state.maxSlippage === parseFloat(slippage)}
                                                           />
                                                         ))

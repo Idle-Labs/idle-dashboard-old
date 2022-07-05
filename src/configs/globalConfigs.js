@@ -521,7 +521,7 @@ const globalConfigs = {
       decimals: 18,
       showAUM: true, // Include stkAAVE balance in AUM
       showAPR: true, // Include stkAAVE Apr
-      enabled: true,
+      enabled: false,
       showPrice: true,
       token: 'stkAAVE',
       showBalance: true, // Include stkAAVE balance in Portfolio Donut
@@ -1561,7 +1561,7 @@ const globalConfigs = {
       },
       STKAAVE: {
         decimals: 18,
-        enabled: true,
+        enabled: false,
         token: 'stkAAVE',
         color: {
           hex: "#B6509E",
