@@ -1881,7 +1881,6 @@ class FunctionsUtil {
               polygonTx.networkId = polygonNetworkId;
               polygonTx.bridgeType = tokenConfig.bridgeType;
               polygonTx.included = this.props.maticPOSClient ? await this.props.maticPOSClient.isCheckPointed(polygonTx.hash) : false;
-              polygonTx.exited = false;
 
               // console.log('polygonTx',polygonTx);
 

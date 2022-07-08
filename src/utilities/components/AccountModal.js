@@ -92,6 +92,7 @@ class AccountModal extends React.Component {
 
     this.props.logout();
     await this.setConnector('Infura');
+
     // this.props.closeModal();
   }
 

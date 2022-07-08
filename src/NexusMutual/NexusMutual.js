@@ -364,7 +364,7 @@ class NexusMutual extends Component {
 
   selectCoverToClaim(coverId){
     const selectedCoverToClaim = this.state.selectedCoverToClaim ? this.state.claimableCovers.find( cover => parseInt(cover.value) === coverId ) : null;
-    // console.log('selectCoverToClaim',selectedCoverToClaim);
+    console.log('selectCoverToClaim',selectedCoverToClaim);
     this.setState({
       selectedCoverToClaim
     });
@@ -1158,7 +1158,7 @@ class NexusMutual extends Component {
                               contractApproved={this.yieldTokenApproveSucceeded.bind(this)}
                               getTransactionParams={this.getClaimTransactionParams.bind(this)}
                               approveDescription={'To claim your tokens you need to approve the Smart-Contract.'}
-                              tokenBalance={this.functionsUtil.BNify(this.state.yieldTokenBalance).gt(this.state.selectedCoverToClaim.maxCoveredAmount) ? this.state.selectedCoverToClaim.maxCoveredAmount : this.state.yieldTokenBalance }
+                              tokenBalance={this.functionsUtil.BNify(this.state.yieldTokenBalance).gt(this.state.selectedCoverToClaim.claimableAmount) ? this.state.selectedCoverToClaim.claimableAmount : this.state.yieldTokenBalance }
                             >
                               <DashboardCard
                                 cardProps={{
