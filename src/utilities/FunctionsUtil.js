@@ -4858,11 +4858,19 @@ class FunctionsUtil {
     };
   }
   getGaugeWeight = async (gaugeConfig) => {
+    const currTimestamp = parseInt(Date.now()/1000);
     let lastGaugeTimestamp = await this.genericContractCall('GaugeController','time_weight',[gaugeConfig.address]);
     if (!lastGaugeTimestamp){
-      lastGaugeTimestamp = parseInt(Date.now()/1000);
+      lastGaugeTimestamp = currTimestamp;
     }
-    let gaugeWeight = await this.genericContractCall('GaugeController','gauge_relative_weight',[gaugeConfig.address,lastGaugeTimestamp]);
+
+    const params = [gaugeConfig.address];
+
+    if (lastGaugeTimestamp<currTimestamp){
+      params.push(lastGaugeTimestamp);
+    }
+
+    let gaugeWeight = await this.genericContractCall('GaugeController','gauge_relative_weight',params);
 
     gaugeWeight = this.BNify(gaugeWeight);
     if (gaugeWeight.isNaN()){
