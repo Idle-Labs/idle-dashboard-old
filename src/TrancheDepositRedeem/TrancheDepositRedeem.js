@@ -30,7 +30,6 @@ class TrancheDetails extends Component {
     canWithdraw:null,
     activeModal:null,
     actionLabel:null,
-    modalAction:null,
     balanceProp:null,
     lastHarvest:null,
     gaugeConfig:null,
@@ -48,6 +47,7 @@ class TrancheDetails extends Component {
     buttonDisabled:false,
     selectedTranche:null,
     availableTranches:null,
+    modalAction:'deposited',
     approveDescription:null,
     gaugeStakedBalance:null,
     selectedAction:'deposit',
@@ -90,7 +90,7 @@ class TrancheDetails extends Component {
 
   async loadData(){
 
-    const gaugeConfig = this.functionsUtil.getGlobalConfig(['tools','gauges','props','availableGauges',this.props.selectedToken]);
+    const gaugeConfig = this.functionsUtil.getTrancheGaugeConfig(this.props.tokenConfig.protocol,this.props.selectedToken);
 
     const [
       // blockNumber,
@@ -152,6 +152,7 @@ class TrancheDetails extends Component {
       trancheAPY,
       trancheFee,
       canUnstake,
+      gaugeConfig,
       canWithdraw,
       lastHarvest,
       tokenBalance,
@@ -187,7 +188,6 @@ class TrancheDetails extends Component {
 
     let actionLabel = this.state.selectedAction;
     const trancheDetails = this.functionsUtil.getGlobalConfig(['tranches',this.props.selectedTranche]);
-    const gaugeConfig = this.functionsUtil.getGlobalConfig(['tools','gauges','props','availableGauges',this.props.selectedToken]);
     let infoText = this.functionsUtil.getArrayPath(['messages',this.state.selectedAction],this.props.tokenConfig) || trancheDetails.description[this.state.selectedAction];
 
     switch (this.state.selectedAction){
@@ -207,8 +207,8 @@ class TrancheDetails extends Component {
           }
         }
         
-        if (gaugeConfig && gaugeConfig.trancheToken.token.toLowerCase() === this.props.tokenConfig[this.props.selectedTranche].token.toLowerCase() && this.state.trancheBalance && this.state.trancheBalance.gt(0)){
-          infoText = `Stake your tranche tokens (${gaugeConfig.trancheToken.token}) in the Liquidity Gauge and get additional rewards.`;
+        if (this.state.gaugeConfig && this.state.gaugeConfig.trancheToken.token.toLowerCase() === this.props.tokenConfig[this.props.selectedTranche].token.toLowerCase() && this.state.trancheBalance && this.state.trancheBalance.gt(0)){
+          infoText = `Stake your tranche tokens (${this.state.gaugeConfig.trancheToken.token}) in the Liquidity Gauge and get additional rewards.`;
         }
       break;
       case 'stake':
@@ -225,7 +225,7 @@ class TrancheDetails extends Component {
         switch (this.state.selectedStakeAction){
           case 'stake':
             // Disable staking deposit if gaugeConfig is set
-            if (gaugeConfig || !this.state.stakeEnabled){
+            if (this.state.gaugeConfig || !this.state.stakeEnabled){
               infoText = null;
             }
             approveEnabled = true;
@@ -289,7 +289,6 @@ class TrancheDetails extends Component {
       infoText,
       eventData,
       actionLabel,
-      gaugeConfig,
       tokenConfig,
       balanceProp,
       contractInfo,
@@ -1106,7 +1105,8 @@ class TrancheDetails extends Component {
                     }}
                     text={`To withdraw your ${this.props.selectedToken} you need to unstake the tranche tokens from the <a href="${this.functionsUtil.getDashboardSectionUrl(`gauges/${this.props.selectedToken}`)}" class="link">${this.props.selectedToken} Gauge</a> first.`}
                   />
-                )/* : this.props.selectedToken === 'stETH' && this.props.selectedTranche === 'AA' && (
+                ) :*/
+                !this.props.tokenConfig.adaptiveYieldSplitEnabled && (
                   <IconBox
                     cardProps={{
                       p:2,
@@ -1127,9 +1127,9 @@ class TrancheDetails extends Component {
                       textAlign:'center',
                       fontSize:['13px','15px']
                     }}
-                    text={`With the <a href="https://medium.com/idle-finance/introducing-stkidle-gauges-a-new-stakers-centric-paradigm-for-pyts-and-lps-8c0ef167232e" target="_blank" rel="nofollow noopener noreferrer" class="link">IDLE Gauges release</a>, LDO rewards are going to be distributed via a different staking contract on <strong>Thursday 14 April 2022 16:30:00 GMT</strong>. Please make sure to unstake your stETH from the current staking contract after that date and deposit in the <a href="${this.functionsUtil.getDashboardSectionUrl(`gauges/stETH`)}" class="link">stETH Gauge</a> contract to continue receiving the LDO rewards, alongside the IDLE distribution from Gauges`}
+                    text={`To improve the capital efficiency of tranches, the apy ratio will be updated to the new Adaptive Yield Split on Wed July 20th. No action required. Read more in the <a href="https://gov.idle.finance/t/adaptive-yield-split-implementation-for-existing-pyts/1019" target="_blank" rel="nofollow noopener noreferrer" class="link">Forum Proposal</a>.`}
                   />
-                )*/
+                )
               }
               <Box
                 width={1}
@@ -1164,7 +1164,7 @@ class TrancheDetails extends Component {
                     buttonProps={{
                       mx:0,
                       border:0,
-                      disabled:!this.state.stakingEnabled
+                      disabled:!this.state.stakingEnabled && !this.state.gaugeConfig
                     }}
                     width={[1,'32%']}
                     caption={'Stake / Unstake'}
@@ -1325,7 +1325,25 @@ class TrancheDetails extends Component {
                 justifyContent={'center'}
               >
                 {
-                  ((isStake && !this.state.stakingEnabled) || (isStake && this.state.selectedStakeAction === 'stake' && !this.state.stakeEnabled)) ? (
+                  isStake && this.state.selectedStakeAction === 'stake' && this.state.gaugeConfig ? (
+                    <IconBox
+                      cardProps={{
+                        mt: 2
+                      }}
+                      icon={'LightbulbOutline'}
+                      text={`To earn additional staking rewards deposit your tranche token in the <a href="${this.functionsUtil.getDashboardSectionUrl(`gauges/${this.props.selectedToken}`)}" class="link">${this.functionsUtil.capitalize(this.props.tokenConfig.protocol)} ${this.props.selectedToken} Gauge</a>.`}
+                    >
+                      <RoundButton
+                        buttonProps={{
+                          mt:2,
+                          width:[1,1/2]
+                        }}
+                        handleClick={e => this.props.goToSection(`gauges/${this.props.selectedToken}`)}
+                      >
+                        Go to Gauge
+                      </RoundButton>
+                    </IconBox>
+                  ) : ((isStake && !this.state.stakingEnabled) || (isStake && this.state.selectedStakeAction === 'stake' && !this.state.stakeEnabled)) ? (
                     <DashboardCard
                       cardProps={{
                         p: 2,
@@ -1352,24 +1370,6 @@ class TrancheDetails extends Component {
                         </Text>
                       </Flex>
                     </DashboardCard>
-                  ) : isStake && this.state.selectedStakeAction === 'stake' && this.state.gaugeConfig ? (
-                    <IconBox
-                      cardProps={{
-                        mt: 2
-                      }}
-                      icon={'LightbulbOutline'}
-                      text={`To earn additional staking rewards deposit your tranche token in the <a href="${this.functionsUtil.getDashboardSectionUrl(`gauges/${this.props.selectedToken}`)}" class="link">${this.props.selectedToken} Gauge</a>.`}
-                    >
-                      <RoundButton
-                        buttonProps={{
-                          mt:2,
-                          width:[1,1/2]
-                        }}
-                        handleClick={e => this.props.goToSection(`gauges/${this.props.selectedToken}`)}
-                      >
-                        Go to Gauge
-                      </RoundButton>
-                    </IconBox>
                   ) : isStake && this.state.selectedStakeAction === 'unstake' && !this.props.trancheConfig.CDORewards.unstakeWithBalance ? (
                     <DashboardCard
                       cardProps={{
@@ -1378,47 +1378,71 @@ class TrancheDetails extends Component {
                         mt: 3
                       }}
                     >
-                      <Flex
-                        alignItems={'center'}
-                        flexDirection={'column'}
-                      >
-                        <Icon
-                          size={'1.8em'}
-                          color={'cellText'}
-                          name={'MonetizationOn'}
-                        />
-                        <Text
-                          mt={1}
-                          mb={3}
-                          fontSize={[2,3]}
-                          color={'cellText'}
-                          textAlign={'center'}
-                        >
-                          You can unstake <strong>{this.state.stakedBalance.toFixed(8)} {this.state.tokenConfig.label}</strong>.
-                        </Text>
-                        <ExecuteTransaction
-                          params={[]}
-                          {...this.props}
-                          Component={RoundButton}
-                          parentProps={{
-                            width:1,
-                            alignItems:'center',
-                            justifyContent:'center'
-                          }}
-                          componentProps={{
-                            value:'Unstake',
-                            buttonProps:{
-                              size:'medium',
-                              width:[1,1/3],
-                            }
-                          }}
-                          action={'Unstake'}
-                          eventData={this.state.eventData}
-                          contractName={this.state.contractInfo.name}
-                          callback={this.transactionSucceeded.bind(this)}
-                          methodName={this.props.trancheConfig.functions.unstake}
-                        />
-                      </Flex>
+                      {
+                        this.state.stakedBalance.gt(0) ? (
+                          <Flex
+                            alignItems={'center'}
+                            flexDirection={'column'}
+                          >
+                            <Icon
+                              size={'1.8em'}
+                              color={'cellText'}
+                              name={'MonetizationOn'}
+                            />
+                            <Text
+                              mt={1}
+                              mb={3}
+                              fontSize={[2,3]}
+                              color={'cellText'}
+                              textAlign={'center'}
+                            >
+                              You can unstake <strong>{this.state.stakedBalance.toFixed(8)} {this.state.tokenConfig.label}</strong>.
+                            </Text>
+                            <ExecuteTransaction
+                              params={[]}
+                              {...this.props}
+                              Component={RoundButton}
+                              parentProps={{
+                                width:1,
+                                alignItems:'center',
+                                justifyContent:'center'
+                              }}
+                              componentProps={{
+                                value:'Unstake',
+                                buttonProps:{
+                                  size:'medium',
+                                  width:[1,1/3],
+                                }
+                              }}
+                              action={'Unstake'}
+                              eventData={this.state.eventData}
+                              contractName={this.state.contractInfo.name}
+                              callback={this.transactionSucceeded.bind(this)}
+                              methodName={this.props.trancheConfig.functions.unstake}
+                            />
+                          </Flex>
+                        ) : (
+                          <Flex
+                            width={1}
+                            alignItems={'center'}
+                            flexDirection={'column'}
+                            justifyContent={'center'}
+                          >
+                            <Icon
+                              size={'1.8em'}
+                              color={'cellText'}
+                              name={'MoneyOff'}
+                            />
+                            <Text
+                              mt={1}
+                              color={'cellText'}
+                              textAlign={'center'}
+                            >
+                              You don't have any <strong>{this.state.tokenConfig.label}</strong> to unstake.
+                            </Text>
+                          </Flex>
+                        )
+                      }
                     </DashboardCard>
                   ) : (
                     <SendTxWithBalance
@@ -1569,7 +1593,7 @@ class TrancheDetails extends Component {
                 closeModal={this.resetModal}
                 tokenName={this.props.selectedToken}
                 isOpen={this.state.activeModal === 'share'}
-                text={`You have successfully ${this.state.modalAction} in Idle!<br />Enjoy <strong>${this.state.modalApy ? this.state.modalApy.toFixed(2) : '0.00'}% APY</strong> on your <strong>${this.props.selectedToken}</strong>!`}
+                text={`You have successfully ${this.state.modalAction} in Idle!<br />Enjoy <strong>${this.state.modalApy ? this.state.modalApy.toFixed(2) : '0.00'}% APY</strong> on your <strong>${this.props.selectedToken}</strong>!`+(this.state.gaugeConfig ? `<br />Stake your tranche tokens in the <a href="${this.functionsUtil.getDashboardSectionUrl(`gauges/${this.props.selectedToken}`)}" class="link">${this.functionsUtil.capitalize(this.props.tokenConfig.protocol)} ${this.props.selectedToken} Gauge</a> to get additional rewards!` : ``)}
                 tweet={`I'm earning ${this.state.modalApy ? this.state.modalApy.toFixed(2) : '0.00'}% APY on my ${this.props.selectedToken} with @idlefinance tranches! Go to ${this.functionsUtil.getGlobalConfig(['baseURL'])}${this.props.selectedSection.route} and start earning now from your idle tokens!`}
               />
             </Flex>

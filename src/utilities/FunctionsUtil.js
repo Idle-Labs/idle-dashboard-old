@@ -4857,6 +4857,9 @@ class FunctionsUtil {
       workingSupply:working_supply
     };
   }
+  getTrancheGaugeConfig = (protocol,token) => {
+    return Object.values(this.getGlobalConfig(['tools','gauges','props','availableGauges'])).find( g => g.protocol.toLowerCase() === protocol.toLowerCase() && g.underlyingToken.toLowerCase() === token.toLowerCase() );
+  }
   getGaugeWeight = async (gaugeConfig) => {
     const currTimestamp = parseInt(Date.now()/1000);
     let lastGaugeTimestamp = await this.genericContractCall('GaugeController','time_weight',[gaugeConfig.address]);
