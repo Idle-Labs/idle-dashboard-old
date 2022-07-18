@@ -109,10 +109,11 @@ class Gauges extends Component {
   loadData(){
     const availableTokens = Object.keys(this.props.toolProps.availableGauges).reduce((obj, token) => {
       const gaugeConfig = this.props.toolProps.availableGauges[token];
-      const baseTokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',token.toUpperCase()]);
+      const baseTokenConfig = this.functionsUtil.getTokenConfig(gaugeConfig.underlyingToken);
+      const protocolConfig = this.functionsUtil.getGlobalConfig(['stats','protocols',gaugeConfig.protocol]);
 
       const tokenConfig = {};
-      tokenConfig.token = token;
+      tokenConfig.token = gaugeConfig.underlyingToken;
       tokenConfig.abi = gaugeConfig.abi;
       tokenConfig.address = gaugeConfig.address;
       tokenConfig.decimals = baseTokenConfig.decimals;

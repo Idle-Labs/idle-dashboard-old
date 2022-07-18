@@ -2475,6 +2475,66 @@ const globalConfigs = {
               address: '0x4657B96D587c4d46666C244B40216BEeEA437D0d'
             }
           },
+          AGEUR:{
+            protocol:'euler',
+            abi:LiquidityGauge,
+            rewardTokens:['IDLE'],
+            underlyingToken:'AGEUR',
+            name: "LiquidityGauge_aa_euler_ageur",
+            token: "LiquidityGauge_aa_euler_ageur",
+            address:'0x8f195979f7af6c500b4688e492d07036c730c1b2',
+            trancheToken:{
+              abi: ERC20,
+              name: 'AA_euler_AGEUR',
+              token: 'AA_euler_AGEUR',
+              address: '0x624DfE05202b66d871B8b7C0e14AB29fc3a5120c'
+            }
+          },
+          USDC:{
+            protocol:'euler',
+            abi:LiquidityGauge,
+            rewardTokens:['IDLE'],
+            underlyingToken:'USDC',
+            name: "LiquidityGauge_aa_euler_usdc",
+            token: "LiquidityGauge_aa_euler_usdc",
+            address:'0x1cd24f833af78ae877f90569eaec3174d6769995',
+            trancheToken:{
+              abi: ERC20,
+              name: 'AA_euler_USDC',
+              token: 'AA_euler_USDC',
+              address: '0x1e095cbF663491f15cC1bDb5919E701b27dDE90C'
+            }
+          },
+          DAI:{
+            protocol:'euler',
+            abi:LiquidityGauge,
+            rewardTokens:['IDLE'],
+            underlyingToken:'DAI',
+            name: "LiquidityGauge_aa_euler_dai",
+            token: "LiquidityGauge_aa_euler_dai",
+            address:'0x57d59d4bbb0e2432f1698f33d4a47b3c7a9754f3',
+            trancheToken:{
+              abi: ERC20,
+              name: 'AA_euler_DAI',
+              token: 'AA_euler_DAI',
+              address: '0x852c4d2823E98930388b5cE1ed106310b942bD5a'
+            }
+          },
+          USDT:{
+            protocol:'euler',
+            abi:LiquidityGauge,
+            rewardTokens:['IDLE'],
+            underlyingToken:'USDT',
+            name: "LiquidityGauge_aa_euler_usdt",
+            token: "LiquidityGauge_aa_euler_usdt",
+            address:'0x0c3310b0b57b86d376040b755f94a925f39c4320',
+            trancheToken:{
+              abi: ERC20,
+              name: 'AA_euler_USDT',
+              token: 'AA_euler_USDT',
+              address: '0xE0f126236d2a5b13f26e72cBb1D1ff5f297dDa07'
+            }
+          },
           /*
           mUSD:{
             protocol:'mstable',
