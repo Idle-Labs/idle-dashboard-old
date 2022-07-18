@@ -274,7 +274,7 @@ class TrancheDetails extends Component {
         } else {
           // Overwrite default action message
           if (this.props.selectedTranche === 'AA' && this.functionsUtil.BNify(this.state.gaugeStakedBalance).gt(0)){
-            infoText = `To withdraw your ${this.props.selectedToken} you need to unstake the tranche tokens from the <a href="${this.functionsUtil.getDashboardSectionUrl(`gauges/${this.props.selectedToken}`)}" class="link">${this.props.selectedToken} Gauge</a> first.`;
+            infoText = `To withdraw your ${this.props.selectedToken} make sure to unstake the tranche tokens from the <a href="${this.functionsUtil.getDashboardSectionUrl(`gauges/${this.props.selectedToken}`)}" class="link">${this.props.selectedToken} Gauge</a> first.`;
           }
         }
       break;
