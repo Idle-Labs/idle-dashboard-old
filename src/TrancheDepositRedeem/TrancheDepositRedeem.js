@@ -208,7 +208,7 @@ class TrancheDetails extends Component {
         }
         
         if (gaugeConfig && gaugeConfig.trancheToken.token.toLowerCase() === this.props.tokenConfig[this.props.selectedTranche].token.toLowerCase() && this.state.trancheBalance && this.state.trancheBalance.gt(0)){
-          infoText = `Stake your ${gaugeConfig.trancheToken.token} in the Liquidity Gauge and get rewarded!`;
+          infoText = `Stake your tranche tokens (${gaugeConfig.trancheToken.token}) in the Liquidity Gauge and get additional rewards.`;
         }
       break;
       case 'stake':

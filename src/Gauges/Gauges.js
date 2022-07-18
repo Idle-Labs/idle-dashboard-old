@@ -110,7 +110,7 @@ class Gauges extends Component {
     const availableTokens = Object.keys(this.props.toolProps.availableGauges).reduce((obj, token) => {
       const gaugeConfig = this.props.toolProps.availableGauges[token];
       const baseTokenConfig = this.functionsUtil.getTokenConfig(gaugeConfig.underlyingToken);
-      const protocolConfig = this.functionsUtil.getGlobalConfig(['stats','protocols',gaugeConfig.protocol]);
+      // const protocolConfig = this.functionsUtil.getGlobalConfig(['stats','protocols',gaugeConfig.protocol]);
 
       const tokenConfig = {};
       tokenConfig.token = gaugeConfig.underlyingToken;
