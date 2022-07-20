@@ -1539,13 +1539,11 @@ class DepositRedeem extends Component {
                               <DashboardCard
                                 cardProps={{
                                   p: 3,
-                                  width: 0.48,
-                                  onMouseDown: () => {
-                                    this.setAction('deposit');
-                                  }
+                                  width: 0.48
                                 }}
                                 isInteractive={true}
                                 isActive={this.state.action === 'deposit'}
+                                handleClick={() => { this.setAction('deposit') }}
 
                               >
                                 <Flex
@@ -1576,13 +1574,11 @@ class DepositRedeem extends Component {
                               <DashboardCard
                                 cardProps={{
                                   p: 3,
-                                  width: 0.48,
-                                  onMouseDown: () => {
-                                    this.setAction('redeem');
-                                  }
+                                  width: 0.48
                                 }}
                                 isInteractive={true}
                                 isActive={this.state.action === 'redeem'}
+                                handleClick={() => { this.setAction('redeem') }}
                                 isDisabled={!this.state.canRedeem && !this.state.canRedeemCurve}
                               >
                                 <Flex

@@ -4466,8 +4466,14 @@ class FunctionsUtil {
 
     const permitConfig = this.getGlobalConfig(['permit', baseContractName]);
 
+    if (!permitConfig.nonceMethod || !baseContract.methods[permitConfig.nonceMethod]){
+      return false;
+    }
+
+    // console.log('signPermit',baseContractName,baseContract,baseContract.methods,permitConfig.nonceMethod);
+
     const expiry = Math.round(new Date().getTime() / 1000 + 3600);
-    let nonce = permitConfig.nonceMethod ? await baseContract.methods[permitConfig.nonceMethod](holder).call() : null;
+    let nonce = await baseContract.methods[permitConfig.nonceMethod](holder).call();
     if (addToNonce > 0) {
       nonce = parseInt(nonce) + parseInt(addToNonce);
     }

@@ -1,3 +1,5 @@
+import DAI from '../abis/tokens/DAI.json';
+import USDC from '../abis/tokens/USDC.json';
 import ERC20 from '../contracts/ERC20.json';
 import IdleCDO from '../contracts/IdleCDO.json';
 import IdleStrategy from '../contracts/IdleStrategy.json';
@@ -106,6 +108,7 @@ const availableTranches = {
   1:{
     idle:{
       DAI:{
+        abi:DAI,
         token:'DAI',
         decimals:18,
         protocol:'idle',
@@ -987,7 +990,7 @@ const availableTranches = {
     },
     euler:{
       USDC:{
-        abi:ERC20,
+        abi:USDC,
         decimals:6,
         token:'USDC',
         autoFarming:[],
@@ -1065,7 +1068,7 @@ const availableTranches = {
         }
       },
       DAI:{
-        abi:ERC20,
+        abi:DAI,
         token:'DAI',
         decimals:18,
         autoFarming:[],
@@ -1298,7 +1301,7 @@ const availableTranches = {
     },
     clearpool:{
       USDC:{
-        abi:ERC20,
+        abi:USDC,
         decimals:6,
         token:'USDC',
         blockNumber:15044679,
