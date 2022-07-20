@@ -1003,7 +1003,7 @@ class Gauges extends Component {
                       iconProps={{
                         color:'tick'
                       }}
-                      text={`Your vote has been succesfully  and will remain registered until you change it.<br />Wait until <strong>${this.state.unlockDate} UTC</strong> to update your vote for this gauge.`}
+                      text={`Your vote has been succesfully and will remain registered until you change it.<br />Wait until <strong>${this.state.unlockDate} UTC</strong> to update your vote for this gauge.`}
                     />
                   ) : this.state.selectedAction === 'vote' && this.functionsUtil.BNify(this.state.availableVotingPower).lte(0) ? (
                     <IconBox

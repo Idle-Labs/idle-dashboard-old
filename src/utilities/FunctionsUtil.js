@@ -1232,13 +1232,13 @@ class FunctionsUtil {
       let limit = null;
       let startBlock = tokenConfig.blockNumber;
       let latestHarvestBlock = await this.genericContractCall(strategyConfig.name,'latestHarvestBlock');
-      if (parseInt(latestHarvestBlock)>0){
-        startBlock = latestHarvestBlock;
-        latestHarvestBlock++;
-      } else {
-        limit = 1;
-        latestHarvestBlock = 'latest';
+
+      if (!latestHarvestBlock || !parseInt(latestHarvestBlock)){
+        return null;
       }
+
+      startBlock = latestHarvestBlock;
+      latestHarvestBlock++;
 
       let transfers = await this.getEtherscanTokenTransfers(tokenConfig.token, idleStrategyAddress, null, tokenConfig.address, idleStrategyAddress, startBlock, latestHarvestBlock, 'desc', limit);
 

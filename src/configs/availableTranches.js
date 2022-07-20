@@ -1319,6 +1319,7 @@ const availableTranches = {
           name:'IdleStrategy_clearpool_USDC',
           address:'0x54ae90be2dee0a960953c724839541e75bb1f471'
         },
+        description:'This strategy deploys funds in the <a href="https://app.clearpool.finance/pool/0xCb288b6d30738db7E3998159d192615769794B5b" class="link" rel="nofollow noopener noreferrer" target="_blank">Clearpool Wintermute USDC pool</a>. The APR is dynamically adjusted according to the coverage provided to the counterpart Senior tranche thanks to the <a href="https://medium.com/idle-finance/adaptive-yield-split-foster-pyts-liquidity-scalability-a796fa17ea35" class="link" rel="nofollow noopener noreferrer" target="_blank">Adaptive Yield Split</a>.',
         AA:{
           abi:ERC20,
           decimals:6,
