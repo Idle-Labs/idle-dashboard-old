@@ -147,6 +147,8 @@ class Tranches extends Component {
 
     const portfolio = await this.functionsUtil.getAccountPortfolioTranches(this.props.availableTranches,this.props.account);
 
+    // console.log('portfolio',portfolio);
+
     if (portfolio){
       const tranchesTokens = [];
       const tranchesBalances = [];

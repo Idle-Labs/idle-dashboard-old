@@ -1003,13 +1003,19 @@ class FunctionsUtil {
       underlying_redeems,
       underlying_deposits,
       trancheToken_redeems,
-      trancheToken_deposits
+      trancheToken_deposits,
+      trancheToken_received,
+      trancheToken_sent
     ] = await Promise.all([
       this.getContractEvents(tokenConfig.token, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: underlyingEventsFilters_redeems }),
       this.getContractEvents(tokenConfig.token, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: underlyingEventsFilters_deposits }),
       this.getContractEvents(trancheConfig.name, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: { from: [this.props.account], to: ['0x0000000000000000000000000000000000000000'] } }),
-      this.getContractEvents(trancheConfig.name, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: { from: ['0x0000000000000000000000000000000000000000'], to: [this.props.account] } })
+      this.getContractEvents(trancheConfig.name, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: { from: ['0x0000000000000000000000000000000000000000'], to: [this.props.account] } }),
+      this.getContractEvents(trancheConfig.name, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: { from: [this.props.account] } }),
+      this.getContractEvents(trancheConfig.name, 'Transfer', trancheConfig.blockNumber, 'latest', { filter: { to: [this.props.account] } })
     ]);
+
+    // console.log('getTrancheUserTransactionsEvents',account,tokenConfig.token,trancheToken_transfers_in,trancheToken_transfers_out);
 
     if (underlying_redeems){
       underlying_redeems.forEach( tx => {
@@ -1045,6 +1051,24 @@ class FunctionsUtil {
       });
     } else {
       trancheToken_redeems = [];
+    }
+
+    if (trancheToken_received){
+      trancheToken_received.forEach( tx => {
+        tx.type = 'trancheReceived';
+        tx.contractAddress = trancheConfig.address.toLowerCase();
+      });
+    } else {
+      trancheToken_received = [];
+    }
+
+    if (trancheToken_sent){
+      trancheToken_sent.forEach( tx => {
+        tx.type = 'trancheSent';
+        tx.contractAddress = trancheConfig.address.toLowerCase();
+      });
+    } else {
+      trancheToken_sent = [];
     }
 
     return underlying_redeems.concat(underlying_deposits).concat(trancheToken_deposits).concat(trancheToken_redeems);
@@ -1089,6 +1113,9 @@ class FunctionsUtil {
     if (etherscanTxlist && etherscanTxlist.data && etherscanTxlist.data.result && typeof etherscanTxlist.data.result.filter === 'function') {
       return etherscanTxlist.data.result.filter(tx => {
         return tokenConfigs.some( tokenConfig => {
+
+          const gaugeConfig = this.getTrancheGaugeConfig(tokenConfig.protocol,tokenConfig.token);
+
           const trancheTokenAddresses = trancheTypes.map( trancheType => (tokenConfig[trancheType].address.toLowerCase()) );
 
           const defaultEventsConfig = { to: 'to', from: 'from', value: 'value' };
@@ -1099,6 +1126,9 @@ class FunctionsUtil {
           const isTrancheDeposit = tx.from.toLowerCase() === '0x0000000000000000000000000000000000000000' && trancheTokenAddresses.includes(tx.contractAddress.toLowerCase()) && tx.to.toLowerCase() === account.toLowerCase();
           const isTrancheRedeem = tx.from.toLowerCase() === account.toLowerCase() && trancheTokenAddresses.includes(tx.contractAddress.toLowerCase()) && tx.to.toLowerCase() === '0x0000000000000000000000000000000000000000';
 
+          const isTrancheReceived = (tx.from.toLowerCase() !== '0x0000000000000000000000000000000000000000' && (!gaugeConfig || tx.from.toLowerCase() !== gaugeConfig.address.toLowerCase())) && trancheTokenAddresses.includes(tx.contractAddress.toLowerCase()) && tx.to.toLowerCase() === account.toLowerCase();
+          const isTrancheSent = tx.from.toLowerCase() === account.toLowerCase() && trancheTokenAddresses.includes(tx.contractAddress.toLowerCase()) && (tx.to.toLowerCase() !== '0x0000000000000000000000000000000000000000' && (!gaugeConfig || tx.to.toLowerCase() !== gaugeConfig.address.toLowerCase()));
+
           let type = null;
           if (isUnderlyingDeposit){
             type = 'underlyingDeposit';
@@ -1108,6 +1138,10 @@ class FunctionsUtil {
             type = 'trancheDeposit';
           } else if (isTrancheRedeem){
             type = 'trancheRedeem';
+          } else if (isTrancheReceived){
+            type = 'trancheReceived';
+          } else if (isTrancheSent){
+            type = 'trancheSent';
           }
 
           tx.type = type;
@@ -1120,7 +1154,9 @@ class FunctionsUtil {
           tx.returnValues[underlyingEventsConfig.from] = tx.from;
           tx.returnValues[underlyingEventsConfig.value] = tx.value;
 
-          return isUnderlyingDeposit || isUnderlyingRedeem || isTrancheDeposit || isTrancheRedeem;
+          // console.log('tx',tokenConfig.token,tx.hash,type);
+
+          return isUnderlyingDeposit || isUnderlyingRedeem || isTrancheDeposit || isTrancheRedeem || isTrancheReceived || isTrancheSent;
         });
       });
     }
@@ -1496,25 +1532,28 @@ class FunctionsUtil {
 
     // Order token transfers
     const underlying_transfers = userTransactions.filter( tx => ['underlyingDeposit','underlyingRedeem'].includes(tx.type) ).sort((a, b) => (parseInt(a.blockNumber) > parseInt(b.blockNumber) ? 1 : -1));
-    const trancheToken_transfers = userTransactions.filter( tx => ['trancheDeposit','trancheRedeem'].includes(tx.type) ).sort((a, b) => (parseInt(a.blockNumber) > parseInt(b.blockNumber) ? 1 : -1));
+    const trancheToken_transfers = userTransactions.filter( tx => ['trancheDeposit','trancheRedeem','trancheReceived','trancheSent'].includes(tx.type) ).sort((a, b) => (parseInt(a.blockNumber) > parseInt(b.blockNumber) ? 1 : -1));
 
     const blocksInfo = {};
 
     await this.asyncForEach(trancheToken_transfers, async (trancheTokenTransferEvent) => {
-      const tokenTransferEvent = underlying_transfers.find(t => t.transactionHash.toLowerCase() === trancheTokenTransferEvent.transactionHash.toLowerCase());
-      if (!tokenTransferEvent) {
-        return;
-      }
+      // const tokenTransferEvent = underlying_transfers.find(t => t.transactionHash.toLowerCase() === trancheTokenTransferEvent.transactionHash.toLowerCase());
+      // if (!tokenTransferEvent) {
+      //   return;
+      // }
       const [
         blockInfo,
-        tokenConversionRate
+        tokenConversionRate,
+        tranchePrice
       ] = await Promise.all([
-        this.getBlockInfo(tokenTransferEvent.blockNumber),
-        this.convertTrancheTokenBalance(1,tokenConfig,tokenTransferEvent.blockNumber)
+        this.getBlockInfo(trancheTokenTransferEvent.blockNumber),
+        this.convertTrancheTokenBalance(1,tokenConfig,trancheTokenTransferEvent.blockNumber),
+        this.genericContractCallCached(tokenConfig.CDO.name, 'virtualPrice', [trancheConfig.address], {}, trancheTokenTransferEvent.blockNumber)
       ]);
 
-      blocksInfo[tokenTransferEvent.blockNumber] = {
+      blocksInfo[trancheTokenTransferEvent.blockNumber] = {
         blockInfo,
+        tranchePrice,
         tokenConversionRate
       };
     });
@@ -1524,17 +1563,20 @@ class FunctionsUtil {
       const tokenTransferEvent = underlying_transfers.find(t => t.transactionHash.toLowerCase() === trancheTokenTransferEvent.transactionHash.toLowerCase());
 
       // Skip if no tranche token transfer event found
-      if (!tokenTransferEvent) {
-        return;
-      }
+      // if (!tokenTransferEvent) {
+      //   return;
+      // }
 
-      const tokenAmount = this.fixTokenDecimals(tokenTransferEvent.returnValues[underlyingEventsConfig.value], tokenConfig.decimals);
-      const trancheTokenAmount = this.fixTokenDecimals(trancheTokenTransferEvent.returnValues.value, 18);
+      const tranchePrice = this.fixTokenDecimals(blocksInfo[trancheTokenTransferEvent.blockNumber].tranchePrice, trancheConfig.decimals);
+
+      const trancheTokenAmount = this.fixTokenDecimals(trancheTokenTransferEvent.returnValues.value, trancheConfig.decimals);
+      const tokenAmount = tokenTransferEvent ? this.fixTokenDecimals(tokenTransferEvent.returnValues[underlyingEventsConfig.value], trancheConfig.decimals) : trancheTokenAmount.times(tranchePrice);
+
       // console.log('tranchePrice',trancheConfig.token,tokenAmount.toFixed(),trancheTokenAmount.toFixed());
 
-      const tranchePrice = tokenAmount.div(trancheTokenAmount);
-      const blockInfo = blocksInfo[tokenTransferEvent.blockNumber].blockInfo;
-      const hashKey = `${trancheConfig.token}_${tokenTransferEvent.transactionHash}`;
+      // const tranchePrice = tokenAmount.div(trancheTokenAmount);
+      const blockInfo = blocksInfo[trancheTokenTransferEvent.blockNumber].blockInfo;
+      const hashKey = `${trancheConfig.token}_${trancheTokenTransferEvent.transactionHash}`;
       const protocolConfig = this.getGlobalConfig(['stats', 'protocols', tokenConfig.protocol]);
       const protocolIcon = protocolConfig && protocolConfig.icon ? `images/protocols/${protocolConfig.icon}` : `images/protocols/${tokenConfig.protocol}.svg`;
 
@@ -1551,18 +1593,19 @@ class FunctionsUtil {
         protocol: protocolConfig.label,
         tokenSymbol: tokenConfig.token,
         trancheTokens: trancheTokenAmount,
-        hash: tokenTransferEvent.transactionHash,
-        blockNumber: tokenTransferEvent.blockNumber,
+        hash: trancheTokenTransferEvent.transactionHash,
         timeStamp: blockInfo ? blockInfo.timestamp : null,
+        blockNumber: trancheTokenTransferEvent.blockNumber,
       };
 
-      const tokenAmountConverted = this.BNify(tokenAmount).times(blocksInfo[tokenTransferEvent.blockNumber].tokenConversionRate);
+      const tokenAmountConverted = this.BNify(tokenAmount).times(blocksInfo[trancheTokenTransferEvent.blockNumber].tokenConversionRate);
 
       // Get conversion rate outside the loop
       // await this.convertTrancheTokenBalance(tokenAmount,tokenConfig,tokenTransferEvent.blockNumber);
 
       // Deposit
-      if (trancheTokenTransferEvent.returnValues.from.toLowerCase() === '0x0000000000000000000000000000000000000000') {
+      // if (trancheTokenTransferEvent.returnValues.from.toLowerCase() === '0x0000000000000000000000000000000000000000') {
+      if (['trancheDeposit','trancheReceived'].includes(trancheTokenTransferEvent.type)) {
         // Set first deposit tx
         if (!firstDepositTx) {
           firstDepositTx = tx;
@@ -1576,7 +1619,8 @@ class FunctionsUtil {
 
         // console.log('Deposit',blockInfo.timestamp,trancheConfig.token,tokenAmount.toFixed(),tokenAmountConverted.toFixed(),amountDeposited.toFixed(),amountDepositedConverted.toFixed(),trancheTokenAmount.toFixed());
         // Withdraw
-      } else if (trancheTokenTransferEvent.returnValues.to.toLowerCase() === '0x0000000000000000000000000000000000000000') {
+      // } else if (trancheTokenTransferEvent.returnValues.to.toLowerCase() === '0x0000000000000000000000000000000000000000') {
+      } else if (['trancheRedeem','trancheSent'].includes(trancheTokenTransferEvent.type)) {
         tx.action = 'Withdraw';
         amountDeposited = amountDeposited.minus(tokenAmount);
         amountDepositedConverted = amountDepositedConverted.minus(tokenAmountConverted);
@@ -1593,7 +1637,7 @@ class FunctionsUtil {
       transactions.push(tx);
     });
 
-    avgBuyPrice = avgBuyPrice.div(totalAmountDeposited);
+    avgBuyPrice = totalAmountDeposited.gt(0) ? avgBuyPrice.div(totalAmountDeposited) : this.BNify(0);
 
     // console.log(trancheConfig.token,'amountDeposited',amountDeposited.toFixed(),'avgBuyPrice',avgBuyPrice.toFixed(),'transactions',transactions);
 
