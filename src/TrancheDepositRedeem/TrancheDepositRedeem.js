@@ -323,7 +323,7 @@ class TrancheDetails extends Component {
         if (selectedPercentage) {
           trancheTokenToRedeem = this.functionsUtil.BNify(this.state.trancheBalance).times(this.functionsUtil.BNify(selectedPercentage).div(100));
         } else {
-          trancheTokenToRedeem = this.functionsUtil.BNify(amount).div(this.functionsUtil.normalizeTokenAmount(this.state.tranchePrice,18));
+          trancheTokenToRedeem = this.functionsUtil.BNify(amount).div(this.functionsUtil.normalizeTokenAmount(this.state.tranchePrice, this.props.tokenConfig.decimals));
         }
 
         // Check if idleTokens to redeem > idleToken balance
