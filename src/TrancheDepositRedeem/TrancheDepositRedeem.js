@@ -891,7 +891,7 @@ class TrancheDetails extends Component {
                               fontSize:[1,2],
                               color:'copyColor'
                             },
-                            name:this.props.tokenConfig.adaptiveYieldSplitEnabled ? 'trancheAYS' : 'trancheAPRRatio'
+                            name:'trancheAPRRatio'
                           }}
                           token={this.props.selectedToken}
                           tranche={this.props.selectedTranche}

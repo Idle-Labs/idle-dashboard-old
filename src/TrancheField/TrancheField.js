@@ -468,26 +468,30 @@ class TrancheField extends Component {
         ) : loader
       break;
       case 'trancheAPRSplitRatio':
-        if (this.props.tokenConfig.adaptiveYieldSplitEnabled){
-          output = (
-            <Tooltip
-              placement={'top'}
-              message={this.functionsUtil.getGlobalConfig(['messages','aysShort'])}
-            >
-              <Image src={`images/ays.svg`} height={['1.4em','2em']} {...fieldProps} />
-            </Tooltip>
-          );
-        } else {
-          output = this.state[fieldInfo.name];
-          formattedValue = this.state[fieldInfo.name];
-          if (this.state[fieldInfo.name] && this.state[fieldInfo.name]._isBigNumber){
-            formattedValue = this.state[fieldInfo.name].toFixed(decimals);
-          }
-
-          output = this.state[fieldInfo.name] ? (
-            <Text {...fieldProps} dangerouslySetInnerHTML={{__html:formattedValue}}></Text>
-          ) : (this.state[fieldInfo.name] === undefined ? loader : null)
+        output = this.state[fieldInfo.name];
+        formattedValue = this.state[fieldInfo.name];
+        if (this.state[fieldInfo.name] && this.state[fieldInfo.name]._isBigNumber){
+          formattedValue = this.state[fieldInfo.name].toFixed(decimals);
         }
+
+        output = this.state[fieldInfo.name] ? (
+          <Flex
+            alignItems={'center'}
+            flexDirection={'row'}
+          >
+            <Text {...fieldProps} dangerouslySetInnerHTML={{__html:formattedValue}}></Text>
+            {
+              (typeof this.props.tokenConfig.adaptiveYieldSplitEnabled === 'undefined' || this.props.tokenConfig.adaptiveYieldSplitEnabled) && (
+                <Tooltip
+                  placement={'top'}
+                  message={this.functionsUtil.getGlobalConfig(['messages','aysShort'])}
+                >
+                  <Image ml={2} src={`images/ays.svg`} height={['1.4em','1.8em']} {...fieldProps} />
+                </Tooltip>
+              )
+            }
+          </Flex>
+        ) : (this.state[fieldInfo.name] === undefined ? loader : null)
       break;
       case 'trancheAYS':
         output = (

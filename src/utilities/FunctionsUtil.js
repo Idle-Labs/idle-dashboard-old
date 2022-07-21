@@ -7354,6 +7354,19 @@ class FunctionsUtil {
       tokenConfigDest.address = tokenConfigDest.addressForPrice;
     }
 
+    // Force token from - in case DAI doesn't exist
+    if (tokenConfigDest.conversionRateForceToken){
+      const forceTokenConfig = this.getTokenConfig(tokenConfigDest.conversionRateForceToken);
+      if (forceTokenConfig){
+        tokenConfigFrom = forceTokenConfig;
+      }
+    }
+
+    // Check if has to convert without passing through WETH
+    if (typeof tokenConfigDest.conversionRateDirectConversion !== 'undefined'){
+      useWETH = useWETH && !tokenConfigDest.conversionRateDirectConversion;
+    }
+
     // Check for cached data
     const cachedDataKey = `customProtocolConversionRate_${tokenConfigFrom.address}_${tokenConfigDest.address}_${blockNumber}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
