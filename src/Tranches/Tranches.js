@@ -1051,25 +1051,6 @@ class Tranches extends Component {
                         },
                         {
                           mobile:false,
-                          title:'APR RATIO',
-                          desc:this.functionsUtil.getGlobalConfig(['messages','aprRatio']),
-                          props:{
-                            width:[0.15, 0.1],
-                          },
-                          fields:[
-                            {
-                              name:'trancheAPRSplitRatio',
-                              props:{
-                                flexProps:{
-                                  mr:2
-                                }
-                              }
-                            },
-                            
-                          ]
-                        },
-                        {
-                          mobile:false,
                           title:'AUTO-COMPOUNDING',
                           desc:this.functionsUtil.getGlobalConfig(['messages','autoFarming']),
                           props:{
@@ -1112,7 +1093,7 @@ class Tranches extends Component {
                           title:'',
                           mobile:false,
                           props:{
-                            width:[0.29, 0.15],
+                            width:[0.29, 0.13],
                           },
                           parentProps:{
                             width:1
@@ -1292,26 +1273,6 @@ class Tranches extends Component {
                             showTooltip:true
                           },
                         ],
-                      },
-                      {
-                        mobile:false,
-                        title:'APR RATIO',
-                        desc:this.functionsUtil.getGlobalConfig(['messages','aprRatio']),
-                        props:{
-                          width:[0.15, 0.1],
-                        },
-                        fields:[
-                          {
-                            name:'trancheAPRSplitRatio',
-                            props:{
-                              flexProps:{
-                                mr:2
-                              },
-                              height:['1.4em','2em']
-                            }
-                          },
-                          
-                        ]
                       },
                       {
                         mobile:false,
