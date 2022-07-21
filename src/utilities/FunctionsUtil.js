@@ -1567,10 +1567,10 @@ class FunctionsUtil {
       //   return;
       // }
 
-      const tranchePrice = this.fixTokenDecimals(blocksInfo[trancheTokenTransferEvent.blockNumber].tranchePrice, trancheConfig.decimals);
+      const tranchePrice = this.fixTokenDecimals(blocksInfo[trancheTokenTransferEvent.blockNumber].tranchePrice, tokenConfig.decimals);
 
       const trancheTokenAmount = this.fixTokenDecimals(trancheTokenTransferEvent.returnValues.value, trancheConfig.decimals);
-      const tokenAmount = tokenTransferEvent ? this.fixTokenDecimals(tokenTransferEvent.returnValues[underlyingEventsConfig.value], trancheConfig.decimals) : trancheTokenAmount.times(tranchePrice);
+      const tokenAmount = tokenTransferEvent ? this.fixTokenDecimals(tokenTransferEvent.returnValues[underlyingEventsConfig.value], tokenConfig.decimals) : trancheTokenAmount.times(tranchePrice);
 
       // console.log('tranchePrice',trancheConfig.token,tokenAmount.toFixed(),trancheTokenAmount.toFixed());
 
@@ -1631,6 +1631,7 @@ class FunctionsUtil {
           totalAmountDeposited = this.BNify(0);
           amountDepositedConverted = this.BNify(0);
         }
+        
         // console.log('Redeem',blockInfo.timestamp,trancheConfig.token,tokenAmount.toFixed(),tokenAmountConverted.toFixed(),amountDeposited.toFixed(),amountDepositedConverted.toFixed(),trancheTokenAmount.toFixed());
       }
 
@@ -5213,13 +5214,13 @@ class FunctionsUtil {
       case 'trancheRealPrice':
         output = await this.genericContractCallCached(tokenConfig.CDO.name, 'tranchePrice', [trancheConfig.address]);
         if (output) {
-          output = this.fixTokenDecimals(output, trancheConfig.decimals);
+          output = this.fixTokenDecimals(output, tokenConfig.decimals);
         }
       break;
       case 'tranchePrice':
         output = await this.genericContractCallCached(tokenConfig.CDO.name, 'virtualPrice', [trancheConfig.address]);
         if (output) {
-          output = this.fixTokenDecimals(output, trancheConfig.decimals);
+          output = this.fixTokenDecimals(output, tokenConfig.decimals);
         }
       break;
       case 'trancheStaked':

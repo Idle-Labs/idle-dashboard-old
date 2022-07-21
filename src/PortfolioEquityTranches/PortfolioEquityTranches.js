@@ -100,15 +100,16 @@ class PortfolioEquityTranches extends Component {
             break;
             case 'Withdraw':
               amountLent = amountLent.minus(tokenAmount);
+              // Reset amountLent if below zero
+              if (amountLent.lt(0)){
+                amountLent = this.functionsUtil.BNify(0);
+              }
             break;
             default:
             break;
           }
 
-          // Reset amountLent if below zero
-          if (amountLent.lt(0)){
-            amountLent = this.functionsUtil.BNify(0);
-          }
+          // console.log(tx.action,tx.protocol,tx.token,tokenAmount.toString(),amountLent.toString());
 
           const action = tx.action;
           const balance = amountLent;
@@ -259,6 +260,7 @@ class PortfolioEquityTranches extends Component {
           });
         }
 
+         // console.log(token,conversionRateBlocksCalls);
         // console.log(token,startTokenConversionRate ? startTokenConversionRate.toString() : null,lastTokenConversionRate ? lastTokenConversionRate.toString() : null);
 
         if (!tokensData[token]){
@@ -347,6 +349,8 @@ class PortfolioEquityTranches extends Component {
       // eslint-disable-next-line
       Object.keys(tokensBalance).forEach( token => {
 
+        const tokenConfig = this.functionsUtil.getTokenConfig(token);
+
         if (!prevBalances[token]){
           prevBalances[token] = {};
         }
@@ -392,7 +396,7 @@ class PortfolioEquityTranches extends Component {
             foundBalances[token][tranche] = null;
           }
 
-          const tokenDecimals = this.functionsUtil.getGlobalConfig(['stats','tokens',token.toUpperCase(),'decimals']);
+          const tokenDecimals = tokenConfig ? tokenConfig.decimals : 18;
           let filteredBalances = tokensBalance[token].filter(tx => (tx.tranche===tranche && tx.timeStamp<=timeStamp && (!prevTimestamp || tx.timeStamp>prevTimestamp)));
           
           if (!filteredBalances.length){
@@ -412,6 +416,8 @@ class PortfolioEquityTranches extends Component {
                   lastFilteredTx.balance = newBalance;
                   lastFilteredTx.tranchePrice = tranchePrice;
                   filteredBalances = [lastFilteredTx];
+
+                  // console.log(token,trancheTokens.toString(),tranchePrice.toString(),newBalance.toString());
                 }
               } else {
                 filteredBalances = [{
@@ -446,6 +452,8 @@ class PortfolioEquityTranches extends Component {
 
           const lastTx = Object.values(filteredBalances).pop();
           let lastTxBalance = trancheTokenBalance[token][tranche].times(lastTx.tranchePrice);
+
+          // console.log(token,trancheTokenBalance[token][tranche].toString(),lastTx.tranchePrice.toString(),lastTxBalance.toString());
           if (lastTxBalance.gt(0)){
             // Convert token balance to USD
             const conversionRateField = this.functionsUtil.getTokenConversionRateField(token);
