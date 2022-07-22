@@ -610,7 +610,7 @@ class Stats extends Component {
                 const availableProtocolsKeys = [];
                 Object.keys(availableTokens).forEach( token => {
                   availableTokens[token].protocols.forEach( protocolInfo => {
-                    if (availableProtocolsKeys.indexOf(protocolInfo.name)<0){
+                    if (availableProtocolsKeys.indexOf(protocolInfo.name)<0 && statsProtocols[protocolInfo.name].enabled && statsProtocols[protocolInfo.name].legend){
                       availableProtocolsKeys.push(protocolInfo.name);
                     }
                   });
@@ -840,7 +840,7 @@ class Stats extends Component {
                       {
                         title:'PROTOCOL',
                         props:{
-                          width:[0.25, 0.14]
+                          width:[0.23, 0.14]
                         },
                         fields:[
                           {
@@ -851,22 +851,15 @@ class Stats extends Component {
                             }
                           },
                           {
+                            mobile:false,
                             name:'protocolName'
                           },
-                          {
-                            mobile:false,
-                            name:'experimentalBadge',
-                            props:{
-                              ml:1,
-                              height:'1.5em'
-                            }
-                          }
                         ]
                       },
                       {
                         title:'TOKEN',
                         props:{
-                          width:[0.25, 0.14],
+                          width:[0.17, 0.12],
                         },
                         fields:[
                           {
@@ -909,11 +902,11 @@ class Stats extends Component {
                       {
                         title:'POOL',
                         props:{
-                          width:[0.25, 0.14],
+                          width:[0.20, 0.12],
                         },
                         fields:[
                           {
-                            name:'pool',
+                            name:'poolConverted',
                             props:{
                               minPrecision:1,
                               decimals:this.props.isMobile ? 0 : 2,
@@ -924,7 +917,7 @@ class Stats extends Component {
                       {
                         title:'SENIOR APY',
                         props:{
-                          width:[0.28, 0.14],
+                          width:[0.20, 0.1],
                         },
                         parentProps:{
                           flexDirection:'column',
@@ -940,7 +933,7 @@ class Stats extends Component {
                       {
                         title:'JUNIOR APY',
                         props:{
-                          width:[0.28, 0.14],
+                          width:[0.20, 0.1],
                         },
                         parentProps:{
                           flexDirection:'column',
@@ -960,24 +953,24 @@ class Stats extends Component {
                       },
                       {
                         mobile:false,
-                        title:'APR RATIO',
+                        title:'APR LAST WEEK',
                         props:{
-                          width:[0.24, 0.13],
+                          width:[0.25],
+                        },
+                        parentProps:{
+                          width:1,
+                          pr:[2,4]
                         },
                         fields:[
                           {
-                            name:'trancheAPRSplitRatio',
-                            props:{
-                              flexProps:{
-                                mr:2
-                              },
-                              height:['1.4em','2em']
-                            }
-                          },
-
+                            name:'aprChart',
+                            style:{
+                              overflow:'visible',
+                            },
+                          }
                         ]
                       },
-                        /*
+                      /*
                       {
                         mobile:false,
                         title:'AUTO-FARMING',
