@@ -52,13 +52,12 @@ class TranchesList extends Component {
         }
       });
     } else {
-      enabledProtocols.map(protocol => {
+      enabledProtocols.forEach(protocol => {
         const protocolTranches = this.props.availableTranches[protocol];
         if (!protocolTranches){
           return null;
         }
-        const tranche = this.props.trancheType || null;
-        return Object.keys(protocolTranches).map( token => {
+        Object.keys(protocolTranches).forEach( token => {
           const tokenConfig = protocolTranches[token];
           if (tokenConfig){
             orderedTranches.push({
