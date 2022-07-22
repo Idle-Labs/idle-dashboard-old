@@ -34,70 +34,91 @@ class TranchesList extends Component {
     if (!enabledProtocols || !enabledProtocols.length){
       enabledProtocols = Object.keys(this.props.availableTranches);
     }
-    const depositedTokens=this.props.depositedTokens;
+
+    let orderedTranches = [];
+    if (this.props.tranchesOrdering){
+      this.props.tranchesOrdering.forEach( t => {
+        if (enabledProtocols.includes(t.protocol)){
+          const token = t.token;
+          const protocol = t.protocol;
+          if (this.props.availableTranches[protocol] && this.props.availableTranches[protocol][token]){
+            const tokenConfig = this.props.availableTranches[protocol][token];
+            orderedTranches.push({
+              token,
+              protocol,
+              tokenConfig
+            });
+          }
+        }
+      });
+    } else {
+      enabledProtocols.map(protocol => {
+        const protocolTranches = this.props.availableTranches[protocol];
+        if (!protocolTranches){
+          return null;
+        }
+        const tranche = this.props.trancheType || null;
+        return Object.keys(protocolTranches).map( token => {
+          const tokenConfig = protocolTranches[token];
+          if (tokenConfig){
+            orderedTranches.push({
+              token,
+              protocol,
+              tokenConfig
+            });
+          }
+         })
+      })
+    }
+
+    const depositedTokens = this.props.depositedTokens;
+    if (depositedTokens){
+      orderedTranches = orderedTranches.filter( t => {
+        return depositedTokens.find( d => d.token === t.token && d.protocol === t.protocol )
+      });
+    }
+
     return (
-      <Flex id="tranches-list-container" width={1} flexDirection={'column'}>
+      <Flex
+        width={1}
+        flexDirection={'column'}
+        id={"tranches-list-container"}
+      >
         <TableHeader
           {...this.props}
           cols={this.props.cols}
           isMobile={this.props.isMobile}
           colsProps={this.props.colsProps}
         />
-       {
-         this.props.isDeposit?
-       (
-         depositedTokens &&
-        <Flex id="tranches-list" flexDirection={'column'}>
-          {
-            depositedTokens.map( token => {
-              const tokenConfig = this.props.availableTranches[token.protocol][token.token];
-              return (
-                <TableRow
-                  {...this.props}
-                  token={token.token}
-                  addTokenName={false}
-                  tranche={token.tranche}
-                  protocol={token.protocol}
-                  tokenConfig={tokenConfig}
-                  rowId={`tranche-col-${token.protocol}`}
-                  cardId={`tranche-card-${token.protocol}`}
-                  fieldComponent={this.props.fieldComponent || TrancheField}
-                  key={`tranche-${token.protocol}-${token.token+token.tranche}`}
-                  trancheConfig={token.tranche==="AA"?tokenConfig.AA:tokenConfig.BB}
-                />
-              )
-            })
-          }
-        </Flex>
-       ):
-       (
-         <Flex id="tranches-list" flexDirection={'column'}>
-          {
-            enabledProtocols.map(protocol => {
-              const protocolConfig = this.props.availableTranches[protocol];
-              if (!protocolConfig){
-                return null;
-              }
-              const tranche = this.props.trancheType || null;
-              return Object.keys(protocolConfig).map( token => {
-                return(
-                  <TableRow
-                    {...this.props}
-                    token={token}
-                    tranche={tranche}
-                    protocol={protocol}
-                    rowId={`tranche-col-${protocol}`}
-                    tokenConfig={protocolConfig[token]}
-                    cardId={`tranche-card-${protocol}`}
-                    key={`tranche-${protocol}-${token}`}
-                    fieldComponent={this.props.fieldComponent || TrancheField}
-                  />
+        {
+          orderedTranches && orderedTranches.length>0 && (
+            <Flex
+              id={"tranches-list"}
+              flexDirection={'column'}
+            >
+              {
+                orderedTranches.map( p => {
+                  const token = p.token;
+                  const protocol = p.protocol;
+                  const tokenConfig = p.tokenConfig;
+                  const tranche = this.props.trancheType || null;
+                  return (
+                    <TableRow
+                      {...this.props}
+                      token={token}
+                      tranche={tranche}
+                      protocol={protocol}
+                      tokenConfig={tokenConfig}
+                      rowId={`tranche-col-${protocol}`}
+                      cardId={`tranche-card-${protocol}`}
+                      key={`tranche-${protocol}-${token}`}
+                      fieldComponent={this.props.fieldComponent || TrancheField}
+                    />
                   )
-               })
-            })
-          }
-        </Flex>
-        )
+                })
+              }
+            </Flex>
+          )
         }
       </Flex>
     );

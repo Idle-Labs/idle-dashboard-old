@@ -431,7 +431,7 @@ class FunctionsUtil {
                   tokenBalance:tokenBalanceConverted
                 });
 
-                // console.log(protocol,token,tranche,amountDeposited.toFixed(),tokenBalance.toFixed(),trancheEarnings.toFixed());
+                // console.log(protocol,token,tranche,'trancheStakedBalance',trancheStakedBalance.toFixed(),'amountDeposited',amountDeposited.toFixed(),'tokenBalance',tokenBalance.toFixed(),'trancheEarnings',trancheEarnings.toFixed());
 
                 // Increment total balance
                 portfolio.totalBalance = portfolio.totalBalance.plus(tokenBalanceConverted);
@@ -1117,6 +1117,7 @@ class FunctionsUtil {
           const gaugeConfig = this.getTrancheGaugeConfig(tokenConfig.protocol,tokenConfig.token);
 
           const trancheTokenAddresses = trancheTypes.map( trancheType => (tokenConfig[trancheType].address.toLowerCase()) );
+          const cdoRewardsContractAddresses = trancheTypes.map( trancheType => (tokenConfig[trancheType].CDORewards.address.toLowerCase()) ).filter( addr => addr !== '0x0000000000000000000000000000000000000000' );
 
           const defaultEventsConfig = { to: 'to', from: 'from', value: 'value' };
           const underlyingEventsConfig = this.getGlobalConfig(['events', tokenConfig.token, 'fields']) || defaultEventsConfig;
@@ -1126,8 +1127,13 @@ class FunctionsUtil {
           const isTrancheDeposit = tx.from.toLowerCase() === '0x0000000000000000000000000000000000000000' && trancheTokenAddresses.includes(tx.contractAddress.toLowerCase()) && tx.to.toLowerCase() === account.toLowerCase();
           const isTrancheRedeem = tx.from.toLowerCase() === account.toLowerCase() && trancheTokenAddresses.includes(tx.contractAddress.toLowerCase()) && tx.to.toLowerCase() === '0x0000000000000000000000000000000000000000';
 
-          const isTrancheReceived = (tx.from.toLowerCase() !== '0x0000000000000000000000000000000000000000' && (!gaugeConfig || tx.from.toLowerCase() !== gaugeConfig.address.toLowerCase())) && trancheTokenAddresses.includes(tx.contractAddress.toLowerCase()) && tx.to.toLowerCase() === account.toLowerCase();
-          const isTrancheSent = tx.from.toLowerCase() === account.toLowerCase() && trancheTokenAddresses.includes(tx.contractAddress.toLowerCase()) && (tx.to.toLowerCase() !== '0x0000000000000000000000000000000000000000' && (!gaugeConfig || tx.to.toLowerCase() !== gaugeConfig.address.toLowerCase()));
+          const stakingContractAddresses = cdoRewardsContractAddresses;
+          if (gaugeConfig){
+            stakingContractAddresses.push(gaugeConfig.address.toLowerCase());
+          }
+
+          const isTrancheReceived = tx.from.toLowerCase() !== '0x0000000000000000000000000000000000000000' && !stakingContractAddresses.includes(tx.from.toLowerCase()) && trancheTokenAddresses.includes(tx.contractAddress.toLowerCase()) && tx.to.toLowerCase() === account.toLowerCase();
+          const isTrancheSent = tx.from.toLowerCase() === account.toLowerCase() && trancheTokenAddresses.includes(tx.contractAddress.toLowerCase()) && tx.to.toLowerCase() !== '0x0000000000000000000000000000000000000000' && !stakingContractAddresses.includes(tx.to.toLowerCase());
 
           let type = null;
           if (isUnderlyingDeposit){
@@ -1154,9 +1160,11 @@ class FunctionsUtil {
           tx.returnValues[underlyingEventsConfig.from] = tx.from;
           tx.returnValues[underlyingEventsConfig.value] = tx.value;
 
-          // console.log('tx',tokenConfig.token,tx.hash,type);
+          // if (type){
+          //   console.log('tx',tokenConfig.token,tx.hash,tx.from,tx.to,stakingContractAddresses,type);
+          // }
 
-          return isUnderlyingDeposit || isUnderlyingRedeem || isTrancheDeposit || isTrancheRedeem || isTrancheReceived || isTrancheSent;
+          return type;
         });
       });
     }
@@ -4908,7 +4916,7 @@ class FunctionsUtil {
       workingSupply:working_supply
     };
   }
-  getTrancheGaugeConfig = (protocol,token) => {
+  getTrancheGaugeConfig = (protocol, token) => {
     return Object.values(this.getGlobalConfig(['tools','gauges','props','availableGauges'])).find( g => g.protocol.toLowerCase() === protocol.toLowerCase() && g.underlyingToken.toLowerCase() === token.toLowerCase() );
   }
   getGaugeWeight = async (gaugeConfig) => {
@@ -5139,7 +5147,7 @@ class FunctionsUtil {
         output = await this.loadTrancheFieldRaw('pool', fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens);
         output = await this.convertTrancheTokenBalance(output, tokenConfig);
         if (formatValue) {
-          output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + (addTokenName ? ` ${tokenName}` : '');
+          output = '$ '+this.abbreviateNumber(output, decimals, maxPrecision, minPrecision);
         }
       break;
       case 'seniorPoolNoLabel':
@@ -5147,6 +5155,13 @@ class FunctionsUtil {
       break;
       case 'juniorPoolNoLabel':
         output = await this.loadTrancheField('tranchePool', fieldProps, protocol, token, 'BB', tokenConfig, tokenConfig.BB, account, addGovTokens, formatValue, false);
+      break;
+
+      case 'seniorPoolConvertedNoLabel':
+        output = await this.loadTrancheField('poolConverted', fieldProps, protocol, token, 'AA', tokenConfig, tokenConfig.AA, account, addGovTokens, formatValue, false);
+      break;
+      case 'juniorPoolConvertedNoLabel':
+        output = await this.loadTrancheField('poolConverted', fieldProps, protocol, token, 'BB', tokenConfig, tokenConfig.BB, account, addGovTokens, formatValue, false);
       break;
       case 'seniorPool':
         output = await this.loadTrancheField('tranchePool', fieldProps, protocol, token, 'AA', tokenConfig, tokenConfig.AA, account, addGovTokens);

@@ -89,6 +89,25 @@ class Tranches extends Component {
       return false;
     }
 
+    const tranchesTvls = [];
+    await this.functionsUtil.asyncForEach(Object.keys(this.props.availableTranches), async (protocol) => {
+      await this.functionsUtil.asyncForEach(Object.keys(this.props.availableTranches[protocol]), async (token) => {
+        const tokenConfig = this.props.availableTranches[protocol][token];
+        const trancheConfig = tokenConfig.AA;
+        tranchesTvls.push({
+          token,
+          protocol,
+          tvl:parseFloat(await this.functionsUtil.loadTrancheFieldRaw('tranchePoolConverted', {decimals:2,maxPrecision:999,minPrecision:0}, protocol, token, null, tokenConfig, trancheConfig))
+        });
+      });
+    });
+
+    const tranchesOrdering = tranchesTvls.sort((a, b) => (parseInt(a.tvl) < parseInt(b.tvl) ? 1 : -1));
+    // console.log('tranchesOrdering',tranchesOrdering);
+    this.setState({
+      tranchesOrdering
+    });
+
     this.loadPortfolio().then( () => {
       const componentLoaded = true;
       const trancheRoute = this.props.urlParams.param1;
@@ -147,7 +166,7 @@ class Tranches extends Component {
 
     const portfolio = await this.functionsUtil.getAccountPortfolioTranches(this.props.availableTranches,this.props.account);
 
-    // console.log('portfolio',portfolio);
+    // console.log('portfolio', portfolio);
 
     if (portfolio){
       const tranchesTokens = [];
@@ -1000,7 +1019,7 @@ class Tranches extends Component {
                           },
                           fields:[
                             {
-                              name:this.state.useTrancheType ? `${this.state.trancheDetails.baseName}PoolNoLabel` : 'pool',
+                              name:this.state.useTrancheType ? `${this.state.trancheDetails.baseName}PoolConvertedNoLabel` : 'poolConverted',
                               props:{
                                 minPrecision:1,
                                 decimals:this.props.isMobile ? 0 : 2,
@@ -1225,7 +1244,7 @@ class Tranches extends Component {
                         },
                         fields:[
                           {
-                            name:this.state.useTrancheType ? `${this.state.trancheDetails.baseName}PoolNoLabel` : 'pool',
+                            name:this.state.useTrancheType ? `${this.state.trancheDetails.baseName}PoolConvertedNoLabel` : 'poolConverted',
                             props:{
                               minPrecision:1,
                               decimals:this.props.isMobile ? 0 : 2,
@@ -1338,7 +1357,8 @@ class Tranches extends Component {
                       }
                     ]}
                     {...this.props}
-                    availableTranches={this.props.account?this.state.remainingTranches:this.props.availableTranches}
+                    tranchesOrdering={this.state.tranchesOrdering}
+                    availableTranches={this.props.account ? this.state.remainingTranches : this.props.availableTranches}
 
                   />
                 </Flex>

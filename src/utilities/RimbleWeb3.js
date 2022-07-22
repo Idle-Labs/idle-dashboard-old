@@ -139,6 +139,10 @@ class RimbleTransaction extends React.Component {
         this.handleNetworkChanged(networkId);
         // window.location.reload();
       });
+
+      window.ethereum.on('accountsChanged', async (accounts) => {
+        this.initAccount(accounts[0]);
+      });
     }
 
     window.initWeb3 = this.initWeb3;
@@ -837,7 +841,7 @@ class RimbleTransaction extends React.Component {
     return simpleID;
   }
 
-  initAccount = async (account=false) => {
+  initAccount = async (account=null) => {
     
     const customAddress = this.props.customAddress;
     const walletProvider = this.functionsUtil.getWalletProvider('Infura');
@@ -861,12 +865,14 @@ class RimbleTransaction extends React.Component {
 
     try {
 
-      if (this.props.context.active && this.props.context.connectorName===this.props.connectorName && this.props.context.account){
+      if (!account && this.props.context.active && this.props.context.connectorName===this.props.connectorName && this.props.context.account){
         account = this.props.context.account;
       }
 
+      let wallets = null;
+
       if (!account){
-        const wallets = await this.state.web3.eth.getAccounts();
+        wallets = await this.state.web3.eth.getAccounts();
 
         if (wallets && wallets.length){
           account = wallets[0];
@@ -876,6 +882,8 @@ class RimbleTransaction extends React.Component {
       if (!account){
         account = this.props.context.account;
       }
+      
+      // console.log('initAccount',wallets,this.props.context.account,this.state.account,account);
 
       if (!account || this.state.account === account){
         return this.setState({
@@ -883,7 +891,6 @@ class RimbleTransaction extends React.Component {
         });
       }
 
-      // console.log('initAccount_2',account);
 
       // Request account access if needed
       if (account){
