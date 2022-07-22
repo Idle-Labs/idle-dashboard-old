@@ -1731,7 +1731,7 @@ const globalConfigs = {
       dydx: {
         legend: true,
         label: "DyDx",
-        enabled: true,
+        enabled: false,
         color: {
           rgb: [87, 87, 90],
           hsl: ["240", "2%", "35%"]
@@ -1762,7 +1762,7 @@ const globalConfigs = {
       },
       cream: {
         legend: false,
-        enabled: true,
+        enabled: false,
         label: "Cream",
         icon: "cream.svg",
         color: {
@@ -1837,7 +1837,7 @@ const globalConfigs = {
       },
       fuse: {
         legend: true,
-        enabled: true,
+        enabled: false,
         label: "Fuse",
         icon: "fuse.png",
         color: {
