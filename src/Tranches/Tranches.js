@@ -1133,6 +1133,7 @@ class Tranches extends Component {
                         }
                       ]}
                       {...this.props}
+                      tranchesOrdering={this.state.tranchesOrdering}
                       availableTranches={this.state.depositedTranches}
                     />
                   </Flex>
