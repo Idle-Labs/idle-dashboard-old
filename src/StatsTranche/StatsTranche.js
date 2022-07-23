@@ -642,7 +642,7 @@ render() {
                 >
                   <StatsCard
                     label={'Annualized'}
-                    title={`Performance ${seniorTrancheName} Tranche`}
+                    title={`${seniorTrancheName} Tranche Avg APY`}
                   >
                     <VariationNumber
                       direction={'up'}
@@ -671,7 +671,7 @@ render() {
                 >
                   <StatsCard
                     label={'Annualized'}
-                    title={`Performance ${juniorTrancheName} Tranche`}
+                    title={`${juniorTrancheName} Tranche Avg APY`}
                   >
                     <VariationNumber
                       direction={'up'}
@@ -700,7 +700,7 @@ render() {
                 >
                   <StatsCard
                     title={`${seniorTrancheName} Tranche coverage`}
-                    label={`Covered by ${juniorTrancheName} Tranche AUM`}
+                    label={`Covered by ${juniorTrancheName} Tranche TVL`}
                   >
                     <Text
                       lineHeight={1}

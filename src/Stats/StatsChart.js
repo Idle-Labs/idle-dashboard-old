@@ -1015,7 +1015,7 @@ class StatsChart extends Component {
           color: tranchesConfig.AA.color.hex,
           data: apiResults_aa.map((d,i) => {
 
-            const aum_aa = this.functionsUtil.fixTokenDecimals(d.contractValue,18);
+            const aum_aa = this.functionsUtil.fixTokenDecimals(d.contractValue, this.props.tokenConfig.decimals);
             const x = moment(d.timeStamp*1000).format("YYYY/MM/DD HH:mm");
             const y = parseFloat(aum_aa.toString());
 
@@ -1029,7 +1029,7 @@ class StatsChart extends Component {
           color: tranchesConfig.BB.color.hex,
           data: apiResults_bb.map((d,i) => {
 
-            const aum_bb = this.functionsUtil.fixTokenDecimals(d.contractValue,18);
+            const aum_bb = this.functionsUtil.fixTokenDecimals(d.contractValue, this.props.tokenConfig.decimals);
             const x = moment(d.timeStamp*1000).format("YYYY/MM/DD HH:mm");
             const y = parseFloat(aum_bb.toString());
 
