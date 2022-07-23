@@ -422,11 +422,11 @@ render() {
   };
 
   const unitProps = {
-    ml:2,
+    mr:2,
     lineHeight:1,
-    fontWeight:[3,4],
-    color:'statValue',
     fontSize:[3,5],
+    fontWeight:[3,4],
+    color:'statValue'
   };
 
   const tokenConfig = statsTokens[this.props.selectedToken.toUpperCase()];
@@ -624,6 +624,7 @@ render() {
                       precision={2}
                       type={'money'}
                       {...valueProps}
+                      unitPos={'left'}
                       color={'primary'}
                       unitProps={unitProps}
                       number={this.state.aum}
