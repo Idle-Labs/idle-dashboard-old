@@ -1232,7 +1232,6 @@ const globalConfigs = {
         enabled: true,
         label: 'FRAX3CRV',
         token: 'FRAX3CRV',
-        icon: "images/tokens/FRAX3CRV.png",
         color: {
           hex: '#333',
           rgb: [51, 51, 51],
@@ -1289,7 +1288,6 @@ const globalConfigs = {
         enabled: true,
         label: 'ALUSD3CRV',
         token: 'ALUSD3CRV',
-        icon: "images/tokens/ALUSD3CRV.png",
         color: {
           hex: '#ffbf93',
           rgb: [255, 191, 147],
@@ -1302,7 +1300,6 @@ const globalConfigs = {
         enabled: true,
         label: 'MUSD3CRV',
         token: 'MUSD3CRV',
-        icon: "images/tokens/MUSD3CRV.png",
         color: {
           hex: '#333',
           rgb: [51, 51, 51],
