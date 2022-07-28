@@ -56,20 +56,27 @@
         color:#FFFFFF;
       }
       .rdrCalendarWrapper.dark{
-        background: #1e3657 !important;
+        background: transparent !important;
       }
       .dark .rdrDateDisplayWrapper,
       .dark .rdrMonthAndYearPickers select:hover{
-        background: #3e91ff !important;
+        background: transparent !important;
       }
       .dark .rdrMonthAndYearPickers select{
         color:#fff !important;
       }
+      .rdrDateDisplayItemActive input,
+      .rdrDateDisplayItem input {
+          color: #3F3D4B !important;
+      }
       .dark .rdrDayDisabled{
         background: #1e3657 !important;
       }
-      .dark .rdrDayNumber span{
+      .rdrDayPassive .rdrDayNumber span span{
         color: #616161;
+      }
+      .rdrDay:not(.rdrDayPassive) .rdrDayNumber span{
+        color: #d5dce0;
       }
       .link{
         color:#6AE4FF;
