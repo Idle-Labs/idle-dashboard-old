@@ -44,6 +44,7 @@ class TrancheDetails extends Component {
     trancheBalance:null,
     stakingEnabled:true,
     approveEnabled:null,
+    contractPaused:false,
     buttonDisabled:false,
     selectedTranche:null,
     availableTranches:null,
@@ -93,9 +94,9 @@ class TrancheDetails extends Component {
     const gaugeConfig = this.functionsUtil.getTrancheGaugeConfig(this.props.tokenConfig.protocol,this.props.selectedToken);
 
     const [
-      // blockNumber,
       tokenBalance,
       trancheBalance,
+      contractPaused,
       lastHarvest,
       gaugeStakedBalance,
       stakedBalance,
@@ -104,9 +105,9 @@ class TrancheDetails extends Component {
       tranchePrice,
       trancheBaseApy
     ] = await Promise.all([
-      // this.functionsUtil.getBlockNumber(),
       this.functionsUtil.getTokenBalance(this.props.selectedToken,this.props.account),
       this.functionsUtil.getTokenBalance(this.props.trancheConfig.name,this.props.account),
+      this.functionsUtil.genericContractCallCached(this.props.tokenConfig.CDO.name,'paused'),
       this.functionsUtil.getTrancheLastHarvest(this.props.tokenConfig,this.props.trancheConfig),
       gaugeConfig ? this.functionsUtil.getTokenBalance(gaugeConfig.name,this.props.account) : null,
       this.functionsUtil.getTrancheStakedBalance(this.props.trancheConfig.CDORewards.name,this.props.account,this.props.trancheConfig.CDORewards.decimals,this.props.trancheConfig.functions.stakedBalance),
@@ -159,6 +160,7 @@ class TrancheDetails extends Component {
       stakeEnabled,
       tranchePrice,
       stakedBalance,
+      contractPaused,
       trancheBaseApy,
       stakingEnabled,
       trancheBalance,
@@ -436,7 +438,7 @@ class TrancheDetails extends Component {
     const trancheLimit = this.functionsUtil.formatMoney(this.functionsUtil.BNify(this.props.tokenConfig.limit),0)+' '+this.props.selectedToken;
 
     const _referral = this.getReferralAddress();
-    const showReferral = this.props.tokenConfig.referralEnabled && this.state.userHasAvailableFunds && _referral && isDeposit;
+    const showReferral = !this.state.contractPaused && this.props.tokenConfig.referralEnabled && this.state.userHasAvailableFunds && _referral && isDeposit;
 
     const CustomOptionValue = props => {
       const selectedOption = props.options.find( option => option.value === props.value );
@@ -1106,6 +1108,7 @@ class TrancheDetails extends Component {
                     text={`To withdraw your ${this.props.selectedToken} you need to unstake the tranche tokens from the <a href="${this.functionsUtil.getDashboardSectionUrl(`gauges/${this.props.selectedToken}`)}" class="link">${this.props.selectedToken} Gauge</a> first.`}
                   />
                 ) :*/
+                /*
                 !this.props.tokenConfig.adaptiveYieldSplitEnabled && (
                   <IconBox
                     cardProps={{
@@ -1130,6 +1133,7 @@ class TrancheDetails extends Component {
                     text={`To improve the capital efficiency of tranches, the apy ratio will be updated to the new Adaptive Yield Split on Wed July 20th. No action required. Read more in the <a href="https://gov.idle.finance/t/adaptive-yield-split-implementation-for-existing-pyts/1019" target="_blank" rel="nofollow noopener noreferrer" class="link">Forum Proposal</a>.`}
                   />
                 )
+                */
               }
               <Box
                 width={1}
@@ -1249,7 +1253,7 @@ class TrancheDetails extends Component {
                 )
               }
               {
-                this.state.infoText && this.props.account && (
+                this.state.infoText && this.props.account && !this.state.contractPaused && (
                   <IconBox
                     cardProps={{
                       p:2,
@@ -1325,7 +1329,15 @@ class TrancheDetails extends Component {
                 justifyContent={'center'}
               >
                 {
-                  isStake && this.state.selectedStakeAction === 'stake' && this.state.gaugeConfig ? (
+                  this.state.contractPaused ? (
+                    <IconBox
+                      cardProps={{
+                        mt: 2
+                      }}
+                      icon={'Warning'}
+                      text={`Deposits/Withdraws for this tranche are temporarily suspended due to Smart-Contract maintenance.`}
+                    />
+                  ) : isStake && this.state.selectedStakeAction === 'stake' && this.state.gaugeConfig ? (
                     <IconBox
                       cardProps={{
                         mt: 2
