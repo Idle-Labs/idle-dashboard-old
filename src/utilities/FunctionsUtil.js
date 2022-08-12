@@ -6968,16 +6968,6 @@ class FunctionsUtil {
     return null;
   }
 
-  testMulticall = async () => {
-    const calls = [
-      {"method":"tranchePrice(address)","args":[["0x2688fc68c4eac90d9e5e1b94776cf14eade8d877","address"]],"returnTypes":["uint256"],"target":"0x34dcd573c5de4672c8248cd12a99f875ca112ad8"},
-      {"method":"claimable_tokens(address)","args":[["0xF1363D3D55d9e679cC6aa0a0496fD85BDfCF7464","address"]],"returnTypes":["uint256"],"target":"0x675eC042325535F6e176638Dd2d4994F645502B9"}
-    ];
-
-    const data = await this.makeMulticall(calls);
-    console.log(data);
-  }
-
   genericContractCall = async (contractName, methodName, params = [], callParams = {}, blockNumber = 'latest', useMultiCall = true) => {
 
     if (!contractName) {

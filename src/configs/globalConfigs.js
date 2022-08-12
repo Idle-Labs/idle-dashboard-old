@@ -88,7 +88,7 @@ const env = process.env;
 
 const globalConfigs = {
   appName: "Idle",
-  version: "v6.9",
+  version: "v7.0",
   baseToken: "ETH",
   baseURL: "https://app.idle.finance",
   forumURL: "https://gov.idle.finance",
@@ -1624,6 +1624,21 @@ const globalConfigs = {
         },
         address: '0x956f47f50a910163d8bf957cf5846d573e7f87ca',
       },
+      TRU: {
+        token: 'TRU',
+        decimals: 18,
+        enabled: true,
+        color: {
+          hex: '#195bff',
+          rgb: [25, 91, 255],
+          hsl: ["223", "100%", "55%"]
+        },
+        disabledCharts: ['score'],
+        chart: {
+          labelTextColorModifiers: ['darker', 4]
+        },
+        address: '0x4c19596f5aaff459fa38b0f7ed92f11ae6543784',
+      },
       AGEUR: {
         decimals: 18,
         enabled: true,
@@ -1830,6 +1845,15 @@ const globalConfigs = {
         color: {
           rgb: [95, 115, 244],
           hsl: ["232", "87%", "66%"]
+        }
+      },
+      truefi: {
+        legend: false,
+        enabled: true,
+        label: "TrueFi",
+        color: {
+          rgb: [25, 91, 255],
+          hsl: ["223", "100%", "55%"]
         }
       },
       fuse: {

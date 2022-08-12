@@ -2,6 +2,7 @@ import DAI from '../abis/tokens/DAI.json';
 import USDC from '../abis/tokens/USDC.json';
 import ERC20 from '../contracts/ERC20.json';
 import IdleCDO from '../contracts/IdleCDO.json';
+import TruefiPool from '../abis/truefi/TruefiPool.json';
 import IdleStrategy from '../contracts/IdleStrategy.json';
 import IdleCDOPolygon from '../contracts/IdleCDOPolygon.json';
 import IdleCDOTrancheRewards from '../contracts/IdleCDOTrancheRewards.json';
@@ -997,7 +998,6 @@ const availableTranches = {
         enabledEnvs: [],
         protocol:'euler',
         blockNumber:14785127,
-        multiCallDisabled:true,
         adaptiveYieldSplitEnabled:true,
         address:'0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
         CDO:{
@@ -1075,7 +1075,6 @@ const availableTranches = {
         enabledEnvs: [],
         protocol:'euler',
         blockNumber:14961854,
-        multiCallDisabled:true,
         adaptiveYieldSplitEnabled:true,
         address:'0x6b175474e89094c44da98b954eedeac495271d0f',
         CDO:{
@@ -1152,7 +1151,6 @@ const availableTranches = {
         enabledEnvs: [],
         protocol:'euler',
         blockNumber:14961973,
-        multiCallDisabled:true,
         adaptiveYieldSplitEnabled:true,
         address:'0xdac17f958d2ee523a2206206994597c13d831ec7',
         CDO:{
@@ -1229,7 +1227,6 @@ const availableTranches = {
         enabledEnvs: [],
         protocol:'euler',
         blockNumber:15055915,
-        multiCallDisabled:true,
         adaptiveYieldSplitEnabled:true,
         address:'0x1a7e4e63778b4f12a199c062f3efdd288afcbce8',
         CDO:{
@@ -1308,7 +1305,6 @@ const availableTranches = {
         blockNumber:15044679,
         protocol:'clearpool',
         autoFarming:['CPOOL'],
-        multiCallDisabled:true,
         adaptiveYieldSplitEnabled:true,
         address:'0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
         CDO:{
@@ -1376,6 +1372,104 @@ const availableTranches = {
           token:'BB_clearpool_USDC',
           label:'clearpool USDC BB',
           address:'0x4D9d9AA17c3fcEA05F20a87fc1991A045561167d'
+        }
+      }
+    },
+    truefi:{
+      USDC:{
+        abi:USDC,
+        decimals:6,
+        token:'USDC',
+        enabledEnvs:[],
+        protocol:'truefi',
+        autoFarming:['TRU'],
+        blockNumber:15326147,
+        multiCallDisabled:true,
+        // adaptiveYieldSplitEnabled:true,
+        address:'0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+        CDO:{
+          abi:IdleCDO,
+          decimals:18,
+          name:'IdleCDO_truefi_USDC',
+          address:'0x1f5A97fB665e295303D2F7215bA2160cc5313c8E'
+        },
+        Strategy:{
+          abi:IdleStrategy,
+          name:'IdleStrategy_truefi_USDC',
+          address:'0x62B17c9083Db5941197E83BD385985B8878B58Fb'
+        },
+        Pool:{
+          abi:TruefiPool,
+          name:'Pool_truefi_USDC',
+          address:'0xA991356d261fbaF194463aF6DF8f0464F8f1c742'
+        },
+        modal:{
+          enabled:true,
+          buttonText:'Continue',
+          title:'Truefi exit fee',
+          icon:'images/warning-2.png',
+          id:'modal_truefi_usdc_exit_fee',
+          text:'This strategy is subject to an exit fee between 0.05% and 10% depending on the utilization ratio of the Truefi pool, in addition to the performance fee. Read more at <a href="https://docs.truefi.io/faq/dao-managed-pools/pool#what-is-liquid-exit" class="link" rel="nofollow noopener noreferrer" target="_blank">https://docs.truefi.io/faq/dao-managed-pools/pool#what-is-liquid-exit</a>'
+        },
+        messages:{
+          withdraw:'This strategy is subject to an exit fee between 0.05% and 10% depending on the utilization ratio of the Truefi pool.',
+        },
+        description:'This strategy deploys funds in the <a href="https://app.truefi.io/pools/0xA991356d261fbaF194463aF6DF8f0464F8f1c742" class="link" rel="nofollow noopener noreferrer" target="_blank">Truefi USDC pool</a>. The APR is dynamically adjusted according to the coverage provided to the counterpart Senior tranche thanks to the <a href="https://medium.com/idle-finance/adaptive-yield-split-foster-pyts-liquidity-scalability-a796fa17ea35" class="link" rel="nofollow noopener noreferrer" target="_blank">Adaptive Yield Split</a>.',
+        AA:{
+          abi:ERC20,
+          decimals:18,
+          tranche:'AA',
+          functions:{
+            stake:'stake',
+            unstake:'exit',
+            rewards:'earned',
+            claim:'getReward',
+            deposit:'depositAA',
+            withdraw:'withdrawAA',
+            rewardsRate:'rewardRate',
+            stakedBalance:'balanceOf',
+            penaltyFee:'liquidExitPenalty'
+          },
+          CDORewards:{
+            decimals:18,
+            stakingRewards:[],
+            unstakeWithBalance:false,
+            abi:TrancheStakingRewards,
+            name:'TrancheStakingRewards_truefi_USDC_AA',
+            address:'0x0000000000000000000000000000000000000000'
+          },
+          blockNumber:15044679,
+          name:'AA_truefi_USDC',
+          token:'AA_truefi_USDC',
+          label:'truefi USDC AA',
+          address:'0x868bb78fb045576162B510ba33358C9f93e7959e'
+        },
+        BB:{
+          abi:ERC20,
+          decimals:18,
+          tranche:'BB',
+          functions:{
+            stake:'stake',
+            claim:'claim',
+            unstake:'unstake',
+            deposit:'depositBB',
+            withdraw:'withdrawBB',
+            stakedBalance:'usersStakes',
+            penaltyFee:'liquidExitPenalty'
+          },
+          CDORewards:{
+            decimals:18,
+            stakingRewards:[],
+            unstakeWithBalance:true,
+            abi:IdleCDOTrancheRewards,
+            name:'IdleCDOTrancheRewards_truefi_USDC_BB',
+            address:'0x0000000000000000000000000000000000000000'
+          },
+          blockNumber:15044679,
+          name:'BB_truefi_USDC',
+          token:'BB_truefi_USDC',
+          label:'truefi USDC BB',
+          address:'0x6EdE2522347E6a5A0420F41f42e021246e97B540'
         }
       }
     }

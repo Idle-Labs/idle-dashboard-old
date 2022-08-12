@@ -83,6 +83,39 @@ class Tranches extends Component {
     }
   }
 
+  loadQueryParams(){
+    const trancheRoute = this.props.urlParams.param1;
+    const tranchesDetails = this.functionsUtil.getGlobalConfig(['tranches']);
+    const trancheDetails = Object.values(tranchesDetails).find( t => t.route === trancheRoute );
+
+    if (trancheDetails !== undefined) {
+      const trancheType = trancheDetails.type;
+      const selectedToken = this.props.urlParams.param3;
+      const selectedProtocol = this.props.urlParams.param2;
+      const tokenConfig = selectedProtocol ? (this.props.availableTranches[selectedProtocol] && this.props.availableTranches[selectedProtocol][selectedToken] ? this.props.availableTranches[selectedProtocol][selectedToken] : null) : null;
+
+      this.setState({
+        trancheType,
+        tokenConfig,
+        trancheRoute,
+        selectedToken,
+        trancheDetails,
+        selectedProtocol
+      });
+    } else {
+      const selectedToken = this.props.urlParams.param2;
+      const selectedProtocol = this.props.urlParams.param1;
+      const tokenConfig = this.props.availableTranches[selectedProtocol] && this.props.availableTranches[selectedProtocol][selectedToken] ? this.props.availableTranches[selectedProtocol][selectedToken] : null;
+      if (tokenConfig){
+        this.setState({
+          tokenConfig,
+          selectedToken,
+          selectedProtocol
+        });
+      }
+    }
+  }
+
   async loadData(){
 
     if (!this.props.availableTranches){
@@ -103,52 +136,29 @@ class Tranches extends Component {
     });
 
     const tranchesOrdering = tranchesTvls.sort((a, b) => (parseInt(a.tvl) < parseInt(b.tvl) ? 1 : -1));
-    // console.log('tranchesOrdering',tranchesOrdering);
+
     this.setState({
       tranchesOrdering
     });
 
+    this.loadQueryParams();
+
     this.loadPortfolio().then( () => {
-      const componentLoaded = true;
-      const trancheRoute = this.props.urlParams.param1;
-      const tranchesDetails = this.functionsUtil.getGlobalConfig(['tranches']);
-      const trancheDetails = Object.values(tranchesDetails).find( t => t.route === trancheRoute );
 
-      if (trancheDetails !== undefined) {
-        const trancheType = trancheDetails.type;
-        const useTrancheType = !this.state.userHasFunds;
-        const selectedToken = this.props.urlParams.param3;
-        const selectedProtocol = this.props.urlParams.param2;
-        const tokenConfig = selectedProtocol ? (this.props.availableTranches[selectedProtocol] && this.props.availableTranches[selectedProtocol][selectedToken] ? this.props.availableTranches[selectedProtocol][selectedToken] : null) : null;
+      if (!!this.state.trancheDetails) {
 
-        if (this.state.userHasFunds && !tokenConfig){
+        if (this.state.userHasFunds && !this.state.tokenConfig){
           return this.props.goToSection(this.props.selectedSection.route);
         }
 
+        const useTrancheType = !this.state.userHasFunds;
         this.setState({
-          trancheType,
-          tokenConfig,
-          trancheRoute,
-          selectedToken,
-          trancheDetails,
-          useTrancheType,
-          selectedProtocol
+          useTrancheType
         });
-      } else {
-        const selectedToken = this.props.urlParams.param2;
-        const selectedProtocol = this.props.urlParams.param1;
-        const tokenConfig = this.props.availableTranches[selectedProtocol] && this.props.availableTranches[selectedProtocol][selectedToken] ? this.props.availableTranches[selectedProtocol][selectedToken] : null;
-        if (tokenConfig){
-          this.setState({
-            tokenConfig,
-            selectedToken,
-            selectedProtocol
-          });
-        }
       }
 
       this.setState({
-        componentLoaded
+        componentLoaded:true
       });
     });
   }
@@ -164,7 +174,16 @@ class Tranches extends Component {
       return false;
     }
 
-    const portfolio = await this.functionsUtil.getAccountPortfolioTranches(this.props.availableTranches,this.props.account);
+    let availableTranches = {...this.props.availableTranches};
+    if (this.state.selectedProtocol && this.state.selectedToken){
+      availableTranches = {
+        [this.state.selectedProtocol]:{
+          [this.state.selectedToken]:availableTranches[this.state.selectedProtocol][this.state.selectedToken]
+        }
+      }
+    }
+
+    const portfolio = await this.functionsUtil.getAccountPortfolioTranches(availableTranches,this.props.account);
 
     // console.log('portfolio', portfolio);
 
@@ -196,21 +215,21 @@ class Tranches extends Component {
 
       const depositedTokens = Object.keys(tranchesTokens);
       
-      Object.keys(this.props.availableTranches).forEach(protocol => {
-        Object.keys(this.props.availableTranches[protocol]).forEach( tranche=> {
+      Object.keys(availableTranches).forEach(protocol => {
+        Object.keys(availableTranches[protocol]).forEach( tranche=> {
           if(depositedTokens.includes(tranche)) {
               if(!depositedTranches[protocol]){
                 depositedTranches[protocol]={};
               }
               depositedTranches[protocol][tranche]={}
-              depositedTranches[protocol][tranche]=this.props.availableTranches[protocol][tranche];
+              depositedTranches[protocol][tranche]=availableTranches[protocol][tranche];
           }
           else{
             if(!remainingTranches[protocol]){
               remainingTranches[protocol]={};
             }
             remainingTranches[protocol][tranche]={};
-            remainingTranches[protocol][tranche]=this.props.availableTranches[protocol][tranche];
+            remainingTranches[protocol][tranche]=availableTranches[protocol][tranche];
           }
         })
       })

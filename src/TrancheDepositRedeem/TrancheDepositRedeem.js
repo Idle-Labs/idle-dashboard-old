@@ -11,8 +11,8 @@ import TrancheField from '../TrancheField/TrancheField';
 import { Flex, Text, Image, Box, Icon } from "rimble-ui";
 import DashboardCard from '../DashboardCard/DashboardCard';
 import ShareModal from '../utilities/components/ShareModal';
-// import StatsCardSmall from '../StatsCardSmall/StatsCardSmall';
 import CardIconButton from '../CardIconButton/CardIconButton';
+import GenericModal from '../utilities/components/GenericModal';
 import GenericSelector from '../GenericSelector/GenericSelector';
 import SendTxWithBalance from '../SendTxWithBalance/SendTxWithBalance';
 import LimitReachedModal from '../utilities/components/LimitReachedModal';
@@ -72,6 +72,7 @@ class TrancheDetails extends Component {
   async componentWillMount(){
     this.loadUtils();
     this.loadData();
+    this.checkModal();
   }
 
   async componentDidUpdate(prevProps,prevState){
@@ -86,6 +87,18 @@ class TrancheDetails extends Component {
     const selectedStakeActionChanged = prevState.selectedStakeAction !== this.state.selectedStakeAction;
     if (selectedActionChanged || selectedStakeActionChanged){
       this.loadActionData();
+    }
+  }
+
+  checkModal(){
+    const modalEnabled = this.props.tokenConfig.modal && this.props.tokenConfig.modal.enabled;
+    if (modalEnabled){
+      const modalAlreadyOpened = this.functionsUtil.getStoredItem(this.props.tokenConfig.modal.id);
+      if (!modalAlreadyOpened){
+        this.setState({
+          activeModal:this.props.tokenConfig.modal.id
+        });
+      }
     }
   }
 
@@ -176,7 +189,7 @@ class TrancheDetails extends Component {
     });
   }
 
-  loadActionData(){
+  loadActionData = async () => {
     let infoBox = null;
     let balanceProp = null;
     let tokenConfig = null;
@@ -301,8 +314,27 @@ class TrancheDetails extends Component {
     })
   }
 
-  changeInputCallback(){
+  changeInputCallback = async (inputValue) => {
 
+    let balanceSelectorInfo = null;
+    // Calculate exit fee for TrueFi - USDC
+    if (this.state.selectedAction === 'withdraw' && this.props.trancheConfig.functions.penaltyFee && this.props.tokenConfig.Pool && this.functionsUtil.BNify(inputValue).gt(0)){
+      await this.functionsUtil.initContract(this.props.tokenConfig.Pool.name, this.props.tokenConfig.Pool.address, this.props.tokenConfig.Pool.abi);
+
+      const amount = this.functionsUtil.normalizeTokenAmount(inputValue, this.props.tokenConfig.decimals);
+      let penaltyFee = await this.functionsUtil.genericContractCall(this.props.tokenConfig.Pool.name, this.props.trancheConfig.functions.penaltyFee, [amount])
+
+      if (penaltyFee){
+        penaltyFee = this.functionsUtil.BNify(10000).minus(penaltyFee).div(100)
+        balanceSelectorInfo = {
+          text:`Penalty fee: <span style="color:${this.props.theme.colors.alert}">${penaltyFee.toFixed(2)}%</span>`
+        }
+      }
+    }
+
+    this.setState({
+      balanceSelectorInfo
+    });
   }
 
   contractApprovedCallback(){
@@ -439,6 +471,8 @@ class TrancheDetails extends Component {
 
     const _referral = this.getReferralAddress();
     const showReferral = !this.state.contractPaused && this.props.tokenConfig.referralEnabled && this.state.userHasAvailableFunds && _referral && isDeposit;
+
+    const modalEnabled = this.props.tokenConfig.modal && this.props.tokenConfig.modal.enabled;
 
     const CustomOptionValue = props => {
       const selectedOption = props.options.find( option => option.value === props.value );
@@ -1608,6 +1642,15 @@ class TrancheDetails extends Component {
                 text={`You have successfully ${this.state.modalAction} in Idle!<br />Enjoy <strong>${this.state.modalApy ? this.state.modalApy.toFixed(2) : '0.00'}% APY</strong> on your <strong>${this.props.selectedToken}</strong>!`+(this.state.gaugeConfig ? `<br />Stake your tranche tokens in the <a href="${this.functionsUtil.getDashboardSectionUrl(`gauges/${this.props.selectedToken}`)}" class="link">${this.functionsUtil.capitalize(this.props.tokenConfig.protocol)} ${this.props.selectedToken} Gauge</a> to get additional rewards!` : ``)}
                 tweet={`I'm earning ${this.state.modalApy ? this.state.modalApy.toFixed(2) : '0.00'}% APY on my ${this.props.selectedToken} with @idlefinance tranches! Go to ${this.functionsUtil.getGlobalConfig(['baseURL'])}${this.props.selectedSection.route} and start earning now from your idle tokens!`}
               />
+              {
+                modalEnabled && (
+                  <GenericModal
+                    {...this.props.tokenConfig.modal}
+                    closeModal={this.resetModal}
+                    isOpen={this.state.activeModal === this.props.tokenConfig.modal.id}
+                  />
+                )
+              }
             </Flex>
           )
         }
