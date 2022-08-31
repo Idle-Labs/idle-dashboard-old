@@ -1067,6 +1067,83 @@ const availableTranches = {
           address:'0xe11679CDb4587FeE907d69e9eC4a7d3F0c2bcf3B'
         }
       },
+      levUSDC:{
+        abi:USDC,
+        decimals:6,
+        token:'USDC',
+        autoFarming:[],
+        enabledEnvs: [],
+        protocol:'euler',
+        blockNumber:15445762,
+        adaptiveYieldSplitEnabled:true,
+        address:'0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+        CDO:{
+          abi:IdleCDO,
+          decimals:18,
+          name:'IdleCDO_euler_levUSDC',
+          address:'0x29d094110c7a89f1cb6c975df0a38cae80f24b21'
+        },
+        Strategy:{
+          abi:IdleStrategy,
+          name:'IdleStrategy_euler_levUSDC',
+          address:'0x37De1D299C93743472343699c58Ec95000870Dc5'
+        },
+        description:'This strategy deploys funds in the <a href="https://app.euler.finance/market/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48" class="link" rel="nofollow noopener noreferrer" target="_blank">Euler USDC pool</a>. The APR is dynamically adjusted according to the coverage provided to the counterpart Senior tranche thanks to the <a href="https://medium.com/idle-finance/adaptive-yield-split-foster-pyts-liquidity-scalability-a796fa17ea35" class="link" rel="nofollow noopener noreferrer" target="_blank">Adaptive Yield Split</a>.',
+        AA:{
+          abi:ERC20,
+          decimals:18,
+          tranche:'AA',
+          functions:{
+            stake:'stake',
+            unstake:'exit',
+            rewards:'earned',
+            claim:'getReward',
+            deposit:'depositAA',
+            withdraw:'withdrawAA',
+            rewardsRate:'rewardRate',
+            stakedBalance:'balanceOf'
+          },
+          CDORewards:{
+            decimals:18,
+            stakingRewards:[],
+            unstakeWithBalance:false,
+            abi:TrancheStakingRewards,
+            name:'TrancheStakingRewards_euler_levUSDC_AA',
+            address:'0x0000000000000000000000000000000000000000'
+          },
+          blockNumber:15445762,
+          label:'euler USDC AA',
+          name:'AA_euler_levUSDC',
+          token:'AA_euler_levUSDC',
+          address:'0xb43B101F1261784E3c4AF931dBD6082e08BB3317'
+        },
+        BB:{
+          abi:ERC20,
+          decimals:18,
+          tranche:'BB',
+          functions:{
+            stake:'stake',
+            claim:'claim',
+            unstake:'unstake',
+            deposit:'depositBB',
+            withdraw:'withdrawBB',
+            stakedBalance:'usersStakes'
+          },
+          CDORewards:{
+            decimals:18,
+            stakingRewards:[],
+            unstakeWithBalance:true,
+            abi:IdleCDOTrancheRewards,
+            name:'IdleCDOTrancheRewards_euler_levUSDC_BB',
+            address:'0x0000000000000000000000000000000000000000'
+          },
+          blockNumber:15445762,
+          label:'euler USDC BB',
+          name:'BB_euler_levUSDC',
+          token:'BB_euler_levUSDC',
+          address:'0x19ef72c89e0B28406B7EbAcf2556CAb7Cc623eF9'
+        }
+      },
       DAI:{
         abi:DAI,
         token:'DAI',

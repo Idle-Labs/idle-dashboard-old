@@ -32,7 +32,6 @@ class TrancheDetails extends Component {
     actionLabel:null,
     balanceProp:null,
     lastHarvest:null,
-    gaugeConfig:null,
     tokenConfig:null,
     contractInfo:null,
     tranchePrice:null,
@@ -104,8 +103,6 @@ class TrancheDetails extends Component {
 
   async loadData(){
 
-    const gaugeConfig = this.functionsUtil.getTrancheGaugeConfig(this.props.tokenConfig.protocol,this.props.selectedToken);
-
     const [
       tokenBalance,
       trancheBalance,
@@ -122,7 +119,7 @@ class TrancheDetails extends Component {
       this.functionsUtil.getTokenBalance(this.props.trancheConfig.name,this.props.account),
       this.functionsUtil.genericContractCallCached(this.props.tokenConfig.CDO.name,'paused'),
       this.functionsUtil.getTrancheLastHarvest(this.props.tokenConfig,this.props.trancheConfig),
-      gaugeConfig ? this.functionsUtil.getTokenBalance(gaugeConfig.name,this.props.account) : null,
+      this.props.gaugeConfig ? this.functionsUtil.getTokenBalance(this.props.gaugeConfig.name,this.props.account) : null,
       this.functionsUtil.getTrancheStakedBalance(this.props.trancheConfig.CDORewards.name,this.props.account,this.props.trancheConfig.CDORewards.decimals,this.props.trancheConfig.functions.stakedBalance),
       this.functionsUtil.loadTrancheField('trancheFee',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account),
       this.functionsUtil.loadTrancheFieldRaw('trancheApy',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account),
@@ -166,7 +163,6 @@ class TrancheDetails extends Component {
       trancheAPY,
       trancheFee,
       canUnstake,
-      gaugeConfig,
       canWithdraw,
       lastHarvest,
       tokenBalance,
@@ -222,8 +218,8 @@ class TrancheDetails extends Component {
           }
         }
         
-        if (this.state.gaugeConfig && this.state.gaugeConfig.trancheToken.token.toLowerCase() === this.props.tokenConfig[this.props.selectedTranche].token.toLowerCase() && this.state.trancheBalance && this.state.trancheBalance.gt(0)){
-          infoText = `Stake your tranche tokens (${this.state.gaugeConfig.trancheToken.token}) in the Liquidity Gauge and get additional rewards.`;
+        if (this.props.gaugeConfig && this.props.gaugeConfig.trancheToken.token.toLowerCase() === this.props.tokenConfig[this.props.selectedTranche].token.toLowerCase() && this.state.trancheBalance && this.state.trancheBalance.gt(0)){
+          infoText = `Stake your tranche tokens (${this.props.gaugeConfig.trancheToken.token}) in the Liquidity Gauge and get additional rewards.`;
         }
       break;
       case 'stake':
@@ -240,7 +236,7 @@ class TrancheDetails extends Component {
         switch (this.state.selectedStakeAction){
           case 'stake':
             // Disable staking deposit if gaugeConfig is set
-            if (this.state.gaugeConfig || !this.state.stakeEnabled){
+            if (this.props.gaugeConfig || !this.state.stakeEnabled){
               infoText = null;
             }
             approveEnabled = true;
@@ -316,7 +312,6 @@ class TrancheDetails extends Component {
 
   changeInputCallback = async (inputValue) => {
 
-    let balanceSelectorInfo = null;
     // Calculate exit fee for TrueFi - USDC
     if (this.state.selectedAction === 'withdraw' && this.props.trancheConfig.functions.penaltyFee && this.props.tokenConfig.Pool && this.functionsUtil.BNify(inputValue).gt(0)){
       await this.functionsUtil.initContract(this.props.tokenConfig.Pool.name, this.props.tokenConfig.Pool.address, this.props.tokenConfig.Pool.abi);
@@ -326,15 +321,15 @@ class TrancheDetails extends Component {
 
       if (penaltyFee){
         penaltyFee = this.functionsUtil.BNify(10000).minus(penaltyFee).div(100)
-        balanceSelectorInfo = {
+        const balanceSelectorInfo = {
           text:`Penalty fee: <span style="color:${this.props.theme.colors.alert}">${penaltyFee.toFixed(2)}%</span>`
         }
+        
+        this.setState({
+          balanceSelectorInfo
+        });
       }
     }
-
-    this.setState({
-      balanceSelectorInfo
-    });
   }
 
   contractApprovedCallback(){
@@ -1202,7 +1197,7 @@ class TrancheDetails extends Component {
                     buttonProps={{
                       mx:0,
                       border:0,
-                      disabled:!this.state.stakingEnabled && !this.state.gaugeConfig
+                      disabled:!this.state.stakingEnabled && !this.props.gaugeConfig
                     }}
                     width={[1,'32%']}
                     caption={'Stake / Unstake'}
@@ -1371,7 +1366,7 @@ class TrancheDetails extends Component {
                       icon={'Warning'}
                       text={`Deposits/Withdraws for this tranche are temporarily suspended due to Smart-Contract maintenance.`}
                     />
-                  ) : isStake && this.state.selectedStakeAction === 'stake' && this.state.gaugeConfig ? (
+                  ) : isStake && this.state.selectedStakeAction === 'stake' && this.props.gaugeConfig ? (
                     <IconBox
                       cardProps={{
                         mt: 2
@@ -1639,7 +1634,7 @@ class TrancheDetails extends Component {
                 closeModal={this.resetModal}
                 tokenName={this.props.selectedToken}
                 isOpen={this.state.activeModal === 'share'}
-                text={`You have successfully ${this.state.modalAction} in Idle!<br />Enjoy <strong>${this.state.modalApy ? this.state.modalApy.toFixed(2) : '0.00'}% APY</strong> on your <strong>${this.props.selectedToken}</strong>!`+(this.state.gaugeConfig ? `<br />Stake your tranche tokens in the <a href="${this.functionsUtil.getDashboardSectionUrl(`gauges/${this.props.selectedToken}`)}" class="link">${this.functionsUtil.capitalize(this.props.tokenConfig.protocol)} ${this.props.selectedToken} Gauge</a> to get additional rewards!` : ``)}
+                text={`You have successfully ${this.state.modalAction} in Idle!<br />Enjoy <strong>${this.state.modalApy ? this.state.modalApy.toFixed(2) : '0.00'}% APY</strong> on your <strong>${this.props.selectedToken}</strong>!`+(this.props.gaugeConfig ? `<br />Stake your tranche tokens in the <a href="${this.functionsUtil.getDashboardSectionUrl(`gauges/${this.props.selectedToken}`)}" class="link">${this.functionsUtil.capitalize(this.props.tokenConfig.protocol)} ${this.props.selectedToken} Gauge</a> to get additional rewards!` : ``)}
                 tweet={`I'm earning ${this.state.modalApy ? this.state.modalApy.toFixed(2) : '0.00'}% APY on my ${this.props.selectedToken} with @idlefinance tranches! Go to ${this.functionsUtil.getGlobalConfig(['baseURL'])}${this.props.selectedSection.route} and start earning now from your idle tokens!`}
               />
               {

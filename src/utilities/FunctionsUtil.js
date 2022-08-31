@@ -339,8 +339,9 @@ class FunctionsUtil {
     await this.asyncForEach(Object.keys(availableTranches), async (protocol) => {
       const protocolConfig = availableTranches[protocol];
 
-      await this.asyncForEach(Object.keys(protocolConfig), async (token) => {
-        const tokenConfig = protocolConfig[token];
+      await this.asyncForEach(Object.keys(protocolConfig), async (protocolToken) => {
+        const tokenConfig = protocolConfig[protocolToken];
+        const token = tokenConfig.token;
 
         await this.asyncForEach(Object.keys(tranches), async (tranche) => {
           const trancheConfig = tokenConfig[tranche];
@@ -428,6 +429,7 @@ class FunctionsUtil {
                   amountDeposited,
                   trancheTokenBalance,
                   trancheStakedBalance,
+                  cdo:tokenConfig.CDO.name,
                   tokenBalance:tokenBalanceConverted
                 });
 
@@ -1597,6 +1599,7 @@ class FunctionsUtil {
         value: tokenAmount,
         status: 'Completed',
         token: tokenConfig.token,
+        cdo: tokenConfig.CDO.name,
         tranche: trancheConfig.tranche,
         protocol: protocolConfig.label,
         tokenSymbol: tokenConfig.token,
@@ -4917,7 +4920,12 @@ class FunctionsUtil {
     };
   }
   getTrancheGaugeConfig = (protocol, token) => {
-    return Object.values(this.getGlobalConfig(['tools','gauges','props','availableGauges'])).find( g => g.protocol.toLowerCase() === protocol.toLowerCase() && g.underlyingToken.toLowerCase() === token.toLowerCase() );
+    const availableGauges = this.getGlobalConfig(['tools','gauges','props','availableGauges'])
+    const gaugeToken = Object.keys(availableGauges).find( gaugeToken => availableGauges[gaugeToken].protocol.toLowerCase() === protocol.toLowerCase() && gaugeToken.toLowerCase() === token.toLowerCase() );
+    if (gaugeToken){
+      return availableGauges[gaugeToken];
+    }
+    return null;
   }
   getGaugeWeight = async (gaugeConfig) => {
     const currTimestamp = parseInt(Date.now()/1000);
@@ -5104,7 +5112,7 @@ class FunctionsUtil {
 
     const internal_view = this.getQueryStringParameterByName('internal_view');
 
-    const tokenName = this.getGlobalConfig(['stats', 'tokens', token.toUpperCase(), 'label']) || this.capitalize(token);
+    const tokenName = this.getTokenConfig(tokenConfig.token).label || this.capitalize(tokenConfig.token);
 
     let gaugeConfig = this.getGlobalConfig(['tools','gauges','props','availableGauges',token]);
     if (gaugeConfig && trancheConfig && gaugeConfig.trancheToken && gaugeConfig.trancheToken.token.toLowerCase() !== trancheConfig.token.toLowerCase()){
@@ -5549,7 +5557,9 @@ class FunctionsUtil {
           this.loadTrancheFieldRaw('strategyApr', fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens, formatValue, false),
         ]);
 
-        output = this.BNify(trancheApy).div(this.BNify(strategyApr));
+        // console.log('trancheApy' ,this.BNify(trancheApy).toString(), 'strategyApr', this.BNify(strategyApr).toString());
+
+        output = this.BNify(strategyApr).gt(0) ? this.BNify(trancheApy).div(this.BNify(strategyApr)) : this.BNify(0);
 
         if (formatValue){
           output = `${output.toFixed(1)}x`;// (${strategyApr.toFixed(2)}%)`;

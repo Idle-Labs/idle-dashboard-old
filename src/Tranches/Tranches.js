@@ -23,6 +23,7 @@ class Tranches extends Component {
     lastUpdate:null,
     transactions:[],
     tokenConfig:null,
+    gaugeConfig:null,
     trancheType:null,
     trancheRoute:null,
     selectedToken:null,
@@ -31,6 +32,7 @@ class Tranches extends Component {
     remainingTokens:[],
     trancheDetails:null,
     useTrancheType:false,
+    selectedTranche:null,
     depositedTranches:{},
     remainingTranches:{},
     portfolioLoaded:false,
@@ -90,26 +92,34 @@ class Tranches extends Component {
 
     if (trancheDetails !== undefined) {
       const trancheType = trancheDetails.type;
-      const selectedToken = this.props.urlParams.param3;
+      const selectedTranche = this.props.urlParams.param3;
       const selectedProtocol = this.props.urlParams.param2;
-      const tokenConfig = selectedProtocol ? (this.props.availableTranches[selectedProtocol] && this.props.availableTranches[selectedProtocol][selectedToken] ? this.props.availableTranches[selectedProtocol][selectedToken] : null) : null;
+      const tokenConfig = selectedProtocol ? (this.props.availableTranches[selectedProtocol] && this.props.availableTranches[selectedProtocol][selectedTranche] ? this.props.availableTranches[selectedProtocol][selectedTranche] : null) : null;
+      const selectedToken = tokenConfig ? tokenConfig.token : null;
+      const gaugeConfig = this.functionsUtil.getTrancheGaugeConfig(selectedProtocol,selectedTranche);
 
       this.setState({
         trancheType,
         tokenConfig,
+        gaugeConfig,
         trancheRoute,
         selectedToken,
         trancheDetails,
+        selectedTranche,
         selectedProtocol
       });
     } else {
-      const selectedToken = this.props.urlParams.param2;
+      const selectedTranche = this.props.urlParams.param2;
       const selectedProtocol = this.props.urlParams.param1;
-      const tokenConfig = this.props.availableTranches[selectedProtocol] && this.props.availableTranches[selectedProtocol][selectedToken] ? this.props.availableTranches[selectedProtocol][selectedToken] : null;
+      const tokenConfig = this.props.availableTranches[selectedProtocol] && this.props.availableTranches[selectedProtocol][selectedTranche] ? this.props.availableTranches[selectedProtocol][selectedTranche] : null;
       if (tokenConfig){
+        const selectedToken = tokenConfig.token;
+        const gaugeConfig = this.functionsUtil.getTrancheGaugeConfig(selectedProtocol,selectedTranche);
         this.setState({
           tokenConfig,
+          gaugeConfig,
           selectedToken,
+          selectedTranche,
           selectedProtocol
         });
       }
@@ -175,22 +185,23 @@ class Tranches extends Component {
     }
 
     let availableTranches = {...this.props.availableTranches};
-    if (this.state.selectedProtocol && this.state.selectedToken){
+    if (this.state.selectedProtocol && this.state.selectedTranche){
       availableTranches = {
         [this.state.selectedProtocol]:{
-          [this.state.selectedToken]:availableTranches[this.state.selectedProtocol][this.state.selectedToken]
+          [this.state.selectedTranche]:availableTranches[this.state.selectedProtocol][this.state.selectedTranche]
         }
       }
     }
 
     const portfolio = await this.functionsUtil.getAccountPortfolioTranches(availableTranches,this.props.account);
 
-    // console.log('portfolio', portfolio);
+    // console.log('portfolio', this.state.selectedProtocol, this.state.selectedTranche, portfolio);
 
     if (portfolio){
+      const depositedCdos = [];
       const tranchesTokens = [];
       const tranchesBalances = [];
-      
+
       const depositedTranches = {};
       const remainingTranches = {};
       const portfolioLoaded = true;
@@ -211,33 +222,39 @@ class Tranches extends Component {
           tranchesTokens[trancheInfo.token] = this.functionsUtil.BNify(0);
         }
         tranchesTokens[trancheInfo.token] = tranchesTokens[trancheInfo.token].plus(trancheInfo.tokenBalance);
+
+        // Push deposited CDO instead of token
+        depositedCdos.push(trancheInfo.cdo);
       });
 
       const depositedTokens = Object.keys(tranchesTokens);
       
-      Object.keys(availableTranches).forEach(protocol => {
-        Object.keys(availableTranches[protocol]).forEach( tranche=> {
-          if(depositedTokens.includes(tranche)) {
+      Object.keys(availableTranches).forEach( protocol => {
+        Object.keys(availableTranches[protocol]).forEach( token => {
+          const tokenConfig = availableTranches[protocol][token];
+          if(depositedCdos.includes(tokenConfig.CDO.name)) {
               if(!depositedTranches[protocol]){
                 depositedTranches[protocol]={};
               }
-              depositedTranches[protocol][tranche]={}
-              depositedTranches[protocol][tranche]=availableTranches[protocol][tranche];
+              depositedTranches[protocol][token]={}
+              depositedTranches[protocol][token]=availableTranches[protocol][token];
           }
           else{
             if(!remainingTranches[protocol]){
               remainingTranches[protocol]={};
             }
-            remainingTranches[protocol][tranche]={};
-            remainingTranches[protocol][tranche]=availableTranches[protocol][tranche];
+            remainingTranches[protocol][token]={};
+            remainingTranches[protocol][token]=availableTranches[protocol][token];
           }
         })
       })
 
+      // console.log('tranchesTokens', tranchesTokens)
+
       const portfolioDonutData = Object.keys(tranchesTokens).map( token => {
         const balanceValue = parseFloat(tranchesTokens[token].toFixed(4));
         const tokenPercentage = tranchesTokens[token].div(portfolio.totalBalance).times(100);
-        const tokenConfig = this.functionsUtil.getGlobalConfig(['stats','tokens',token.toUpperCase()]);
+        const tokenConfig = this.functionsUtil.getTokenConfig(token);
         return {
           id:token,
           name:token,
@@ -327,9 +344,9 @@ class Tranches extends Component {
 
   selectTrancheType(trancheRoute){
     let route = `${this.props.selectedSection.route}/${trancheRoute}`;
-    const tokenConfig = this.props.availableTranches[this.state.selectedProtocol] && this.props.availableTranches[this.state.selectedProtocol][this.state.selectedToken] ? this.props.availableTranches[this.state.selectedProtocol][this.state.selectedToken] : null;
+    const tokenConfig = this.props.availableTranches[this.state.selectedProtocol] && this.props.availableTranches[this.state.selectedProtocol][this.state.selectedTranche] ? this.props.availableTranches[this.state.selectedProtocol][this.state.selectedTranche] : null;
     if (tokenConfig){
-      route += `/${this.state.selectedProtocol}/${this.state.selectedToken}`;
+      route += `/${this.state.selectedProtocol}/${this.state.selectedTranche}`;
     }
     this.props.goToSection(route);
   }
@@ -371,7 +388,7 @@ class Tranches extends Component {
       if (!this.state.userHasFunds){
         this.props.goToSection(this.props.selectedSection.route+'/'+this.state.trancheDetails.route);
       } else {
-        this.props.goToSection(this.props.selectedSection.route+'/'+this.state.selectedProtocol+'/'+this.state.selectedToken);
+        this.props.goToSection(this.props.selectedSection.route+'/'+this.state.selectedProtocol+'/'+this.state.selectedTranche);
       }
     }/* else if (this.state.trancheType){
       this.props.goToSection(this.props.selectedSection.route);
@@ -390,15 +407,15 @@ class Tranches extends Component {
         if (!this.state.userHasFunds){
           pathLink.push(this.props.selectedSection.route+'/'+this.state.trancheDetails.route);
         } else if (this.state.tokenConfig){
-          pathLink.push(this.props.selectedSection.route+'/'+this.state.selectedProtocol+'/'+this.state.selectedToken);
+          pathLink.push(this.props.selectedSection.route+'/'+this.state.selectedProtocol+'/'+this.state.selectedTranche);
         }
       }
     }
     if (this.state.selectedProtocol){
       breadcrumbPath.push(this.functionsUtil.getGlobalConfig(['stats','protocols',this.state.selectedProtocol,'label']));
     }
-    if (this.state.selectedToken){
-      breadcrumbPath.push(this.state.selectedToken);
+    if (this.state.selectedTranche){
+      breadcrumbPath.push(this.state.selectedTranche);
     }
 
     return (
@@ -457,6 +474,7 @@ class Tranches extends Component {
             <TranchePage
               {...this.props}
               portfolio={this.state.portfolio}
+              gaugeConfig={this.state.gaugeConfig}
               trancheType={this.state.trancheType}
               tokenConfig={this.state.tokenConfig}
               userHasFunds={this.state.userHasFunds}
