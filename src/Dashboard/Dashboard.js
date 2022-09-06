@@ -17,6 +17,7 @@ import DashboardCard from '../DashboardCard/DashboardCard';
 import CurveStrategy from '../CurveStrategy/CurveStrategy';
 import PolygonModal from "../utilities/components/PolygonModal";
 import WelcomeModal from "../utilities/components/WelcomeModal";
+import GenericModal from "../utilities/components/GenericModal";
 import TooltipModal from "../utilities/components/TooltipModal";
 import MigrateModal from "../utilities/components/MigrateModal";
 import UpgradeModal from "../utilities/components/UpgradeModal";
@@ -509,16 +510,28 @@ class Dashboard extends Component {
 
   async checkModals() {
 
-    if (this.props.selectedToken || !this.props.accountInizialized || !this.props.contractsInitialized || !this.props.availableStrategies || !this.props.availableTokens) {
+    if (this.props.selectedToken || !this.props.accountInizialized || !this.props.contractsInitialized || !this.props.availableStrategies) {
       return null;
     }
 
+    await this.checkStrategiesRevampModal();
+    await this.checkRiskAdjusted();
     await this.checkRiskAdjusted();
     await this.checkPolygonModal();
     await this.checkBetaApproval();
     await this.checkTokensToMigrate();
     await this.checkWelcomeModal();
     await this.checkProtocolsTokensBalances();
+  }
+
+  async checkStrategiesRevampModal() {
+    const modalAlreadyOpened = this.functionsUtil.getStoredItem('strategiesRevamp');
+    console.log('currentSection', this.state.currentSection);
+    if (!modalAlreadyOpened && ['tranches','best'].includes(this.state.currentSection)){
+      this.setState({
+        activeModal:'strategiesRevamp'
+      });
+    }
   }
 
   async checkRiskAdjusted() {
@@ -1104,6 +1117,30 @@ class Dashboard extends Component {
             initSimpleID={this.props.initSimpleID}
             baseTokenName={this.props.selectedToken}
             isOpen={this.state.activeModal === 'welcome'}
+          />
+          <GenericModal
+            buttonText={'Continue'}
+            id={'strategiesRevamp'}
+            closeModal={this.resetModal}
+            icon={'images/warning-2.png'}
+            title={'Strategies Revamp: unused assets shutdown'}
+            isOpen={this.state.activeModal === 'strategiesRevamp'}
+            text={`
+              On September 19th, the following strategies are going to be shutted down, therefore deposits will no longer be available:
+              <br /><br />
+              <strong>Tranches:</strong>
+              <ul>
+                <li>Convex - MUSD3CRV <img src="images/tokens/MUSD3CRV.svg" style="width:20px;height:20px;vertical-align:middle;margin-left:5px" /></li>
+                <li>Convex - MIM3CRV <img src="images/tokens/MIM3CRV.svg" style="width:20px;height:20px;vertical-align:middle;margin-left:5px" /></li>
+                <li>Idle - FEI <img src="images/tokens/FEI.svg" style="width:20px;height:20px;vertical-align:middle;margin-left:5px" /></li>
+                <li>Idle - DAI <img src="images/tokens/DAI.svg" style="width:20px;height:20px;vertical-align:middle;margin-left:5px" /></li>
+              </ul>
+              <strong>Best Yield:</strong>
+              <ul>
+                <li>FEI <img src="images/tokens/FEI.svg" style="width:20px;height:20px;vertical-align:middle;margin-left:5px" /></li>
+              </ul>
+              Since the above strategies won't be available in the dashboard from Sept 19th on, we suggest to redeem your deposited funds. After that date, you will still be able to redeem your funds but you would need to interact with the <a class="link" href="https://beta.idle.finance" target="_blank" rel="nofollow noopener noreferrer">beta version</a> of our dashboard. For further support join our <a class="link" href="https://discord.gg/mpySAJp" target="_blank" rel="nofollow noopener noreferrer">Discord server</a>.
+            `}
           />
         </Flex>
       </Swipeable>
