@@ -526,7 +526,6 @@ class Dashboard extends Component {
 
   async checkStrategiesRevampModal() {
     const modalAlreadyOpened = this.functionsUtil.getStoredItem('strategiesRevamp');
-    console.log('currentSection', this.state.currentSection);
     if (!modalAlreadyOpened && ['tranches','best'].includes(this.state.currentSection)){
       this.setState({
         activeModal:'strategiesRevamp'
@@ -1119,6 +1118,7 @@ class Dashboard extends Component {
             isOpen={this.state.activeModal === 'welcome'}
           />
           <GenericModal
+            checkboxEnabled={true}
             buttonText={'Continue'}
             id={'strategiesRevamp'}
             closeModal={this.resetModal}

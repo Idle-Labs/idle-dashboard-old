@@ -112,6 +112,7 @@ const availableTranches = {
         abi:DAI,
         token:'DAI',
         decimals:18,
+        disabled:true,
         protocol:'idle',
         blockNumber:13054628,
         address:'0x6b175474e89094c44da98b954eedeac495271d0f',
@@ -199,6 +200,7 @@ const availableTranches = {
       FEI:{
         token:'FEI',
         decimals:18,
+        disabled:true,
         protocol:'idle',
         blockNumber:13575397,
         address:'0x956f47f50a910163d8bf957cf5846d573e7f87ca',
@@ -520,6 +522,7 @@ const availableTranches = {
       MIM3CRV:{
         abi:ERC20,
         decimals:18,
+        disabled:true,
         token:'MIM3CRV',
         protocol:'convex',
         blockNumber:13848124,
@@ -834,6 +837,7 @@ const availableTranches = {
       MUSD3CRV:{
         abi:ERC20,
         decimals:18,
+        disabled:true,
         token:'MUSD3CRV',
         protocol:'convex',
         blockNumber:14177794,
@@ -1081,12 +1085,12 @@ const availableTranches = {
           abi:IdleCDO,
           decimals:18,
           name:'IdleCDO_euler_levUSDC',
-          address:'0x29d094110c7a89f1cb6c975df0a38cae80f24b21'
+          address:'0xcb2bd49d4b7874e6597dedfaa3e7b4e01831c5af'
         },
         Strategy:{
           abi:IdleStrategy,
           name:'IdleStrategy_euler_levUSDC',
-          address:'0x37De1D299C93743472343699c58Ec95000870Dc5'
+          address:'0xee5ec95ce2c8700a2d152db3249fa13b163f0073'
         },
         description:'This strategy deploys funds in the <a href="https://app.euler.finance/market/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48" class="link" rel="nofollow noopener noreferrer" target="_blank">Euler USDC pool</a>. The APR is dynamically adjusted according to the coverage provided to the counterpart Senior tranche thanks to the <a href="https://medium.com/idle-finance/adaptive-yield-split-foster-pyts-liquidity-scalability-a796fa17ea35" class="link" rel="nofollow noopener noreferrer" target="_blank">Adaptive Yield Split</a>.',
         AA:{
@@ -1115,7 +1119,7 @@ const availableTranches = {
           label:'euler USDC AA',
           name:'AA_euler_levUSDC',
           token:'AA_euler_levUSDC',
-          address:'0xb43B101F1261784E3c4AF931dBD6082e08BB3317'
+          address:'0x9F94fa97cC2d48315015040708D12aB855283164'
         },
         BB:{
           abi:ERC20,
@@ -1141,7 +1145,7 @@ const availableTranches = {
           label:'euler USDC BB',
           name:'BB_euler_levUSDC',
           token:'BB_euler_levUSDC',
-          address:'0x19ef72c89e0B28406B7EbAcf2556CAb7Cc623eF9'
+          address:'0x617648B846512E2F49dC21Bf27e4505C285E6977'
         }
       },
       DAI:{

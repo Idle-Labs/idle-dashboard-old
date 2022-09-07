@@ -1,12 +1,14 @@
 import React from "react";
 import ModalCard from './ModalCard';
-import { Text, Modal, Flex } from "rimble-ui";
+import { Text, Modal, Flex, Checkbox } from "rimble-ui";
 import FunctionsUtil from '../../utilities/FunctionsUtil';
 import RoundButton from '../../RoundButton/RoundButton.js';
 
 class GenericModal extends React.Component {
 
-  state = {};
+  state = {
+    dontShowAgain:false
+  };
 
   // Utils
   functionsUtil = null;
@@ -28,8 +30,19 @@ class GenericModal extends React.Component {
   }
 
   closeModal = async () => {
-    this.functionsUtil.setLocalStorage(this.props.id,true);
     this.props.closeModal();
+  }
+
+  toggleDontShowAgain = (dontShowAgain) => {
+    if (dontShowAgain){
+      this.functionsUtil.setLocalStorage(this.props.id,'true');
+    } else {
+      this.functionsUtil.removeStoredItem('dontShowMigrateModal');
+    }
+
+    this.setState({
+      dontShowAgain
+    });
   }
 
   render() {
@@ -69,6 +82,18 @@ class GenericModal extends React.Component {
               flexDirection={'column'}
               justifyContent={'center'}
             >
+              {
+                this.props.checkboxEnabled && (
+                  <Checkbox
+                    mb={3}
+                    required={false}
+                    color={'mid-gray'}
+                    checked={this.state.dontShowAgain}
+                    label={`Don't show this popup again`}
+                    onChange={ e => this.toggleDontShowAgain(e.target.checked) }
+                  />
+                )
+              }
               <RoundButton
                 handleClick={this.closeModal}
                 buttonProps={{

@@ -140,6 +140,7 @@ export default {
     cardBgContrast: "#293243",
     menuRightBorder: '#0d2034',
     experimental: "#8500ff",
+    disabledBg: '#8e8d8d',
     production: "#00b84a",
     cardHoverShadow: '0px 0px 0px 1px rgb(45 74 114)',
     transactions: {

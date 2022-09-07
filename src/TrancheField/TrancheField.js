@@ -360,7 +360,10 @@ class TrancheField extends Component {
         if (!this.state.statusBadge){
           output = loader;
         } else {
-          if (this.functionsUtil.BNify(this.state.statusBadge).gt(0) && this.functionsUtil.BNify(this.state.statusBadge).lte(5000000)){
+          if (!!this.props.tokenConfig.disabled){
+            badgeText = 'Disabled';
+            badgeColor = 'disabledBg';
+          } else if (this.functionsUtil.BNify(this.state.statusBadge).gt(0) && this.functionsUtil.BNify(this.state.statusBadge).lte(5000000)){
             badgeText = 'Experimental';
             badgeColor = 'experimental';
           } else {

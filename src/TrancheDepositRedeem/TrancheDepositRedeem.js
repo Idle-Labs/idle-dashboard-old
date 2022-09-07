@@ -221,6 +221,11 @@ class TrancheDetails extends Component {
         if (this.props.gaugeConfig && this.props.gaugeConfig.trancheToken.token.toLowerCase() === this.props.tokenConfig[this.props.selectedTranche].token.toLowerCase() && this.state.trancheBalance && this.state.trancheBalance.gt(0)){
           infoText = `Stake your tranche tokens (${this.props.gaugeConfig.trancheToken.token}) in the Liquidity Gauge and get additional rewards.`;
         }
+
+        // Disabled info text for disabled tranche
+        if (!!this.props.tokenConfig.disabled){
+          infoText = null;
+        }
       break;
       case 'stake':
         actionLabel = this.state.selectedStakeAction;
@@ -235,8 +240,8 @@ class TrancheDetails extends Component {
 
         switch (this.state.selectedStakeAction){
           case 'stake':
-            // Disable staking deposit if gaugeConfig is set
-            if (this.props.gaugeConfig || !this.state.stakeEnabled){
+            // Disable staking deposit if gaugeConfig is set or the tranche is disabled
+            if (this.props.gaugeConfig || !this.state.stakeEnabled || !this.props.tokenConfig.enabled){
               infoText = null;
             }
             approveEnabled = true;
@@ -324,7 +329,7 @@ class TrancheDetails extends Component {
         const balanceSelectorInfo = {
           text:`Penalty fee: <span style="color:${this.props.theme.colors.alert}">${penaltyFee.toFixed(2)}%</span>`
         }
-        
+
         this.setState({
           balanceSelectorInfo
         });
@@ -460,6 +465,7 @@ class TrancheDetails extends Component {
     const isStake = this.state.selectedAction === 'stake';
     const isDeposit = this.state.selectedAction === 'deposit';
     const isWithdraw = this.state.selectedAction === 'withdraw';
+    const isDisabled = !!this.props.tokenConfig.disabled;
 
     const stakingRewards = this.props.trancheConfig.CDORewards.stakingRewards.filter( t => t.enabled );
     const trancheLimit = this.functionsUtil.formatMoney(this.functionsUtil.BNify(this.props.tokenConfig.limit),0)+' '+this.props.selectedToken;
@@ -1366,6 +1372,24 @@ class TrancheDetails extends Component {
                       icon={'Warning'}
                       text={`Deposits/Withdraws for this tranche are temporarily suspended due to Smart-Contract maintenance.`}
                     />
+                  ) : isDisabled && (isDeposit || (isStake && this.state.selectedStakeAction === 'stake')) ? (
+                    <IconBox
+                      cardProps={{
+                        mt: 2
+                      }}
+                      icon={'Warning'}
+                      text={`Deposits have been disabled for this tranche, please redeem your funds.`}
+                    >
+                      <RoundButton
+                        buttonProps={{
+                          mt:2,
+                          width:[1,1/2]
+                        }}
+                        handleClick={ e => this.setSelectedAction('redeem') }
+                      >
+                        Redeem
+                      </RoundButton>
+                    </IconBox>
                   ) : isStake && this.state.selectedStakeAction === 'stake' && this.props.gaugeConfig ? (
                     <IconBox
                       cardProps={{
