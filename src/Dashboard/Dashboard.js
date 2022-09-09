@@ -1126,7 +1126,7 @@ class Dashboard extends Component {
             title={'Strategies Revamp: unused assets shutdown'}
             isOpen={this.state.activeModal === 'strategiesRevamp'}
             text={`
-              On September 19th, the following strategies are going to be shutted down, therefore deposits will no longer be available:
+              On September 19th, the following strategies are going to be shut down, therefore deposits will no longer be available:
               <br /><br />
               <strong>Tranches:</strong>
               <ul>
