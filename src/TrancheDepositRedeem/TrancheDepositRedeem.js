@@ -1385,7 +1385,7 @@ class TrancheDetails extends Component {
                           mt:2,
                           width:[1,1/2]
                         }}
-                        handleClick={ e => this.setSelectedAction('redeem') }
+                        handleClick={ e => this.setSelectedAction('withdraw') }
                       >
                         Redeem
                       </RoundButton>
