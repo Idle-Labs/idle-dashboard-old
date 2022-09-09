@@ -30,6 +30,9 @@ class GenericModal extends React.Component {
   }
 
   closeModal = async () => {
+    if (!this.props.checkboxEnabled){
+      this.toggleDontShowAgain(true)
+    }
     this.props.closeModal();
   }
 
@@ -37,7 +40,7 @@ class GenericModal extends React.Component {
     if (dontShowAgain){
       this.functionsUtil.setLocalStorage(this.props.id,'true');
     } else {
-      this.functionsUtil.removeStoredItem('dontShowMigrateModal');
+      this.functionsUtil.removeStoredItem(this.props.id);
     }
 
     this.setState({

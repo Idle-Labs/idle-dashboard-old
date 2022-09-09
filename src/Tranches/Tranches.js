@@ -998,9 +998,9 @@ class Tranches extends Component {
                             },
                             {
                               mobile:false,
-                              name:'experimentalBadge',
+                              name:'statusIcon',
                               props:{
-                                ml:1,
+                                ml:2,
                                 height:'1.5em'
                               }
                             }
@@ -1224,9 +1224,9 @@ class Tranches extends Component {
                           },
                           {
                             mobile:false,
-                            name:'experimentalBadge',
+                            name:'statusIcon',
                             props:{
-                              ml:1,
+                              ml:2,
                               height:'1.5em'
                             }
                           }

@@ -338,10 +338,33 @@ class TrancheField extends Component {
           <Image src={`images/protocols/${protocolIcon}`} {...fieldProps} />
         );
       break;
+      case 'statusIcon':
+        output = null;
+        if (!!this.props.tokenConfig.disabled){
+          output = (
+            <Tooltip
+              placement={'top'}
+              message={`Deposits for this pool have been disabled, redeem your funds.`}
+            >
+              <Image src={`images/warning-2.png`} {...fieldProps} />
+            </Tooltip>
+          )
+        } else {
+          output = (
+            <TrancheField
+              {...this.props}
+              fieldInfo={{
+                ...fieldInfo,
+                name:'experimentalBadge'
+              }}
+            />
+          );
+        }
+      break;
       case 'experimentalBadge':
         output = null;
-        if (this.functionsUtil.BNify(this.state.experimentalBadge).gt(0) && this.functionsUtil.BNify(this.state.experimentalBadge).lte(5000000)){
-          const limitCap = this.functionsUtil.abbreviateNumber(this.state.experimentalBadge, 2, maxPrecision, 0) + ` ${this.props.token}`;
+        if (this.functionsUtil.BNify(this.state[fieldInfo.name]).gt(0) && this.functionsUtil.BNify(this.state[fieldInfo.name]).lte(5000000)){
+          const limitCap = this.functionsUtil.abbreviateNumber(this.state[fieldInfo.name], 2, maxPrecision, 0) + ` ${this.props.token}`;
           output = (
             <Tooltip
               placement={'top'}
