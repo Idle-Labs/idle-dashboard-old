@@ -96,7 +96,7 @@ class Tranches extends Component {
       const selectedProtocol = this.props.urlParams.param2;
       const tokenConfig = selectedProtocol ? (this.props.availableTranches[selectedProtocol] && this.props.availableTranches[selectedProtocol][selectedTranche] ? this.props.availableTranches[selectedProtocol][selectedTranche] : null) : null;
       const selectedToken = tokenConfig ? tokenConfig.token : null;
-      const gaugeConfig = this.functionsUtil.getTrancheGaugeConfig(selectedProtocol,selectedTranche);
+      const gaugeConfig = tokenConfig ? this.functionsUtil.getTrancheGaugeConfig(selectedProtocol,selectedTranche) : null;
 
       this.setState({
         trancheType,
