@@ -2229,6 +2229,10 @@ const availableTokens = {
         enabled: true,
         abi: ERC20.abi,
         enabledEnvs: [],
+        canDeposit: {
+          enabled: false,
+          disabledMessageDepositKey: 'bestYieldDisabledMessage'
+        },
         defiScoreDisabled: true,
         govTokensDisabled: false,
         color: 'hsl(158, 64%, 37%)',
