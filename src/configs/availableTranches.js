@@ -115,6 +115,7 @@ const availableTranches = {
         disabled:true,
         protocol:'idle',
         blockNumber:13054628,
+        enabledEnvs: ['beta'],
         address:'0x6b175474e89094c44da98b954eedeac495271d0f',
         CDO:{
           decimals:18,
@@ -203,6 +204,7 @@ const availableTranches = {
         disabled:true,
         protocol:'idle',
         blockNumber:13575397,
+        enabledEnvs: ['beta'],
         address:'0x956f47f50a910163d8bf957cf5846d573e7f87ca',
         CDO:{
           abi:IdleCDO,
@@ -526,6 +528,7 @@ const availableTranches = {
         token:'MIM3CRV',
         protocol:'convex',
         blockNumber:13848124,
+        enabledEnvs: ['beta'],
         curveApyPath:['apy','day','mim'],
         autoFarming:['CVX','CRV','SPELL'],
         address:'0x5a6A4D54456819380173272A5E8E9B9904BdF41B',
@@ -841,6 +844,7 @@ const availableTranches = {
         token:'MUSD3CRV',
         protocol:'convex',
         blockNumber:14177794,
+        enabledEnvs: ['beta'],
         autoFarming:['CVX','CRV'],
         address:'0x1AEf73d49Dedc4b1778d0706583995958Dc862e6',
         CDO:{

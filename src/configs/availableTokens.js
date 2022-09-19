@@ -2228,7 +2228,7 @@ const availableTokens = {
         decimals: 18,
         enabled: true,
         abi: ERC20.abi,
-        enabledEnvs: [],
+        enabledEnvs: ['beta'],
         canDeposit: {
           enabled: false,
           disabledMessageDepositKey: 'bestYieldDisabledMessage'
