@@ -514,7 +514,7 @@ class Dashboard extends Component {
       return null;
     }
 
-    await this.checkStrategiesRevampModal();
+    // await this.checkStrategiesRevampModal();
     await this.checkRiskAdjusted();
     await this.checkRiskAdjusted();
     await this.checkPolygonModal();
