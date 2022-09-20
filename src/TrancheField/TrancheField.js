@@ -352,7 +352,7 @@ class TrancheField extends Component {
         } else if (this.state.statusIcon === 'paused') {
           output = (<Tooltip
             placement={'top'}
-            message={`This pool has been temporarily paused due to smart-contract maintenance`}
+            message={`Deposits for this pool have been temporarily paused due to Smart-Contract maintenance`}
           >
             <Image src={`images/warning-2.png`} {...fieldProps} />
           </Tooltip>)
@@ -397,7 +397,7 @@ class TrancheField extends Component {
             badgeText = 'Experimental';
             badgeColor = 'experimental';
           } else if (this.state.statusBadge === 'paused'){
-            badgeText = 'Paused';
+            badgeText = 'Deposits Paused';
             badgeColor = 'paused';
           } else {
             badgeText = 'Production';

@@ -53,6 +53,7 @@ class TrancheDetails extends Component {
     approveDescription:null,
     gaugeStakedBalance:null,
     selectedAction:'deposit',
+    poolUtilizationRate:null,
     balanceSelectorInfo:null,
     selectedTrancheOption:null,
     selectedStakeAction:'stake',
@@ -105,6 +106,11 @@ class TrancheDetails extends Component {
 
   async loadData(){
 
+    // Init Pool contract
+    if (this.props.tokenConfig.Pool){
+      await this.functionsUtil.initContract(this.props.tokenConfig.Pool.name, this.props.tokenConfig.Pool.address, this.props.tokenConfig.Pool.abi);
+    }
+
     const [
       tokenBalance,
       trancheBalance,
@@ -113,11 +119,12 @@ class TrancheDetails extends Component {
       allowAAWithdraw,
       allowBBWithdraw,
       gaugeStakedBalance,
+      poolUtilizationRate,
       stakedBalance,
       trancheFee,
       trancheAPY,
       tranchePrice,
-      trancheBaseApy
+      trancheBaseApy,
     ] = await Promise.all([
       this.functionsUtil.getTokenBalance(this.props.selectedToken,this.props.account),
       this.functionsUtil.getTokenBalance(this.props.trancheConfig.name,this.props.account),
@@ -126,6 +133,7 @@ class TrancheDetails extends Component {
       this.functionsUtil.genericContractCallCached(this.props.tokenConfig.CDO.name, 'allowAAWithdraw'),
       this.functionsUtil.genericContractCallCached(this.props.tokenConfig.CDO.name, 'allowBBWithdraw'),
       this.props.gaugeConfig ? this.functionsUtil.getTokenBalance(this.props.gaugeConfig.name,this.props.account) : null,
+      this.props.trancheConfig.functions.utilizationRate ? this.functionsUtil.genericContractCallCached(this.props.tokenConfig.Pool.name, this.props.trancheConfig.functions.utilizationRate) : null,
       this.functionsUtil.getTrancheStakedBalance(this.props.trancheConfig.CDORewards.name,this.props.account,this.props.trancheConfig.CDORewards.decimals,this.props.trancheConfig.functions.stakedBalance),
       this.functionsUtil.loadTrancheField('trancheFee',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account),
       this.functionsUtil.loadTrancheFieldRaw('trancheApy',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account),
@@ -138,6 +146,7 @@ class TrancheDetails extends Component {
 
     // console.log('lastHarvest',lastHarvest);
     // console.log('loadData',this.props.trancheConfig.tranche,blockNumber,cdoCoolingPeriod,latestHarvestBlock,stakeCoolingPeriod,userStakeBlock,canUnstake,canWithdraw);
+    // console.log('utilizationRate', this.props.trancheConfig.functions.utilizationRate, poolUtilizationRate);
 
     const availableTranches = Object.values(this.functionsUtil.getGlobalConfig(['tranches'])).map( trancheInfo => ({
       value:trancheInfo.type,
@@ -185,6 +194,7 @@ class TrancheDetails extends Component {
       allowBBWithdraw,
       availableTranches,
       gaugeStakedBalance,
+      poolUtilizationRate,
       selectedStakeAction,
       selectedTrancheOption,
       userHasAvailableFunds
@@ -327,8 +337,6 @@ class TrancheDetails extends Component {
 
     // Calculate exit fee for TrueFi - USDC
     if (this.state.selectedAction === 'withdraw' && this.props.trancheConfig.functions.penaltyFee && this.props.tokenConfig.Pool && this.functionsUtil.BNify(inputValue).gt(0)){
-      await this.functionsUtil.initContract(this.props.tokenConfig.Pool.name, this.props.tokenConfig.Pool.address, this.props.tokenConfig.Pool.abi);
-
       const amount = this.functionsUtil.normalizeTokenAmount(inputValue, this.props.tokenConfig.decimals);
       let penaltyFee = await this.functionsUtil.genericContractCall(this.props.tokenConfig.Pool.name, this.props.trancheConfig.functions.penaltyFee, [amount])
 
@@ -475,7 +483,9 @@ class TrancheDetails extends Component {
     const isWithdraw = this.state.selectedAction === 'withdraw';
     const isDisabled = !!this.props.tokenConfig.disabled;
 
-    const withdrawEnabled = (this.props.trancheConfig.tranche === 'AA' && this.state.allowAAWithdraw) || (this.props.trancheConfig.tranche === 'BB' && this.state.allowBBWithdraw);
+    const maxPoolUtilizationRateReached = this.props.tokenConfig.maxUtilizationRate && !this.functionsUtil.BNify(this.state.poolUtilizationRate).isNaN() && this.functionsUtil.fixTokenDecimals(this.state.poolUtilizationRate, 18).gte(this.props.tokenConfig.maxUtilizationRate);
+
+    const withdrawEnabled = ((this.props.trancheConfig.tranche === 'AA' && this.state.allowAAWithdraw) || (this.props.trancheConfig.tranche === 'BB' && this.state.allowBBWithdraw));
 
     const stakingRewards = this.props.trancheConfig.CDORewards.stakingRewards.filter( t => t.enabled );
     const trancheLimit = this.functionsUtil.formatMoney(this.functionsUtil.BNify(this.props.tokenConfig.limit),0)+' '+this.props.selectedToken;
@@ -1298,7 +1308,7 @@ class TrancheDetails extends Component {
                 )
               }
               {
-                this.state.infoText && this.props.account && !this.state.contractPaused && (
+                this.state.infoText && this.props.account && !this.state.contractPaused && !maxPoolUtilizationRateReached && (
                   <IconBox
                     cardProps={{
                       p:2,
@@ -1381,6 +1391,14 @@ class TrancheDetails extends Component {
                       }}
                       icon={'Warning'}
                       text={`Deposits${!withdrawEnabled ? '/Withdraws' : '' } for this tranche are temporarily suspended due to Smart-Contract maintenance.`}
+                    />
+                  ) : maxPoolUtilizationRateReached ? (
+                    <IconBox
+                      cardProps={{
+                        mt: 2
+                      }}
+                      icon={'Warning'}
+                      text={`This pool has reached the maximum utilization rate (${(this.props.tokenConfig.maxUtilizationRate*100).toFixed(0)}%), therefore ${this.state.selectedAction}s are temporarily unavailable.`}
                     />
                   ) : isDisabled && (isDeposit || (isStake && this.state.selectedStakeAction === 'stake')) ? (
                     <IconBox

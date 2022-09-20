@@ -3,6 +3,7 @@ import USDC from '../abis/tokens/USDC.json';
 import ERC20 from '../contracts/ERC20.json';
 import IdleCDO from '../contracts/IdleCDO.json';
 import TruefiPool from '../abis/truefi/TruefiPool.json';
+import Clearpool from '../abis/clearpool/Clearpool.json';
 import IdleStrategy from '../contracts/IdleStrategy.json';
 import IdleCDOPolygon from '../contracts/IdleCDOPolygon.json';
 import IdleCDOTrancheRewards from '../contracts/IdleCDOTrancheRewards.json';
@@ -1390,6 +1391,7 @@ const availableTranches = {
         blockNumber:15044679,
         protocol:'clearpool',
         autoFarming:['CPOOL'],
+        maxUtilizationRate:0.99,
         adaptiveYieldSplitEnabled:true,
         address:'0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
         CDO:{
@@ -1397,6 +1399,11 @@ const availableTranches = {
           decimals:18,
           name:'IdleCDO_clearpool_USDC',
           address:'0xDBCEE5AE2E9DAf0F5d93473e08780C9f45DfEb93'
+        },
+        Pool:{
+          abi:Clearpool,
+          name:'Pool_clearpool_USDC',
+          address:'0xcb288b6d30738db7e3998159d192615769794b5b'
         },
         Strategy:{
           abi:IdleStrategy,
@@ -1416,7 +1423,8 @@ const availableTranches = {
             deposit:'depositAA',
             withdraw:'withdrawAA',
             rewardsRate:'rewardRate',
-            stakedBalance:'balanceOf'
+            stakedBalance:'balanceOf',
+            utilizationRate:'getUtilizationRate'
           },
           CDORewards:{
             decimals:18,
@@ -1442,7 +1450,8 @@ const availableTranches = {
             unstake:'unstake',
             deposit:'depositBB',
             withdraw:'withdrawBB',
-            stakedBalance:'usersStakes'
+            stakedBalance:'usersStakes',
+            utilizationRate:'getUtilizationRate'
           },
           CDORewards:{
             decimals:18,
