@@ -46,6 +46,8 @@ class TrancheDetails extends Component {
     contractPaused:false,
     buttonDisabled:false,
     selectedTranche:null,
+    allowAAWithdraw:false,
+    allowBBWithdraw:false,
     availableTranches:null,
     modalAction:'deposited',
     approveDescription:null,
@@ -108,6 +110,8 @@ class TrancheDetails extends Component {
       trancheBalance,
       contractPaused,
       lastHarvest,
+      allowAAWithdraw,
+      allowBBWithdraw,
       gaugeStakedBalance,
       stakedBalance,
       trancheFee,
@@ -117,8 +121,10 @@ class TrancheDetails extends Component {
     ] = await Promise.all([
       this.functionsUtil.getTokenBalance(this.props.selectedToken,this.props.account),
       this.functionsUtil.getTokenBalance(this.props.trancheConfig.name,this.props.account),
-      this.functionsUtil.genericContractCallCached(this.props.tokenConfig.CDO.name,'paused'),
+      this.functionsUtil.genericContractCallCached(this.props.tokenConfig.CDO.name, 'paused'),
       this.functionsUtil.getTrancheLastHarvest(this.props.tokenConfig,this.props.trancheConfig),
+      this.functionsUtil.genericContractCallCached(this.props.tokenConfig.CDO.name, 'allowAAWithdraw'),
+      this.functionsUtil.genericContractCallCached(this.props.tokenConfig.CDO.name, 'allowBBWithdraw'),
       this.props.gaugeConfig ? this.functionsUtil.getTokenBalance(this.props.gaugeConfig.name,this.props.account) : null,
       this.functionsUtil.getTrancheStakedBalance(this.props.trancheConfig.CDORewards.name,this.props.account,this.props.trancheConfig.CDORewards.decimals,this.props.trancheConfig.functions.stakedBalance),
       this.functionsUtil.loadTrancheField('trancheFee',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account),
@@ -175,6 +181,8 @@ class TrancheDetails extends Component {
       trancheBalance,
       unstakeEnabled,
       selectedTranche,
+      allowAAWithdraw,
+      allowBBWithdraw,
       availableTranches,
       gaugeStakedBalance,
       selectedStakeAction,
@@ -466,6 +474,8 @@ class TrancheDetails extends Component {
     const isDeposit = this.state.selectedAction === 'deposit';
     const isWithdraw = this.state.selectedAction === 'withdraw';
     const isDisabled = !!this.props.tokenConfig.disabled;
+
+    const withdrawEnabled = (this.props.trancheConfig.tranche === 'AA' && this.state.allowAAWithdraw) || (this.props.trancheConfig.tranche === 'BB' && this.state.allowBBWithdraw);
 
     const stakingRewards = this.props.trancheConfig.CDORewards.stakingRewards.filter( t => t.enabled );
     const trancheLimit = this.functionsUtil.formatMoney(this.functionsUtil.BNify(this.props.tokenConfig.limit),0)+' '+this.props.selectedToken;
@@ -1364,13 +1374,13 @@ class TrancheDetails extends Component {
                 justifyContent={'center'}
               >
                 {
-                  this.state.contractPaused ? (
+                  this.state.contractPaused && (this.state.selectedAction !== 'withdraw' || !withdrawEnabled) ? (
                     <IconBox
                       cardProps={{
                         mt: 2
                       }}
                       icon={'Warning'}
-                      text={`Deposits/Withdraws for this tranche are temporarily suspended due to Smart-Contract maintenance.`}
+                      text={`Deposits${!withdrawEnabled ? '/Withdraws' : '' } for this tranche are temporarily suspended due to Smart-Contract maintenance.`}
                     />
                   ) : isDisabled && (isDeposit || (isStake && this.state.selectedStakeAction === 'stake')) ? (
                     <IconBox

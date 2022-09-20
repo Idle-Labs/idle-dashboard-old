@@ -1209,7 +1209,7 @@ class Tranches extends Component {
                       {
                         title:'PROTOCOL', 
                         props:{
-                          width:[0.34, this.state.useTrancheType ? 0.15 : 0.13]
+                          width:[0.34, this.state.useTrancheType ? 0.15 : 0.15]
                         },
                         fields:[
                           {
@@ -1235,7 +1235,7 @@ class Tranches extends Component {
                       {
                         title:'TOKEN',
                         props:{
-                          width:[0.15, 0.13],
+                          width:[0.15, 0.11],
                         },
                         fields:[
                           {

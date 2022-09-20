@@ -5103,6 +5103,7 @@ class FunctionsUtil {
   }
   loadTrancheField = async (field, fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account = null, addGovTokens = true, formatValue = true, addTokenName = true) => {
     let output = null;
+    let paused = false;
     let rewardsTokensInfo = null;
     const maxPrecision = (fieldProps && parseInt(fieldProps.maxPrecision)>0) ? fieldProps.maxPrecision : 5;
     const decimals = (fieldProps && parseInt(fieldProps.decimals)>0) ? fieldProps.decimals : (this.props.isMobile ? 2 : 3);
@@ -5583,22 +5584,33 @@ class FunctionsUtil {
       case 'BBIDLEDistribution':
         output = this.abbreviateNumber('4321', decimals, maxPrecision, minPrecision) + ` IDLE/day`;
       break;
+      case 'statusIcon':
+        paused = await this.genericContractCallCachedTTL(tokenConfig.CDO.name, 'paused');
+        if (paused){
+          output = 'paused';
+        }
+      break;
       case 'statusBadge':
       case 'trancheLimit':
       case 'experimentalBadge':
-        output = await this.genericContractCallCachedTTL(tokenConfig.CDO.name,'limit',3600);
-        if (output){
-          output = this.fixTokenDecimals(output, tokenConfig.decimals);
+        paused = await this.genericContractCallCachedTTL(tokenConfig.CDO.name, 'paused');
+        if (paused){
+          output = 'paused';
+        } else {
+          output = await this.genericContractCallCachedTTL(tokenConfig.CDO.name, 'limit', 3600);
+          if (output){
+            output = this.fixTokenDecimals(output, tokenConfig.decimals);
 
-          if (field === 'trancheLimit'){
-            if (output.gt(0)){
-              if (formatValue) {
-                output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + (addTokenName ? ` ${tokenName}` : '');
-              }
-            } else {
-              output = this.BNify(0);
-              if (formatValue){
-                output = 'None';
+            if (field === 'trancheLimit'){
+              if (output.gt(0)){
+                if (formatValue) {
+                  output = this.abbreviateNumber(output, decimals, maxPrecision, minPrecision) + (addTokenName ? ` ${tokenName}` : '');
+                }
+              } else {
+                output = this.BNify(0);
+                if (formatValue){
+                  output = 'None';
+                }
               }
             }
           }

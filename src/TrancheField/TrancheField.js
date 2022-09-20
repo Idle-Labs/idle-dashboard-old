@@ -340,15 +340,22 @@ class TrancheField extends Component {
       break;
       case 'statusIcon':
         output = null;
-        if (!!this.props.tokenConfig.disabled){
+        if (!!this.props.tokenConfig.disabled) {
           output = (
             <Tooltip
               placement={'top'}
-              message={`Deposits for this pool have been disabled, redeem your funds.`}
+              message={`This pool has been disabled, please redeem your funds`}
             >
               <Image src={`images/warning-2.png`} {...fieldProps} />
             </Tooltip>
           )
+        } else if (this.state.statusIcon === 'paused') {
+          output = (<Tooltip
+            placement={'top'}
+            message={`This pool has been temporarily paused due to smart-contract maintenance`}
+          >
+            <Image src={`images/warning-2.png`} {...fieldProps} />
+          </Tooltip>)
         } else {
           output = (
             <TrancheField
@@ -386,9 +393,12 @@ class TrancheField extends Component {
           if (!!this.props.tokenConfig.disabled){
             badgeText = 'Disabled';
             badgeColor = 'disabledBg';
-          } else if (this.functionsUtil.BNify(this.state.statusBadge).gt(0) && this.functionsUtil.BNify(this.state.statusBadge).lte(5000000)){
+          } else if (!this.functionsUtil.BNify(this.state.statusBadge).isNaN() && this.functionsUtil.BNify(this.state.statusBadge).gt(0) && this.functionsUtil.BNify(this.state.statusBadge).lte(5000000)){
             badgeText = 'Experimental';
             badgeColor = 'experimental';
+          } else if (this.state.statusBadge === 'paused'){
+            badgeText = 'Paused';
+            badgeColor = 'paused';
           } else {
             badgeText = 'Production';
             badgeColor = 'production';
