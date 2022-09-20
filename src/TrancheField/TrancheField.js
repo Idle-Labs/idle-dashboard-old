@@ -354,7 +354,7 @@ class TrancheField extends Component {
             placement={'top'}
             message={`Deposits for this pool have been temporarily paused due to Smart-Contract maintenance`}
           >
-            <Image src={`images/warning-2.png`} {...fieldProps} />
+            <Image src={`images/pause.svg`} {...fieldProps} />
           </Tooltip>)
         } else {
           output = (
