@@ -1427,7 +1427,7 @@ class TrancheDetails extends Component {
                         mt: 2
                       }}
                       icon={'Warning'}
-                      text={`Deposits${!withdrawEnabled ? '/Withdraws' : '' } for this tranche are temporarily suspended due to Smart-Contract maintenance.`}
+                      text={`Deposits${!withdrawEnabled ? '/Withdraws' : '' } for this tranche are temporarily suspended due to Smart-Contract maintenance.${withdrawEnabled && ' Withdrawals remain enabled.'}`}
                     />
                   ) : this.state.maxPoolUtilizationRateReached && (this.state.selectedAction !== 'withdraw' || unlentAmount.lte(0)) ? (
                     <IconBox
