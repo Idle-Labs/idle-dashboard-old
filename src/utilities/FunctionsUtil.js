@@ -1503,6 +1503,9 @@ class FunctionsUtil {
 
     return tokensDistribution;
   }
+  getTrancheUnlentAmount = async (tokenConfig) => {
+    return await this.getTokenBalance(tokenConfig.token, tokenConfig.CDO.address);
+  }
   getTrancheUserInfo = async (tokenConfig, trancheConfig, account=null, userTransactions=null) => {
     account = account || this.props.account;
 

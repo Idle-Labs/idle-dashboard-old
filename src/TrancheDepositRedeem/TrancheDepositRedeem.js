@@ -36,6 +36,7 @@ class TrancheDetails extends Component {
     contractInfo:null,
     tranchePrice:null,
     tokenBalance:null,
+    unlentAmount:null,
     stakeEnabled:true,
     stakedBalance:null,
     unstakeEnabled:true,
@@ -57,7 +58,8 @@ class TrancheDetails extends Component {
     balanceSelectorInfo:null,
     selectedTrancheOption:null,
     selectedStakeAction:'stake',
-    userHasAvailableFunds:false
+    userHasAvailableFunds:false,
+    maxPoolUtilizationRateReached:null
   }
 
   // Utils
@@ -112,6 +114,7 @@ class TrancheDetails extends Component {
     }
 
     const [
+      unlentAmount,
       tokenBalance,
       trancheBalance,
       contractPaused,
@@ -126,6 +129,7 @@ class TrancheDetails extends Component {
       tranchePrice,
       trancheBaseApy,
     ] = await Promise.all([
+      this.functionsUtil.getTrancheUnlentAmount(this.props.tokenConfig),
       this.functionsUtil.getTokenBalance(this.props.selectedToken,this.props.account),
       this.functionsUtil.getTokenBalance(this.props.trancheConfig.name,this.props.account),
       this.functionsUtil.genericContractCallCached(this.props.tokenConfig.CDO.name, 'paused'),
@@ -174,12 +178,15 @@ class TrancheDetails extends Component {
       selectedStakeAction = 'unstake';
     }
 
+    const maxPoolUtilizationRateReached = this.props.tokenConfig.maxUtilizationRate && !this.functionsUtil.BNify(poolUtilizationRate).isNaN() && this.functionsUtil.fixTokenDecimals(poolUtilizationRate, 18).gte(this.props.tokenConfig.maxUtilizationRate);
+
     this.setState({
       trancheAPY,
       trancheFee,
       canUnstake,
       canWithdraw,
       lastHarvest,
+      unlentAmount,
       tokenBalance,
       stakeEnabled,
       tranchePrice,
@@ -197,7 +204,8 @@ class TrancheDetails extends Component {
       poolUtilizationRate,
       selectedStakeAction,
       selectedTrancheOption,
-      userHasAvailableFunds
+      userHasAvailableFunds,
+      maxPoolUtilizationRateReached
     }, () => {
       this.loadActionData();
     });
@@ -335,19 +343,30 @@ class TrancheDetails extends Component {
 
   changeInputCallback = async (inputValue) => {
 
-    // Calculate exit fee for TrueFi - USDC
-    if (this.state.selectedAction === 'withdraw' && this.props.trancheConfig.functions.penaltyFee && this.props.tokenConfig.Pool && this.functionsUtil.BNify(inputValue).gt(0)){
-      const amount = this.functionsUtil.normalizeTokenAmount(inputValue, this.props.tokenConfig.decimals);
-      let penaltyFee = await this.functionsUtil.genericContractCall(this.props.tokenConfig.Pool.name, this.props.trancheConfig.functions.penaltyFee, [amount])
+    if (this.state.selectedAction === 'withdraw'){
+      // Calculate exit fee for TrueFi - USDC
+      if (this.props.trancheConfig.functions.penaltyFee && this.props.tokenConfig.Pool && this.functionsUtil.BNify(inputValue).gt(0)){
+        const amount = this.functionsUtil.normalizeTokenAmount(inputValue, this.props.tokenConfig.decimals);
+        let penaltyFee = await this.functionsUtil.genericContractCall(this.props.tokenConfig.Pool.name, this.props.trancheConfig.functions.penaltyFee, [amount])
 
-      if (penaltyFee){
-        penaltyFee = this.functionsUtil.BNify(10000).minus(penaltyFee).div(100)
-        const balanceSelectorInfo = {
-          text:`Penalty fee: <span style="color:${this.props.theme.colors.alert}">${penaltyFee.toFixed(2)}%</span>`
+        if (penaltyFee){
+          penaltyFee = this.functionsUtil.BNify(10000).minus(penaltyFee).div(100)
+          const balanceSelectorInfo = {
+            text:`Penalty fee: <span style="color:${this.props.theme.colors.alert}">${penaltyFee.toFixed(2)}%</span>`
+          }
+
+          this.setState({
+            balanceSelectorInfo
+          });
         }
-
+      // Handle max unlent amount while max Utilization Rate reached
+      } else {
+        let buttonDisabled = false;
+        if (this.state.maxPoolUtilizationRateReached && this.state.unlentAmount.gt(0) && this.functionsUtil.BNify(inputValue).gt(this.state.unlentAmount)){
+          buttonDisabled = true;
+        }
         this.setState({
-          balanceSelectorInfo
+          buttonDisabled
         });
       }
     }
@@ -483,7 +502,14 @@ class TrancheDetails extends Component {
     const isWithdraw = this.state.selectedAction === 'withdraw';
     const isDisabled = !!this.props.tokenConfig.disabled;
 
-    const maxPoolUtilizationRateReached = this.props.tokenConfig.maxUtilizationRate && !this.functionsUtil.BNify(this.state.poolUtilizationRate).isNaN() && this.functionsUtil.fixTokenDecimals(this.state.poolUtilizationRate, 18).gte(this.props.tokenConfig.maxUtilizationRate);
+    const unlentAmount = this.state.unlentAmount || this.functionsUtil.BNify(0);
+
+    let maxPoolUtilizationRateReachedText = `This pool has reached the maximum utilization rate (${(this.props.tokenConfig.maxUtilizationRate*100).toFixed(0)}%), `;
+    if (unlentAmount.gt(0)){
+      maxPoolUtilizationRateReachedText = maxPoolUtilizationRateReachedText.concat(`you can withdraw up to ${unlentAmount.toFixed(4)} ${this.props.tokenConfig.token}`);
+    } else {
+      maxPoolUtilizationRateReachedText = maxPoolUtilizationRateReachedText.concat(`therefore ${this.state.selectedAction}s are temporarily unavailable.`);
+    }
 
     const withdrawEnabled = ((this.props.trancheConfig.tranche === 'AA' && this.state.allowAAWithdraw) || (this.props.trancheConfig.tranche === 'BB' && this.state.allowBBWithdraw));
 
@@ -1308,7 +1334,7 @@ class TrancheDetails extends Component {
                 )
               }
               {
-                this.state.infoText && this.props.account && !this.state.contractPaused && !maxPoolUtilizationRateReached && (
+                this.state.infoText && this.props.account && !this.state.contractPaused && !this.state.maxPoolUtilizationRateReached && (
                   <IconBox
                     cardProps={{
                       p:2,
@@ -1377,6 +1403,17 @@ class TrancheDetails extends Component {
                   </IconBox>
                 )
               }
+              {
+                this.state.maxPoolUtilizationRateReached && unlentAmount.gt(0) && (
+                  <IconBox
+                    cardProps={{
+                      mt: 2
+                    }}
+                    icon={'Warning'}
+                    text={maxPoolUtilizationRateReachedText}
+                  />
+                )
+              }
               <Flex
                 width={1}
                 alignItems={'stretch'}
@@ -1392,13 +1429,13 @@ class TrancheDetails extends Component {
                       icon={'Warning'}
                       text={`Deposits${!withdrawEnabled ? '/Withdraws' : '' } for this tranche are temporarily suspended due to Smart-Contract maintenance.`}
                     />
-                  ) : maxPoolUtilizationRateReached ? (
+                  ) : this.state.maxPoolUtilizationRateReached && (this.state.selectedAction !== 'withdraw' || unlentAmount.lte(0)) ? (
                     <IconBox
                       cardProps={{
                         mt: 2
                       }}
                       icon={'Warning'}
-                      text={`This pool has reached the maximum utilization rate (${(this.props.tokenConfig.maxUtilizationRate*100).toFixed(0)}%), therefore ${this.state.selectedAction}s are temporarily unavailable.`}
+                      text={maxPoolUtilizationRateReachedText}
                     />
                   ) : isDisabled && (isDeposit || (isStake && this.state.selectedStakeAction === 'stake')) ? (
                     <IconBox
