@@ -363,6 +363,102 @@ const availableTranches = {
           label:'lido stETH BB',
           address:'0x3a52fa30c33caf05faee0f9c5dfe5fd5fe8b3978'
         }
+      },
+      MATIC:{
+        abi:ERC20,
+        decimals:18,
+        token:'MATIC',
+        protocol:'lido',
+        blockNumber:15623682,
+        getApyFromApi:{
+          path:['apr'],
+          protocol:'polido',
+          apyLabel:'stMATIC APR'
+        },
+        customAprFunction:'getMaticTrancheApy',
+        additionalAprFunction:'getMaticTrancheAdditionalApy',
+        address:'0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0',
+        CDO:{
+          abi:IdleCDO,
+          decimals:18,
+          name:'IdleCDO_lido_MATIC',
+          address:'0xF87ec7e1Ee467d7d78862089B92dd40497cBa5B8'
+        },
+        Strategy:{
+          abi:IdleStrategy,
+          name:'IdleStrategy_lido_MATIC',
+          customAprFunction:'getMaticTrancheStrategyApr',
+          address:'0x6110deC9faC2A721c0EEe64B769A7E4cCcf4aa81'
+        },
+        modal:{
+          enabled:true,
+          buttonText:'Continue',
+          icon:'images/warning-2.png',
+          id:'modal_lido_matic_withdraw',
+          title:'Lido stMATIC unstake period',
+          text:'When you withdraw your funds from the tranche you will receive an NFT representing your redeemed amount, default stMATIC unstaking period takes around 3-4 days (80 epochs) to process. After that you can claim your rewards directly from <a href="https://polygon.lido.fi" class="link" rel="nofollow noopener noreferrer" target="_blank">https://polygon.lido.fi</a> in Claim tab. More info at <a href="https://docs.polygon.lido.fi/how-lido-on-polygon-works/#unstake-tokens" class="link" rel="nofollow noopener noreferrer" target="_blank">https://docs.polygon.lido.fi/how-lido-on-polygon-works/#unstake-tokens</a>'
+        },
+        messages:{
+          pendingNFTAmount:'Claim your rewards directly from <a href="https://polygon.lido.fi" class="link" rel="nofollow noopener noreferrer" target="_blank">https://polygon.lido.fi</a> in Claim tab.',
+          withdraw:'By withdrawing you will receive an NFT representing your redeemed funds, then you need to claim your funds directly from <a href="https://polygon.lido.fi" class="link" rel="nofollow noopener noreferrer" target="_blank">https://polygon.lido.fi</a>'
+        },
+        AA:{
+          abi:ERC20,
+          decimals:18,
+          tranche:'AA',
+          functions:{
+            stake:'stake',
+            unstake:'exit',
+            rewards:'earned',
+            claim:'getReward',
+            deposit:'depositAA',
+            withdraw:'withdrawAA',
+            rewardsRate:'rewardRate',
+            stakedBalance:'balanceOf',
+            periodFinish:'periodFinish',
+            pendingNFTAmount:'getMaticTrancheNFTs'
+          },
+          CDORewards:{
+            decimals:18,
+            stakingRewards:[],
+            unstakeWithBalance:false,
+            abi:TrancheStakingRewards,
+            name:'TrancheStakingRewards_lido_MATIC_AA',
+            address:'0x0000000000000000000000000000000000000000'
+          },
+          blockNumber:15623682,
+          name:'AA_lido_MATIC',
+          token:'AA_lido_MATIC',
+          label:'lido MATIC AA',
+          address:'0xAEf4FCC4E5F2dc270760063446d4116D24704Ad1'
+        },
+        BB:{
+          abi:ERC20,
+          decimals:18,
+          tranche:'BB',
+          functions:{
+            stake:'stake',
+            claim:'claim',
+            unstake:'unstake',
+            deposit:'depositBB',
+            withdraw:'withdrawBB',
+            stakedBalance:'usersStakes',
+            pendingNFTAmount:'getMaticTrancheNFTs'
+          },
+          CDORewards:{
+            decimals:18,
+            stakingRewards:[],
+            unstakeWithBalance:true,
+            abi:IdleCDOTrancheRewards,
+            name:'IdleCDOTrancheRewards_lido_MATIC_BB',
+            address:'0x0000000000000000000000000000000000000000'
+          },
+          blockNumber:15623682,
+          name:'BB_lido_MATIC',
+          token:'BB_lido_MATIC',
+          label:'lido MATIC BB',
+          address:'0x077212c69A66261CF7bD1fd3b5C5db7CfFA948Ee'
+        }
       }
     },
     /*
@@ -450,7 +546,11 @@ const availableTranches = {
         protocol:'convex',
         blockNumber:13812864,
         autoFarming:['CVX','CRV'],
-        curveApyPath:['apy','day','frax'],
+        getApyFromApi:{
+          protocol:'curve',
+          apyLabel:'Curve vAPR',
+          path:['apy','day','frax'],
+        },
         address:'0xd632f22692FaC7611d2AA1C0D552930D43CAEd3B',
         CDO:{
           abi:IdleCDO,
@@ -530,7 +630,11 @@ const availableTranches = {
         protocol:'convex',
         blockNumber:13848124,
         enabledEnvs: ['beta'],
-        curveApyPath:['apy','day','mim'],
+        getApyFromApi:{
+          protocol:'curve',
+          apyLabel:'Curve vAPR',
+          path:['apy','day','mim'],
+        },
         autoFarming:['CVX','CRV','SPELL'],
         address:'0x5a6A4D54456819380173272A5E8E9B9904BdF41B',
         CDO:{
@@ -610,7 +714,11 @@ const availableTranches = {
         protocol:'convex',
         blockNumber:14182975,
         autoFarming:['CVX','CRV','LDO'],
-        curveApyPath:['apy','day','steth'],
+        getApyFromApi:{
+          protocol:'curve',
+          apyLabel:'Curve vAPR',
+          path:['apy','day','steth'],
+        },
         address:'0x06325440D014e39736583c165C2963BA99fAf14E',
         CDO:{
           abi:IdleCDO,
