@@ -49,6 +49,7 @@ class TrancheDetails extends Component {
     selectedTranche:null,
     allowAAWithdraw:false,
     allowBBWithdraw:false,
+    pendingNFTAmount:null,
     availableTranches:null,
     modalAction:'deposited',
     approveDescription:null,
@@ -128,6 +129,7 @@ class TrancheDetails extends Component {
       trancheAPY,
       tranchePrice,
       trancheBaseApy,
+      pendingNFTAmount,
     ] = await Promise.all([
       this.functionsUtil.getTrancheUnlentAmount(this.props.tokenConfig),
       this.functionsUtil.getTokenBalance(this.props.selectedToken,this.props.account),
@@ -136,19 +138,21 @@ class TrancheDetails extends Component {
       this.functionsUtil.getTrancheLastHarvest(this.props.tokenConfig,this.props.trancheConfig),
       this.functionsUtil.genericContractCallCached(this.props.tokenConfig.CDO.name, 'allowAAWithdraw'),
       this.functionsUtil.genericContractCallCached(this.props.tokenConfig.CDO.name, 'allowBBWithdraw'),
-      this.props.gaugeConfig ? this.functionsUtil.getTokenBalance(this.props.gaugeConfig.name,this.props.account) : null,
+      this.props.gaugeConfig ? this.functionsUtil.getTokenBalance(this.props.gaugeConfig.name, this.props.account) : null,
       this.props.trancheConfig.functions.utilizationRate ? this.functionsUtil.genericContractCallCached(this.props.tokenConfig.Pool.name, this.props.trancheConfig.functions.utilizationRate) : null,
       this.functionsUtil.getTrancheStakedBalance(this.props.trancheConfig.CDORewards.name,this.props.account,this.props.trancheConfig.CDORewards.decimals,this.props.trancheConfig.functions.stakedBalance),
       this.functionsUtil.loadTrancheField('trancheFee',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account),
       this.functionsUtil.loadTrancheFieldRaw('trancheApy',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account),
       this.functionsUtil.loadTrancheFieldRaw('tranchePrice',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account),
       this.functionsUtil.loadTrancheFieldRaw('trancheBaseApy',{},this.props.selectedProtocol,this.props.selectedToken,this.props.selectedTranche,this.props.tokenConfig,this.props.trancheConfig,this.props.account),
+      this.props.trancheConfig.functions.pendingNFTAmount && this.functionsUtil[this.props.trancheConfig.functions.pendingNFTAmount] ? this.functionsUtil[this.props.trancheConfig.functions.pendingNFTAmount](this.props.account) : null
     ]);
 
     const canUnstake = true; // !stakeCoolingPeriod || this.functionsUtil.BNify(userStakeBlock).plus(stakeCoolingPeriod).lt(blockNumber);
     const canWithdraw = true; // !cdoCoolingPeriod || !latestHarvestBlock || this.functionsUtil.BNify(latestHarvestBlock).plus(cdoCoolingPeriod).lt(blockNumber);
 
     // console.log('lastHarvest',lastHarvest);
+    // console.log('pendingNFTAmount', pendingNFTAmount);
     // console.log('loadData',this.props.trancheConfig.tranche,blockNumber,cdoCoolingPeriod,latestHarvestBlock,stakeCoolingPeriod,userStakeBlock,canUnstake,canWithdraw);
     // console.log('utilizationRate', this.props.trancheConfig.functions.utilizationRate, poolUtilizationRate);
 
@@ -199,6 +203,7 @@ class TrancheDetails extends Component {
       selectedTranche,
       allowAAWithdraw,
       allowBBWithdraw,
+      pendingNFTAmount,
       availableTranches,
       gaugeStakedBalance,
       poolUtilizationRate,
@@ -1356,6 +1361,18 @@ class TrancheDetails extends Component {
                     }}
                     icon={'LightbulbOutline'}
                     text={this.state.infoText}
+                  />
+                )
+              }
+              {
+                this.state.pendingNFTAmount && this.functionsUtil.BNify(this.state.pendingNFTAmount).gt(0) && (
+                  <IconBox
+                    cardProps={{
+                      my:2,
+                      width:1
+                    }}
+                    icon={'AccessTime'}
+                    text={`You have a pending amount of ${this.state.pendingNFTAmount.toFixed(4)} ${this.props.tokenConfig.token}. ${this.props.tokenConfig.messages.pendingNFTAmount}`}
                   />
                 )
               }

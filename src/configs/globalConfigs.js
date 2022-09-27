@@ -11,6 +11,7 @@ import ERC20 from '../abis/tokens/ERC20.json';
 import TokenSwap from '../TokenSwap/TokenSwap';
 import yDAIv3 from '../abis/iearn/yDAIv3.json';
 import LpStaking from '../LpStaking/LpStaking';
+import stMATIC from '../abis/lido/stMATIC.json';
 import stkIDLE from '../contracts/stkIDLE.json';
 import yUSDCv3 from '../abis/iearn/yUSDCv3.json';
 import yUSDTv3 from '../abis/iearn/yUSDTv3.json';
@@ -327,6 +328,12 @@ const globalConfigs = {
           toBlock:"latest"
         }
       }
+    }
+  },
+  lido:{
+    rates:{
+      path:['apr'],
+      endpoint:'https://polygon.lido.fi/api/stats'
     }
   },
   curve: {
@@ -677,6 +684,10 @@ const globalConfigs = {
       Multicall:{
         abi:Multicall,
         address:'0xeefba1e63905ef1d7acba5a8513c70307c1ce441'
+      },
+      stMATIC:{
+        abi:stMATIC,
+        address:'0x9ee91F9f426fA633d227f7a9b000E28b9dfd8599'
       }
     }
   },
@@ -2044,6 +2055,7 @@ const globalConfigs = {
     isForked: false, // If TRUE the tx confirmation callback is fired on the receipt
     requiredNetwork: 1, // { 1: Mainnet, 3: Ropsten, 42: Kovan }
     secondsPerDay: 86400,
+    weeksPerYear: 52.1429,
     blocksPerYear: 2371428,
     secondsPerYear: 31536000,
     requiredConfirmations: 1,
@@ -2287,6 +2299,13 @@ const globalConfigs = {
   },
   events: {
     DAI: {
+      fields: {
+        to: "dst",
+        from: "src",
+        value: "wad"
+      }
+    },
+    LDO: {
       fields: {
         to: "dst",
         from: "src",

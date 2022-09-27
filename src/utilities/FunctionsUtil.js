@@ -7,6 +7,7 @@ import BigNumber from 'bignumber.js';
 import IdleGovToken from './IdleGovToken';
 import { toBuffer } from "ethereumjs-util";
 import ERC20 from '../abis/tokens/ERC20.json';
+import PoLidoNFT from '../abis/lido/PoLidoNFT.json';
 import { id as keccak256 } from 'ethers/utils/hash';
 import globalConfigs from '../configs/globalConfigs';
 import ENS, { getEnsAddress } from '@ensdomains/ensjs';
@@ -1180,9 +1181,9 @@ class FunctionsUtil {
     const etherscanInfo = this.getGlobalConfig(['network', 'providers', requiredNetwork.explorer]);
     const etherscanApiUrl = etherscanInfo.endpoints[requiredNetworkId];
     let endpoint = `${etherscanApiUrl}?module=account&action=tokentx&address=${walletAddr}&contractaddress=${contractAddress}&startblock=${fromBlock}&endblock=${toBlock}&sort=${sort}`;
-    if (limit && parseInt(limit)>0){
-      endpoint = endpoint+`&limit=${limit}`;
-    }
+    // if (limit && parseInt(limit)>0){
+    //   endpoint = endpoint+`&limit=${limit}`;
+    // }
     const etherscanTxlist = await this.makeEtherscanApiRequest(endpoint, etherscanInfo.keys, 0);
 
     const defaultEventsConfig = { to: 'to', from: 'from', value: 'value' };
@@ -1202,7 +1203,7 @@ class FunctionsUtil {
         tx.returnValues[underlyingEventsConfig.value] = tx.value;
       });
 
-      return transferEvents;
+      return limit && parseInt(limit)>0 ? transferEvents.slice(0, limit) : transferEvents;
     }
 
     const eventFilters = {
@@ -1229,22 +1230,29 @@ class FunctionsUtil {
 
     return stakingDistributions;
   }
-  getTrancheHarvests = async (tokenConfig,trancheConfig) => {
+
+  getTrancheHarvests = async (tokenConfig, trancheConfig, limit=null) => {
     const [
-      stakingRewardsDistributions,
+      // stakingRewardsDistributions,
       autoFarming
     ] = await Promise.all([
-      this.getTrancheStakingRewardsDistributions(tokenConfig,trancheConfig),
-      this.loadTrancheFieldRaw('autoFarming',{},tokenConfig.protocol,tokenConfig.token,trancheConfig.tranche,tokenConfig,trancheConfig)
+      // this.getTrancheStakingRewardsDistributions(tokenConfig,trancheConfig),
+      this.loadTrancheFieldRaw('autoFarming',{}, tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, tokenConfig,trancheConfig)
     ])
 
-    const harvestsList = stakingRewardsDistributions || {};
+    const harvestsList = {}; //stakingRewardsDistributions || {};
+
+    await this.loadTrancheStrategyContract(tokenConfig);
+
+    const strategyConfig = tokenConfig.Strategy;
+    let latestHarvestBlock = await this.genericContractCall(strategyConfig.name, 'latestHarvestBlock');
+
+    if (!latestHarvestBlock || !parseInt(latestHarvestBlock)){
+      latestHarvestBlock =  'latest';
+    }
     
-    await this.asyncForEach(Object.keys(autoFarming),async (token) => {
-      const eventFilters = {
-        to: tokenConfig.CDO.address
-      }
-      const transfers = await this.getContractEvents(token, 'Transfer',tokenConfig.blockNumber,'latest', {filter: eventFilters });
+    await this.asyncForEach(Object.keys(autoFarming), async (token) => {
+      const transfers = await this.getEtherscanTokenTransfers(tokenConfig.token, strategyConfig.address, null, tokenConfig.address, strategyConfig.address, tokenConfig.blockNumber, latestHarvestBlock, 'desc', limit);
 
       if (transfers && transfers.length > 0) {
         harvestsList[token] = transfers;
@@ -1277,7 +1285,7 @@ class FunctionsUtil {
     if (idleStrategyAddress) {
       let limit = null;
       let startBlock = tokenConfig.blockNumber;
-      let latestHarvestBlock = await this.genericContractCall(strategyConfig.name,'latestHarvestBlock');
+      let latestHarvestBlock = await this.genericContractCall(strategyConfig.name, 'latestHarvestBlock');
 
       if (!latestHarvestBlock || !parseInt(latestHarvestBlock)){
         return null;
@@ -3424,11 +3432,12 @@ class FunctionsUtil {
           error_callback(err);
         }
       });
+
     if (data) {
       return data;
-    } else {
-      return axios(config);
     }
+
+    return null;
   }
   makeEtherscanApiRequest = async (endpoint, keys = [], TTL = 180, apiKeyIndex = 0) => {
     const timestamp = parseInt(Date.now() / 1000);
@@ -5130,6 +5139,9 @@ class FunctionsUtil {
 
     const strategyConfig = tokenConfig.Strategy;
     const show_idle_apy = internal_view && parseInt(internal_view) === 1;
+
+    const customAprFunction = tokenConfig.customAprFunction ? this[tokenConfig.customAprFunction] : null;
+    const additionalAprFunction = tokenConfig.additionalAprFunction ? this[tokenConfig.additionalAprFunction] : null;
     
     // Create Tranche Strategy contract
     await this.loadTrancheStrategyContract(tokenConfig);
@@ -5388,35 +5400,39 @@ class FunctionsUtil {
       case 'trancheBaseApy':
       case 'trancheApyWithTooltip':
         let tokensApy = {};
-        let trancheApy = null;
+        let trancheApr = null;
         output = this.BNify(0);
         let apy = this.BNify(0);
         let trancheApyDecimals = 2;
         let baseApy = this.BNify(0);
         let gaugeRewardsTokens = null;
-        let curveBaseApy = this.BNify(0);
+        let protocolBaseApy = this.BNify(0);
+
+        if (additionalAprFunction){
+          tokensApy = await additionalAprFunction(tokenConfig, trancheConfig);
+        }
 
         [
           rewardsTokensInfo,
           gaugeRewardsTokens,
-          curveBaseApy,
-          trancheApy
+          protocolBaseApy,
+          trancheApr
         ] = await Promise.all([
           this.getTrancheRewardTokensInfo(tokenConfig,trancheConfig),
           gaugeConfig ? this.getGaugeRewardsTokens(gaugeConfig) : null,
-          tokenConfig.curveApyPath ? this.getCurveAPYs(tokenConfig.curveApyPath) : null,
-          multiCallDisabled ? this.genericContractCallCachedNoMulticall(tokenConfig.CDO.name, 'getApr', [trancheConfig.address]) : this.genericContractCallCached(tokenConfig.CDO.name, 'getApr', [trancheConfig.address])
+          tokenConfig.getApyFromApi ? this.getPlatformRates(tokenConfig.getApyFromApi.protocol, tokenConfig.getApyFromApi.path) : null,
+          customAprFunction ? customAprFunction(tokenConfig, trancheConfig) : (multiCallDisabled ? this.genericContractCallCachedNoMulticall(tokenConfig.CDO.name, 'getApr', [trancheConfig.address]) : this.genericContractCallCached(tokenConfig.CDO.name, 'getApr', [trancheConfig.address]))
         ]);
 
-        if (trancheApy){
-          let apr = this.fixTokenDecimals(trancheApy,tokenConfig.CDO.decimals);
+        if (trancheApr){
+          let apr = this.fixTokenDecimals(trancheApr, tokenConfig.CDO.decimals);
 
           apy = this.apr2apy(apr.div(100)).times(100);
           baseApy = apy;
 
-          if (!this.BNify(curveBaseApy).isNaN()){
-            apy = apy.plus(curveBaseApy);
-            tokensApy['Curve vAPR'] = curveBaseApy;
+          if (!this.BNify(protocolBaseApy).isNaN()){
+            apy = apy.plus(protocolBaseApy);
+            tokensApy[`${tokenConfig.getApyFromApi.apyLabel}`] = protocolBaseApy;
           }
 
           // Add rewards tokens APRs
@@ -5425,7 +5441,7 @@ class FunctionsUtil {
               const rewardTokenInfo = rewardsTokensInfo[token];
               if (!this.BNify(rewardTokenInfo.apy).isNaN() && (token !== 'IDLE' || show_idle_apy)){
                 const tokenApy = this.BNify(rewardTokenInfo.apy);
-                apy = apy.plus(tokenApy);
+                
                 tokensApy[token] = tokenApy;
               }
             });
@@ -5437,11 +5453,15 @@ class FunctionsUtil {
               const gaugeRewardTokenInfo = gaugeRewardsTokens[token];
               if (!this.BNify(gaugeRewardTokenInfo.apy).isNaN() && (token !== 'IDLE' || show_idle_apy)){
                 const tokenApy = this.BNify(gaugeRewardTokenInfo.apy);
-                apy = apy.plus(tokenApy);
                 tokensApy[token] = tokenApy;
               }
             });
           }
+
+          // Add additional aprs to total apy
+          Object.values(tokensApy).forEach( tokenApy => {
+            apy = apy.plus(tokenApy);
+          })
 
           if (apy.gt(9999)){
             trancheApyDecimals = 0;
@@ -5461,6 +5481,7 @@ class FunctionsUtil {
             output = output.toFixed(trancheApyDecimals)+'%';
           }
         }
+
 
         if (field === 'trancheApyWithTooltip'){
           const formattedApy = output;
@@ -5543,16 +5564,18 @@ class FunctionsUtil {
         }
       break;
       case 'strategyApr':
-        output = await this.genericContractCallCached(tokenConfig.Strategy.name,'getApr');
+        const strategyCustomAprFunction = tokenConfig.Strategy.customAprFunction ? this[tokenConfig.Strategy.customAprFunction] : null;
+        output = strategyCustomAprFunction ? await strategyCustomAprFunction(tokenConfig) : await this.genericContractCallCached(tokenConfig.Strategy.name, 'getApr');
         if (!output){
           output = 0;
         }
-        output = this.fixTokenDecimals(output,18);
+        output = strategyCustomAprFunction ? this.BNify(output) : this.fixTokenDecimals(output,18);
         if (formatValue){
           output = output.toFixed(decimals) + '%';
         }
       break;
       case 'apyBoost':
+        let trancheApy = 0;
         let strategyApr = 0;
         [
           trancheApy,
@@ -5562,9 +5585,9 @@ class FunctionsUtil {
           this.loadTrancheFieldRaw('strategyApr', fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens, formatValue, false),
         ]);
 
-        // console.log('trancheApy' ,this.BNify(trancheApy).toString(), 'strategyApr', this.BNify(strategyApr).toString());
-
         output = this.BNify(strategyApr).gt(0) ? this.BNify(trancheApy).div(this.BNify(strategyApr)) : this.BNify(0);
+
+        // console.log('apyBoost', 'trancheApy' ,this.BNify(trancheApy).toString(), 'strategyApr', this.BNify(strategyApr).toString(), output.toString());
 
         if (formatValue){
           output = `${output.toFixed(1)}x`;// (${strategyApr.toFixed(2)}%)`;
@@ -5572,8 +5595,10 @@ class FunctionsUtil {
       break;
       case 'trancheAPRSplitRatio':
         output = await this.genericContractCallCachedTTL(tokenConfig.CDO.name,'trancheAPRSplitRatio',3600);
-        output= output/1000;
-        output= output.toFixed(0)+"/"+(100-output).toFixed(0);
+        if (formatValue) {
+          output = output/1000;
+          output = output.toFixed(0)+"/"+(100-output).toFixed(0);
+        }
       break;
       case 'trancheAPRRatio':
         output = await this.genericContractCallCachedTTL(tokenConfig.CDO.name,'trancheAPRSplitRatio',3600);
@@ -7560,25 +7585,102 @@ class FunctionsUtil {
     }
     return null;
   }
-  getCurveAPYs = async (path=null) => {
 
+  getMaticTrancheNFTs = async (address) => {
+    const poLidoNFT_address = await this.genericContractCallCached('stMATIC', 'poLidoNFT');
+    await this.initContract('poLidoNFT', poLidoNFT_address, PoLidoNFT);
+
+    const maticTokenConfig = this.getTokenConfig('MATIC');
+    const tokenIds = await this.genericContractCall('poLidoNFT', 'getOwnedTokens', [address]);
+
+    const tokensAmounts = await this.asyncForEach(tokenIds, async (tokenId) => {
+      const tokenAmount = await this.genericContractCall('stMATIC', 'getMaticFromTokenId', [tokenId]);
+      return this.fixTokenDecimals(tokenAmount, maticTokenConfig.decimals);
+    });
+
+    return tokensAmounts.reduce( (totalAmount, tokenAmount) => (totalAmount = totalAmount.plus(tokenAmount)), this.BNify(0) );
+  }
+
+  getMaticTrancheAdditionalApy = async (tokenConfig, trancheConfig) => {
+    const [
+      trancheHarvests,
+      trancheAPRSplitRatio,
+      tranchePool,
+    ] = await Promise.all([
+      this.getTrancheHarvests(tokenConfig, trancheConfig, 1),
+      this.genericContractCall(tokenConfig.CDO.name, 'trancheAPRSplitRatio'),
+      this.loadTrancheFieldRaw('tranchePool',{}, tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, tokenConfig, trancheConfig)
+    ]);
+
+    const trancheAprRatio = this.fixTokenDecimals(trancheAPRSplitRatio, 5);
+
+    const additionalApys = Object.keys(trancheHarvests).reduce( (apys, token) => {
+      const lastHarvest = trancheHarvests[token][0];
+      const harvestTokenConfig = this.getTokenConfig(token);
+      const harvestedValue = this.fixTokenDecimals(lastHarvest.returnValues.value, harvestTokenConfig.decimals).times(trancheAprRatio);
+      const tokenApr = harvestedValue.div(tranchePool).times(this.getGlobalConfig(['network', 'weeksPerYear']));
+      const tokenApy = this.apr2apy(tokenApr);
+      // console.log(token, harvestedValue.toString(), tranchePool.toString(), tokenApr.toString(), tokenApy.toString());
+      apys[token] = tokenApy;
+      return apys;
+    },{});
+
+    // console.log('getMaticTrancheAdditionalApy', trancheHarvests, trancheAPRSplitRatio, tranchePool.toString(), additionalApys);
+
+    return additionalApys;
+  }
+
+  getMaticTrancheStrategyApr = async (tokenConfig) => {
+    return this.getPlatformRates(tokenConfig.protocol, ['apr']);
+  }
+
+  getMaticTrancheApy = async (tokenConfig, trancheConfig) => {
+    const [
+      stratApr,
+      FULL_ALLOC,
+      currentAARatio,
+      trancheAPRSplitRatio,
+    ] = await Promise.all([
+      this.getMaticTrancheStrategyApr(tokenConfig),
+      this.genericContractCall(tokenConfig.CDO.name, 'FULL_ALLOC'),
+      this.genericContractCall(tokenConfig.CDO.name, 'getCurrentAARatio'),
+      this.genericContractCall(tokenConfig.CDO.name, 'trancheAPRSplitRatio')
+    ]);
+
+    const isAATranche = trancheConfig.tranche === 'AA';
+
+    if (this.BNify(currentAARatio).eq(0)){
+      return isAATranche ? this.BNify(0) : this.BNify(stratApr);
+    }
+
+    if (this.BNify(stratApr).isNaN()){
+      return this.BNify(0);
+    }
+
+    const apr = isAATranche ? this.BNify(stratApr).times(trancheAPRSplitRatio).div(currentAARatio) : this.BNify(stratApr).times(this.BNify(FULL_ALLOC).minus(trancheAPRSplitRatio)).div(this.BNify(FULL_ALLOC).minus(currentAARatio));
+
+    return this.BNify(this.normalizeTokenAmount(apr, tokenConfig.CDO.decimals));
+  }
+
+  getPlatformRates = async (platform, path=null) => {
     // Check for cached data
-    const cachedDataKey = `getCurveAPY`;
+    const cachedDataKey = `getPlatformRates_${platform}_${path ? JSON.stringify(path) : ''}`;
     const cachedData = this.getCachedDataWithLocalStorage(cachedDataKey);
     if (cachedData && !this.BNify(cachedData).isNaN()) {
       return this.BNify(cachedData);
     }
 
-    const curveRatesInfo = this.getGlobalConfig(['curve', 'rates']);
-    if (curveRatesInfo) {
-      const results = await this.makeRequest(curveRatesInfo.endpoint);
+    const ratesInfo = this.getGlobalConfig([platform, 'rates']);
+    if (ratesInfo) {
+      const results = await this.makeRequest(ratesInfo.endpoint);
+
       if (results && results.data) {
         if (path){
-          let curveApy = this.getArrayPath(path, results.data);
-          if (curveApy) {
-            curveApy = this.BNify(curveApy).times(100);
-            if (!this.BNify(curveApy).isNaN()) {
-              return this.setCachedDataWithLocalStorage(cachedDataKey, curveApy);
+          let apy = this.getArrayPath(path, results.data);
+          if (apy) {
+            apy = this.BNify(apy).times(100);
+            if (!this.BNify(apy).isNaN()) {
+              return this.setCachedDataWithLocalStorage(cachedDataKey, apy);
             }
           }
         } else {
@@ -9079,6 +9181,9 @@ class FunctionsUtil {
     const tokenConfig = this.getArrayPath([networkId, strategy, token], availableTokens);
     return tokenConfig ? tokenConfig.address : null;
   }
+
+
+
   getTrancheAggregatedStats = async (tranches = null) => {
     let avgAPY = this.BNify(0);
     let totalAUM = this.BNify(0);
