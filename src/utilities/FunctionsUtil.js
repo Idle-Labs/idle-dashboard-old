@@ -7615,10 +7615,9 @@ class FunctionsUtil {
     ]);
 
     // Decrease checkpoint
-    let currentEpochInfo = null;
     let epochIntervalInSeconds = 2700;
     let currentEpochTimestamp = Date.now()/1000;
-    const currentPolygonEpoch = currentPolygonHeight && currentPolygonHeight.result ? currentPolygonHeight.result.result : await this.genericContractCall('poLidoStakeManager', 'epoch');
+    let currentPolygonEpoch = currentPolygonHeight && currentPolygonHeight.result ? currentPolygonHeight.result.result : await this.genericContractCall('poLidoStakeManager', 'epoch');
 
     // Get checkpoints interval
     if (currentPolygonEpoch){
