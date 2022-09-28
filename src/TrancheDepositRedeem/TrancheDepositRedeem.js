@@ -160,13 +160,13 @@ class TrancheDetails extends Component {
       if (!nfts[pendingNFT.status]) {
         nfts[pendingNFT.status] = {
           tokenIds:[],
-          maxRequestEpoch:0,
+          maxUnlockDate:null,
           amount:this.functionsUtil.BNify(0),
           currentEpoch:pendingNFT.currentEpoch
         };
       }
-      if (pendingNFT.requestEpoch>nfts[pendingNFT.status].maxRequestEpoch){
-        nfts[pendingNFT.status].maxRequestEpoch = pendingNFT.requestEpoch;
+      if (!nfts[pendingNFT.status].maxUnlockDate || pendingNFT.unlockDate.isAfter(nfts[pendingNFT.status].maxUnlockDate)){
+        nfts[pendingNFT.status].maxUnlockDate = pendingNFT.unlockDate;
       }
       nfts[pendingNFT.status].tokenIds.push(pendingNFT.tokenId);
       nfts[pendingNFT.status].amount = nfts[pendingNFT.status].amount.plus(pendingNFT.amount);
@@ -1401,7 +1401,7 @@ class TrancheDetails extends Component {
                       width:1
                     }}
                     icon={'AccessTime'}
-                    text={`You have a pending amount of ${this.state.pendingNFTAmounts['pending'].amount.toFixed(4)} ${this.props.tokenConfig.token}. Please wait until epoch ${this.state.pendingNFTAmounts['pending'].maxRequestEpoch} to claim your funds.<br />Current epoch: ${this.state.pendingNFTAmounts['pending'].currentEpoch}, Remaining epochs: ${this.state.pendingNFTAmounts['pending'].maxRequestEpoch-this.state.pendingNFTAmounts['pending'].currentEpoch}.`}
+                    text={`You have a pending amount of ${this.state.pendingNFTAmounts['pending'].amount.toFixed(4)} ${this.props.tokenConfig.token} to withdraw. Please wait approximately until ${this.state.pendingNFTAmounts['pending'].maxUnlockDate.utc().format('DD MMM, YYYY @ HH:mm')} UTC to claim your funds.<br /><a href="https://docs.polygon.lido.fi/how-lido-on-polygon-works/#unstake-tokens" class="link" rel="nofollow noopener noreferrer" target="_blank">Read more</a>`}
                   />
                 )
               }
@@ -1645,56 +1645,14 @@ class TrancheDetails extends Component {
                     >
                       {
                         isDeposit ? (
-                          <Flex
-                            width={1}
-                            alignItems={'stretch'}
-                            flexDirection={'column'}
-                            justifyContent={'center'}
-                          >
-                            <BuyModal
-                              {...this.props}
-                              showInline={true}
-                              availableMethods={[]}
-                              buyToken={this.props.selectedToken}
-                            >
-                              {
-                                this.props.tokenConfig.messages && this.props.tokenConfig.messages.buyInstructions ? (
-                                  <DashboardCard
-                                    cardProps={{
-                                      p: 2,
-                                      my: 2
-                                    }}
-                                  >
-                                    <Flex
-                                      width={1}
-                                      alignItems={'center'}
-                                      flexDirection={'column'}
-                                      justifyContent={'center'}
-                                    >
-                                      <Icon
-                                        size={'1.8em'}
-                                        name={'MoneyOff'}
-                                        color={'cellText'}
-                                      />
-                                      <Text
-                                        mt={1}
-                                        color={'cellText'}
-                                        textAlign={'center'}
-                                      >
-                                        You don't have any <strong>{this.props.selectedToken}</strong> to deposit.
-                                      </Text>
-                                      <Text
-                                        mt={1}
-                                        color={'cellText'}
-                                        textAlign={'center'}
-                                        dangerouslySetInnerHTML={{__html:this.props.tokenConfig.messages.buyInstructions}}>
-                                      </Text>
-                                    </Flex>
-                                  </DashboardCard>
-                                ) : null
-                              }
-                            </BuyModal>
-                          </Flex>
+                          <IconBox
+                            cardProps={{
+                              my:2,
+                              width:1
+                            }}
+                            icon={'MoneyOff'}
+                            text={`You don't have any ${this.props.selectedToken} in your wallet.`}
+                          />
                         ) : isStake ? (
                           <DashboardCard
                             cardProps={{

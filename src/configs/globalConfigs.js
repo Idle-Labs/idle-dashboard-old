@@ -2092,6 +2092,9 @@ const globalConfigs = {
           137: 'https://polygonscan.com',
           80001: 'https://explorer-mumbai.maticvigil.com'
         },
+        endpoints: {
+          checkpoint: 'https://heimdall-api.polygon.technology/checkpoints/'
+        },
         networkPairs: {
           1: 137,
           137: 1,
