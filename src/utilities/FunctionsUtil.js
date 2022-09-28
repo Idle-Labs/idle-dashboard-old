@@ -3485,6 +3485,10 @@ class FunctionsUtil {
 
     let data = await this.makeRequest(endpoint, error_callback, config);
 
+    if (!data || !data.data){
+      return null;
+    }
+
     const dataToCache = {
       data:{
         data:data.data
@@ -7600,13 +7604,47 @@ class FunctionsUtil {
     await this.initContract('poLidoStakeManager', stakeManager_address, PoLidoStakeManager);
 
     const maticTokenConfig = this.getTokenConfig('MATIC');
+    const polygonEndpoint = this.getGlobalConfig(['network','providers','polygon','endpoints','checkpoint']);
+
     const [
-      stakeManagerEpoch,
-      tokenIds,
+      currentPolygonHeight,
+      tokenIds
     ] = await Promise.all([
-      this.genericContractCall('poLidoStakeManager', 'epoch'),
+      this.makeCachedRequest(polygonEndpoint+'count', 300, true),
       this.genericContractCall('poLidoNFT', 'getOwnedTokens', [address])
-    ])
+    ]);
+
+    // Decrease checkpoint
+    let currentEpochInfo = null;
+    let epochIntervalInSeconds = 2700;
+    let currentEpochTimestamp = Date.now()/1000;
+    const currentPolygonEpoch = currentPolygonHeight && currentPolygonHeight.result ? currentPolygonHeight.result.result : await this.genericContractCall('poLidoStakeManager', 'epoch');
+
+    // Get checkpoints interval
+    if (currentPolygonEpoch){
+      // Safe margin for epoch fethed from polido stake manager
+      if (!currentPolygonHeight || !currentPolygonHeight.result){
+        currentPolygonEpoch-=2;
+      }
+      const [
+        lastEpochInfo,
+        currentEpochInfo
+      ] = await Promise.all([
+        this.makeCachedRequest(polygonEndpoint+(currentPolygonEpoch-1), 300, true),
+        this.makeCachedRequest(polygonEndpoint+currentPolygonEpoch, 300, true)
+      ])
+
+      if (currentEpochInfo && currentEpochInfo.result){
+        currentEpochTimestamp = parseInt(currentEpochInfo.result.timestamp);
+
+        if (lastEpochInfo && lastEpochInfo.result){
+          epochIntervalInSeconds = (currentEpochInfo.result.timestamp-lastEpochInfo.result.timestamp);
+        }
+      }
+      // console.log('epoch info', currentEpochInfo, lastEpochInfo, epochIntervalInSeconds);
+    } else {
+      currentPolygonEpoch = 0;
+    }
 
     const tokensAmounts = await this.asyncForEach(tokenIds, async (tokenId) => {
       const [
@@ -7617,14 +7655,23 @@ class FunctionsUtil {
         this.genericContractCall('stMATIC', 'token2WithdrawRequest', [tokenId])
       ]);
 
-      const status = parseInt(usersRequest.requestEpoch)>=parseInt(stakeManagerEpoch) ? 'pending' : 'available';
+      const status = parseInt(usersRequest.requestEpoch)>=parseInt(currentPolygonEpoch) ? 'pending' : 'available';
 
-      // console.log('getMaticTrancheNFTs', tokenId, tokenAmount, usersRequest.requestEpoch, stakeManagerEpoch);
+      // console.log('usersRequest', tokenId, usersRequest, epochIntervalInSeconds);
+
+      const remainingEpochs = Math.max(0, parseInt(usersRequest.requestEpoch)-parseInt(currentPolygonEpoch));
+
+      // Calculate tokens unlock time
+      const remainingTime = parseInt(remainingEpochs)*epochIntervalInSeconds;
+      const unlockDate = moment((currentEpochTimestamp+remainingTime)*1000);
 
       return {
         status,
         tokenId,
-        currentEpoch: parseInt(stakeManagerEpoch),
+        unlockDate,
+        remainingTime,
+        remainingEpochs,
+        currentEpoch: parseInt(currentPolygonEpoch),
         requestEpoch: parseInt(usersRequest.requestEpoch),
         amount: this.fixTokenDecimals(tokenAmount, maticTokenConfig.decimals),
       }
