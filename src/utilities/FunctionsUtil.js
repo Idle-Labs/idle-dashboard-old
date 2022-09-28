@@ -12,6 +12,7 @@ import { id as keccak256 } from 'ethers/utils/hash';
 import globalConfigs from '../configs/globalConfigs';
 import ENS, { getEnsAddress } from '@ensdomains/ensjs';
 import availableTokens from '../configs/availableTokens';
+import PoLidoStakeManager from '../abis/lido/PoLidoStakeManager.json';
 import IAaveIncentivesController from '../abis/aave/IAaveIncentivesController.json';
 
 const ethereumjsABI = require('ethereumjs-abi');
@@ -7587,18 +7588,51 @@ class FunctionsUtil {
   }
 
   getMaticTrancheNFTs = async (address) => {
-    const poLidoNFT_address = await this.genericContractCallCached('stMATIC', 'poLidoNFT');
+    const [
+      poLidoNFT_address,
+      stakeManager_address
+    ] = await Promise.all([
+      this.genericContractCallCached('stMATIC', 'poLidoNFT'),
+      this.genericContractCallCached('stMATIC', 'stakeManager'),
+    ])
+
     await this.initContract('poLidoNFT', poLidoNFT_address, PoLidoNFT);
+    await this.initContract('poLidoStakeManager', stakeManager_address, PoLidoStakeManager);
 
     const maticTokenConfig = this.getTokenConfig('MATIC');
-    const tokenIds = await this.genericContractCall('poLidoNFT', 'getOwnedTokens', [address]);
+    const [
+      stakeManagerEpoch,
+      tokenIds,
+    ] = await Promise.all([
+      this.genericContractCall('poLidoStakeManager', 'epoch'),
+      this.genericContractCall('poLidoNFT', 'getOwnedTokens', [address])
+    ])
 
     const tokensAmounts = await this.asyncForEach(tokenIds, async (tokenId) => {
-      const tokenAmount = await this.genericContractCall('stMATIC', 'getMaticFromTokenId', [tokenId]);
-      return this.fixTokenDecimals(tokenAmount, maticTokenConfig.decimals);
+      const [
+        tokenAmount,
+        usersRequest
+      ] = await Promise.all([
+        this.genericContractCall('stMATIC', 'getMaticFromTokenId', [tokenId]),
+        this.genericContractCall('stMATIC', 'token2WithdrawRequest', [tokenId])
+      ]);
+
+      const status = parseInt(usersRequest.requestEpoch)>=parseInt(stakeManagerEpoch) ? 'pending' : 'available';
+
+      // console.log('getMaticTrancheNFTs', tokenId, tokenAmount, usersRequest.requestEpoch, stakeManagerEpoch);
+
+      return {
+        status,
+        tokenId,
+        currentEpoch: parseInt(stakeManagerEpoch),
+        requestEpoch: parseInt(usersRequest.requestEpoch),
+        amount: this.fixTokenDecimals(tokenAmount, maticTokenConfig.decimals),
+      }
     });
 
-    return tokensAmounts.reduce( (totalAmount, tokenAmount) => (totalAmount = totalAmount.plus(tokenAmount)), this.BNify(0) );
+    return tokensAmounts;
+
+    // return tokensAmounts.reduce( (totalAmount, tokenAmount) => (totalAmount = totalAmount.plus(tokenAmount)), this.BNify(0) );
   }
 
   getMaticTrancheAdditionalApy = async (tokenConfig, trancheConfig) => {

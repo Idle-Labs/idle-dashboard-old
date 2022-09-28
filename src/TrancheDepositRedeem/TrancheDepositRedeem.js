@@ -49,8 +49,8 @@ class TrancheDetails extends Component {
     selectedTranche:null,
     allowAAWithdraw:false,
     allowBBWithdraw:false,
-    pendingNFTAmount:null,
     availableTranches:null,
+    pendingNFTAmounts:null,
     modalAction:'deposited',
     approveDescription:null,
     gaugeStakedBalance:null,
@@ -129,7 +129,7 @@ class TrancheDetails extends Component {
       trancheAPY,
       tranchePrice,
       trancheBaseApy,
-      pendingNFTAmount,
+      pendingNFTs,
     ] = await Promise.all([
       this.functionsUtil.getTrancheUnlentAmount(this.props.tokenConfig),
       this.functionsUtil.getTokenBalance(this.props.selectedToken,this.props.account),
@@ -151,17 +151,34 @@ class TrancheDetails extends Component {
     const canUnstake = true; // !stakeCoolingPeriod || this.functionsUtil.BNify(userStakeBlock).plus(stakeCoolingPeriod).lt(blockNumber);
     const canWithdraw = true; // !cdoCoolingPeriod || !latestHarvestBlock || this.functionsUtil.BNify(latestHarvestBlock).plus(cdoCoolingPeriod).lt(blockNumber);
 
-    // console.log('lastHarvest',lastHarvest);
-    // console.log('pendingNFTAmount', pendingNFTAmount);
+    // console.log('lastHarvest', lastHarvest);
+    // console.log('pendingNFTs', pendingNFTs);
     // console.log('loadData',this.props.trancheConfig.tranche,blockNumber,cdoCoolingPeriod,latestHarvestBlock,stakeCoolingPeriod,userStakeBlock,canUnstake,canWithdraw);
     // console.log('utilizationRate', this.props.trancheConfig.functions.utilizationRate, poolUtilizationRate);
 
+    const pendingNFTAmounts = pendingNFTs.reduce( (nfts, pendingNFT) => {
+      if (!nfts[pendingNFT.status]) {
+        nfts[pendingNFT.status] = {
+          tokenIds:[],
+          maxRequestEpoch:0,
+          amount:this.functionsUtil.BNify(0),
+          currentEpoch:pendingNFT.currentEpoch
+        };
+      }
+      if (pendingNFT.requestEpoch>nfts[pendingNFT.status].maxRequestEpoch){
+        nfts[pendingNFT.status].maxRequestEpoch = pendingNFT.requestEpoch;
+      }
+      nfts[pendingNFT.status].tokenIds.push(pendingNFT.tokenId);
+      nfts[pendingNFT.status].amount = nfts[pendingNFT.status].amount.plus(pendingNFT.amount);
+      return nfts;
+    }, {});
+
     const availableTranches = Object.values(this.functionsUtil.getGlobalConfig(['tranches'])).map( trancheInfo => ({
-      value:trancheInfo.type,
-      icon:trancheInfo.image,
-      label:trancheInfo.name,
-      tranche:trancheInfo.type,
-      trancheConfig:this.props.tokenConfig[trancheInfo.type]
+      value: trancheInfo.type,
+      icon: trancheInfo.image,
+      label: trancheInfo.name,
+      tranche: trancheInfo.type,
+      trancheConfig: this.props.tokenConfig[trancheInfo.type]
     }));
 
     const userHasAvailableFunds = trancheBalance && trancheBalance.gt(0);
@@ -203,7 +220,7 @@ class TrancheDetails extends Component {
       selectedTranche,
       allowAAWithdraw,
       allowBBWithdraw,
-      pendingNFTAmount,
+      pendingNFTAmounts,
       availableTranches,
       gaugeStakedBalance,
       poolUtilizationRate,
@@ -1365,14 +1382,26 @@ class TrancheDetails extends Component {
                 )
               }
               {
-                this.state.pendingNFTAmount && this.functionsUtil.BNify(this.state.pendingNFTAmount).gt(0) && (
+                this.state.pendingNFTAmounts && this.state.pendingNFTAmounts['available'] && this.state.pendingNFTAmounts['available'].amount.gt(0) ? (
+                  <IconBox
+                    cardProps={{
+                      my:2,
+                      width:1
+                    }}
+                    icon={'DoneAll'}
+                    iconProps={{
+                      color:this.props.theme.colors.transactions.status.completed
+                    }}
+                    text={`Your redeem amount of ${this.state.pendingNFTAmounts['available'].amount.toFixed(4)} ${this.props.tokenConfig.token} is now claimable. ${this.props.tokenConfig.messages.pendingNFTAmount}`}
+                  />
+                ) : this.state.pendingNFTAmounts && this.state.pendingNFTAmounts['pending'] && this.state.pendingNFTAmounts['pending'].amount.gt(0) && (
                   <IconBox
                     cardProps={{
                       my:2,
                       width:1
                     }}
                     icon={'AccessTime'}
-                    text={`You have a pending amount of ${this.state.pendingNFTAmount.toFixed(4)} ${this.props.tokenConfig.token}. ${this.props.tokenConfig.messages.pendingNFTAmount}`}
+                    text={`You have a pending amount of ${this.state.pendingNFTAmounts['pending'].amount.toFixed(4)} ${this.props.tokenConfig.token}. Please wait until epoch ${this.state.pendingNFTAmounts['pending'].maxRequestEpoch} to claim your funds.<br />Current epoch: ${this.state.pendingNFTAmounts['pending'].currentEpoch}, Remaining epochs: ${this.state.pendingNFTAmounts['pending'].maxRequestEpoch-this.state.pendingNFTAmounts['pending'].currentEpoch}.`}
                   />
                 )
               }
