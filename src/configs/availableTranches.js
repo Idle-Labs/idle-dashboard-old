@@ -370,6 +370,7 @@ const availableTranches = {
         token:'MATIC',
         protocol:'lido',
         blockNumber:15623682,
+        enabledEnvs: ['beta'],
         getApyFromApi:{
           path:['apr'],
           protocol:'polido',
