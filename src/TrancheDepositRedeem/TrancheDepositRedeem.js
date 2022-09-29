@@ -6,7 +6,7 @@ import ImageButton from '../ImageButton/ImageButton';
 import TooltipText from '../TooltipText/TooltipText';
 import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
-import BuyModal from '../utilities/components/BuyModal';
+// import BuyModal from '../utilities/components/BuyModal';
 import TrancheField from '../TrancheField/TrancheField';
 import { Flex, Text, Image, Box, Icon } from "rimble-ui";
 import DashboardCard from '../DashboardCard/DashboardCard';
