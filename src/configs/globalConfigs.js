@@ -333,7 +333,10 @@ const globalConfigs = {
   lido:{
     rates:{
       path:['apr'],
-      endpoint:'https://polygon.lido.fi/api/stats'
+      endpoint:'https://api.idle.finance/poLidoStats',
+      config: {
+        headers: env.REACT_APP_IDLE_KEY ? { Authorization: `Bearer ${env.REACT_APP_IDLE_KEY}` } : {},
+      },
     }
   },
   curve: {

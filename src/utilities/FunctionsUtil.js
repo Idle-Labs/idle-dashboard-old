@@ -3415,7 +3415,7 @@ class FunctionsUtil {
 
     return this.setCachedDataWithLocalStorage(cachedDataKey, output, 1800);
   }
-  makePostRequest = async (endpoint, postData={}, error_callback = false, config = null) => {
+  makePostRequest = async (endpoint, postData={}, error_callback = null, config = null) => {
     const data = await axios
       .post(endpoint, postData, config)
       .catch(err => {
@@ -3425,7 +3425,7 @@ class FunctionsUtil {
       });
     return data;
   }
-  makeRequest = async (endpoint, error_callback = false, config = null) => {
+  makeRequest = async (endpoint, error_callback = null, config = null) => {
     const data = await axios
       .get(endpoint, config)
       .catch(err => {
@@ -7711,7 +7711,11 @@ class FunctionsUtil {
   }
 
   getMaticTrancheStrategyApr = async (tokenConfig) => {
-    return this.getPlatformRates(tokenConfig.protocol, ['apr']);
+    const apr = await this.getPlatformRates(tokenConfig.protocol, ['apr']);
+    if (!this.BNify(apr).isNaN()){
+      return this.BNify(apr).div(100);
+    }
+    return this.BNify(0);
   }
 
   getMaticTrancheApy = async (tokenConfig, trancheConfig) => {
@@ -7752,7 +7756,7 @@ class FunctionsUtil {
 
     const ratesInfo = this.getGlobalConfig([platform, 'rates']);
     if (ratesInfo) {
-      const results = await this.makeRequest(ratesInfo.endpoint);
+      const results = await this.makeRequest(ratesInfo.endpoint, false, ratesInfo.config);
 
       if (results && results.data) {
         if (path){
