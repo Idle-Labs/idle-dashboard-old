@@ -7606,9 +7606,11 @@ class FunctionsUtil {
     const polygonEndpoint = this.getGlobalConfig(['network','providers','polygon','endpoints','checkpoint']);
 
     const [
+      poLidoStakeManagerEpoch,
       currentPolygonHeight,
       tokenIds
     ] = await Promise.all([
+      this.genericContractCall('poLidoStakeManager', 'epoch'),
       this.makeCachedRequest(polygonEndpoint+'count', 300, true),
       this.genericContractCall('poLidoNFT', 'getOwnedTokens', [address])
     ]);
@@ -7616,7 +7618,7 @@ class FunctionsUtil {
     // Decrease checkpoint
     let epochIntervalInSeconds = 2700;
     let currentEpochTimestamp = Date.now()/1000;
-    let currentPolygonEpoch = currentPolygonHeight && currentPolygonHeight.result ? currentPolygonHeight.result.result : await this.genericContractCall('poLidoStakeManager', 'epoch');
+    let currentPolygonEpoch = currentPolygonHeight && currentPolygonHeight.result ? currentPolygonHeight.result.result : poLidoStakeManagerEpoch;
 
     // Get checkpoints interval
     if (currentPolygonEpoch){
@@ -7653,7 +7655,7 @@ class FunctionsUtil {
         this.genericContractCall('stMATIC', 'token2WithdrawRequest', [tokenId])
       ]);
 
-      const status = parseInt(usersRequest.requestEpoch)>=parseInt(currentPolygonEpoch) ? 'pending' : 'available';
+      const status = parseInt(usersRequest.requestEpoch)>=parseInt(poLidoStakeManagerEpoch) ? 'pending' : 'available';
 
       // console.log('usersRequest', tokenId, usersRequest, epochIntervalInSeconds);
 
