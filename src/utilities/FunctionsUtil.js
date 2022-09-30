@@ -5145,8 +5145,8 @@ class FunctionsUtil {
     const strategyConfig = tokenConfig.Strategy;
     const show_idle_apy = internal_view && parseInt(internal_view) === 1;
 
-    const customAprFunction = tokenConfig.customAprFunction ? this[tokenConfig.customAprFunction] : null;
-    const additionalAprFunction = tokenConfig.additionalAprFunction ? this[tokenConfig.additionalAprFunction] : null;
+    const customAprFunction = tokenConfig.functions && tokenConfig.functions.getCustomApr ? this[tokenConfig.functions.getCustomApr] : null;
+    const additionalAprFunction = tokenConfig.functions && tokenConfig.functions.getAdditionalApr ? this[tokenConfig.functions.getAdditionalApr] : null;
     
     // Create Tranche Strategy contract
     await this.loadTrancheStrategyContract(tokenConfig);
