@@ -49,6 +49,7 @@ class TrancheDetails extends Component {
     selectedTranche:null,
     allowAAWithdraw:false,
     allowBBWithdraw:false,
+    claimedNFTAmount:null,
     availableTranches:null,
     pendingNFTAmounts:null,
     modalAction:'deposited',
@@ -157,6 +158,9 @@ class TrancheDetails extends Component {
     // console.log('utilizationRate', this.props.trancheConfig.functions.utilizationRate, poolUtilizationRate);
 
     const pendingNFTAmounts = pendingNFTs.reduce( (nfts, pendingNFT) => {
+      // Just keep one available NFT to withdraw at a time
+      if (pendingNFT.status === 'available' && nfts[pendingNFT.status]) return nfts;
+
       if (!nfts[pendingNFT.status]) {
         nfts[pendingNFT.status] = {
           tokenIds:[],
@@ -455,6 +459,17 @@ class TrancheDetails extends Component {
       }
     }
     return true;
+  }
+
+  claimNFTSucceeded(tx){
+    const eventConfig = this.props.tokenConfig.ClaimNFT.event;
+
+    const claimTokensEvent = tx.txReceipt.events ? tx.txReceipt.events[eventConfig.name] : null;
+    const claimedNFTAmount = claimTokensEvent ? this.functionsUtil.fixTokenDecimals(claimTokensEvent.returnValues[eventConfig.amountField], this.props.tokenConfig.decimals) : this.functionsUtil.BNify(0);
+
+    this.setState({
+      claimedNFTAmount
+    });
   }
 
   transactionSucceeded(){
@@ -1382,7 +1397,7 @@ class TrancheDetails extends Component {
                 )
               }
               {
-                this.state.pendingNFTAmounts && this.state.pendingNFTAmounts['available'] && this.state.pendingNFTAmounts['available'].amount.gt(0) ? (
+                this.state.claimedNFTAmount ? (
                   <IconBox
                     cardProps={{
                       my:2,
@@ -1392,8 +1407,44 @@ class TrancheDetails extends Component {
                     iconProps={{
                       color:this.props.theme.colors.transactions.status.completed
                     }}
-                    text={`Your redeem amount of ${this.state.pendingNFTAmounts['available'].amount.toFixed(4)} ${this.props.tokenConfig.token} is now claimable. ${this.props.tokenConfig.messages.pendingNFTAmount}`}
+                    text={`You have successfully claimed ${this.state.claimedNFTAmount.toFixed(4)} ${this.props.tokenConfig.token}!`}
                   />
+                ) : this.state.pendingNFTAmounts && this.state.pendingNFTAmounts['available'] && this.state.pendingNFTAmounts['available'].amount.gt(0) ? (
+                  <IconBox
+                    cardProps={{
+                      my:2,
+                      width:1
+                    }}
+                    icon={'DoneAll'}
+                    iconProps={{
+                      color:this.props.theme.colors.transactions.status.completed
+                    }}
+                    text={`Your redeem NFT token (ID: ${this.state.pendingNFTAmounts['available'].tokenIds[0]}) for a total amount of <strong>${this.state.pendingNFTAmounts['available'].amount.toFixed(4)} ${this.props.tokenConfig.token}</strong> is now available for claim.`}
+                  >
+                    <ExecuteTransaction
+                      {...this.props}
+                      Component={RoundButton}
+                      parentProps={{
+                        mt:3,
+                        width:1,
+                        alignItems:'center',
+                        justifyContent:'center'
+                      }}
+                      componentProps={{
+                        buttonProps:{
+                          size:'medium',
+                          width:[1,1/3],
+                        },
+                        value:`Claim ${this.state.pendingNFTAmounts['available'].amount.toFixed(4)} ${this.props.tokenConfig.token}`
+                      }}
+                      action={'Claim NFT'}
+                      eventData={this.state.eventData}
+                      callback={this.claimNFTSucceeded.bind(this)}
+                      methodName={this.props.tokenConfig.ClaimNFT.method}
+                      contractName={this.props.tokenConfig.ClaimNFT.contract}
+                      params={[this.state.pendingNFTAmounts['available'].tokenIds[0]]}
+                    />
+                  </IconBox>
                 ) : this.state.pendingNFTAmounts && this.state.pendingNFTAmounts['pending'] && this.state.pendingNFTAmounts['pending'].amount.gt(0) && (
                   <IconBox
                     cardProps={{

@@ -376,9 +376,19 @@ const availableTranches = {
           protocol:'polido',
           apyLabel:'stMATIC APR'
         },
-        customAprFunction:'getMaticTrancheApy',
-        additionalAprFunction:'getMaticTrancheAdditionalApy',
         address:'0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0',
+        functions:{
+          getCustomApr:'getMaticTrancheApy',
+          getAdditionalApr:'getMaticTrancheAdditionalApy',
+        },
+        ClaimNFT:{
+          contract:'stMATIC',
+          method:'claimTokens',
+          event:{
+            name:'ClaimTokensEvent',
+            amountField:'_amountClaimed'
+          }
+        },
         CDO:{
           abi:IdleCDO,
           decimals:18,
