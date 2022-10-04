@@ -54,13 +54,14 @@ class TranchePage extends Component {
   loadData(){
     const componentLoaded = true;
     const transactions = this.props.portfolio ? this.props.portfolio.transactions.filter( t => t.cdo.toLowerCase() === this.props.tokenConfig.CDO.name.toLowerCase() && (!this.props.trancheType || t.tranche === this.props.trancheType) ) : [];
-    const userHasFunds = this.props.portfolio && this.props.portfolio.tranchesBalance.find( balanceInfo => balanceInfo.cdo.toLowerCase() === this.props.tokenConfig.CDO.name.toLowerCase() && (!this.props.trancheType || balanceInfo.tranche.toLowerCase() === this.props.trancheType.toLowerCase()) ) ? true : false;
+    const trancheBalanceInfo = this.props.portfolio ? this.props.portfolio.tranchesBalance.find( balanceInfo => balanceInfo.cdo.toLowerCase() === this.props.tokenConfig.CDO.name.toLowerCase() && (!this.props.trancheType || balanceInfo.tranche.toLowerCase() === this.props.trancheType.toLowerCase()) ) : null;
+    const userHasFunds = trancheBalanceInfo && trancheBalanceInfo.amountDeposited.gt(0);
 
     const stakingRewards = this.props.tokenConfig && this.props.trancheType ? this.props.tokenConfig[this.props.trancheType].CDORewards.stakingRewards : [];
     const stakingRewardsEnabled = stakingRewards.length ? stakingRewards.filter( t => t.enabled ) : null;
     const stakingEnabled = stakingRewardsEnabled && stakingRewardsEnabled.length>0;
 
-    // console.log('userHasFunds', userHasFunds, this.props.portfolio.tranchesBalance, this.props.tokenConfig.CDO.name)
+    // console.log('userHasFunds', userHasFunds, trancheBalanceInfo);
     // console.log('loadData',this.props.tokenConfig,this.props.trancheType,this.props.tokenConfig[this.props.trancheType].CDORewards,stakingRewards,stakingRewardsEnabled,stakingEnabled);
 
     this.setState({

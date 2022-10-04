@@ -207,27 +207,31 @@ class Tranches extends Component {
       const portfolioLoaded = true;
       const tranchesConfig = this.functionsUtil.getGlobalConfig(['tranches']);
 
-      portfolio.tranchesBalance.forEach( trancheInfo => {
-        if (!tranchesBalances[trancheInfo.tranche]){
-          tranchesBalances[trancheInfo.tranche] = {
+      portfolio.tranchesBalance.forEach( trancheBalanceInfo => {
+        if (!tranchesBalances[trancheBalanceInfo.tranche]){
+          tranchesBalances[trancheBalanceInfo.tranche] = {
             weight:this.functionsUtil.BNify(0),
             balance:this.functionsUtil.BNify(0)
           };
         }
         
-        tranchesBalances[trancheInfo.tranche].weight = tranchesBalances[trancheInfo.tranche].weight.plus(trancheInfo.trancheWeight);
-        tranchesBalances[trancheInfo.tranche].balance = tranchesBalances[trancheInfo.tranche].balance.plus(trancheInfo.tokenBalance);
+        tranchesBalances[trancheBalanceInfo.tranche].weight = tranchesBalances[trancheBalanceInfo.tranche].weight.plus(trancheBalanceInfo.trancheWeight);
+        tranchesBalances[trancheBalanceInfo.tranche].balance = tranchesBalances[trancheBalanceInfo.tranche].balance.plus(trancheBalanceInfo.tokenBalance);
 
-        if (!tranchesTokens[trancheInfo.token]){
-          tranchesTokens[trancheInfo.token] = this.functionsUtil.BNify(0);
+        if (!tranchesTokens[trancheBalanceInfo.token]){
+          tranchesTokens[trancheBalanceInfo.token] = this.functionsUtil.BNify(0);
         }
-        tranchesTokens[trancheInfo.token] = tranchesTokens[trancheInfo.token].plus(trancheInfo.tokenBalance);
+        tranchesTokens[trancheBalanceInfo.token] = tranchesTokens[trancheBalanceInfo.token].plus(trancheBalanceInfo.tokenBalance);
 
         // Push deposited CDO instead of token
-        depositedCdos.push(trancheInfo.cdo);
+        if (trancheBalanceInfo.amountDeposited.gt(0)){
+          depositedCdos.push(trancheBalanceInfo.cdo);
+        }
       });
 
       const depositedTokens = Object.keys(tranchesTokens);
+
+      // console.log('portfolio.tranchesBalance', portfolio.tranchesBalance, depositedTokens)
       
       Object.keys(availableTranches).forEach( protocol => {
         Object.keys(availableTranches[protocol]).forEach( token => {

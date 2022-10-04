@@ -184,10 +184,12 @@ class FundsOverviewTranche extends Component {
   }
 
   render() {
+    const gaugeConfig = this.props.tokenConfig ? this.functionsUtil.getTrancheGaugeConfig(this.props.protocol,this.props.token) : null;
     const stakingRewards = this.props.tokenConfig && this.props.trancheType ? this.props.tokenConfig[this.props.trancheType].CDORewards.stakingRewards : [];
     const stakingRewardsEnabled = stakingRewards.length ? stakingRewards.filter( t => t.enabled ) : null;
-    const stakingEnabled = stakingRewardsEnabled && stakingRewardsEnabled.length>0;
+    const stakingEnabled = (stakingRewardsEnabled && stakingRewardsEnabled.length>0) || gaugeConfig;
     const colWidth = stakingEnabled ? 1/6 : 1/5;
+
 
     return (
       <Flex

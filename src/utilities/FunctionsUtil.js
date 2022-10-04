@@ -5289,6 +5289,7 @@ class FunctionsUtil {
           this.loadTrancheFieldRaw(`tranchePrice`, fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens)
         ]);
 
+
         output = formatValue ? '-' : null;
         if (deposited1 && lastPrice) {
           output = this.BNify(deposited1).times(lastPrice);
