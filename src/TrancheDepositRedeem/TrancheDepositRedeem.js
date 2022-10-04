@@ -1419,7 +1419,7 @@ class TrancheDetails extends Component {
                     iconProps={{
                       color:this.props.theme.colors.transactions.status.completed
                     }}
-                    text={`Your redeem NFT token (ID: ${this.state.pendingNFTAmounts['available'].tokenIds[0]}) for a total amount of <strong>${this.state.pendingNFTAmounts['available'].amount.toFixed(4)} ${this.props.tokenConfig.token}</strong> is now available for claim.`}
+                    text={`Your redeem NFT (ID: ${this.state.pendingNFTAmounts['available'].tokenIds[0]}) for a total amount of <strong>${this.state.pendingNFTAmounts['available'].amount.toFixed(4)} ${this.props.tokenConfig.token}</strong> is now available for claim.`}
                   >
                     <ExecuteTransaction
                       {...this.props}
