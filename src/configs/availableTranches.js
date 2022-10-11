@@ -1586,6 +1586,91 @@ const availableTranches = {
           label:'clearpool USDC BB',
           address:'0x4D9d9AA17c3fcEA05F20a87fc1991A045561167d'
         }
+      },
+      DAI:{
+        abi:DAI,
+        token:'DAI',
+        decimals:18,
+        enabledEnvs:['beta'],
+        blockNumber:15724548,
+        protocol:'clearpool',
+        autoFarming:['CPOOL'],
+        maxUtilizationRate:0.99,
+        adaptiveYieldSplitEnabled:true,
+        address:'0x6b175474e89094c44da98b954eedeac495271d0f',
+        CDO:{
+          abi:IdleCDO,
+          decimals:18,
+          name:'IdleCDO_clearpool_DAI',
+          address:'0xDcE26B2c78609b983cF91cCcD43E238353653b0E'
+        },
+        Pool:{
+          abi:Clearpool,
+          name:'Pool_clearpool_USDC',
+          address:'0xe3D20A721522874D32548B4097d1afc6f024e45b'
+        },
+        Strategy:{
+          abi:IdleStrategy,
+          name:'IdleStrategy_clearpool_DAI',
+          address:'0xFcA6b0573034BaAca576ea2Ef675032fB8dF6Cec'
+        },
+        description:'This strategy deploys funds in the <a href="https://app.clearpool.finance/pool/0xe3D20A721522874D32548B4097d1afc6f024e45b" class="link" rel="nofollow noopener noreferrer" target="_blank">Clearpool Folkvang USDC pool</a>. The APR is dynamically adjusted according to the coverage provided to the counterpart Senior tranche thanks to the <a href="https://medium.com/idle-finance/adaptive-yield-split-foster-pyts-liquidity-scalability-a796fa17ea35" class="link" rel="nofollow noopener noreferrer" target="_blank">Adaptive Yield Split</a>.',
+        AA:{
+          abi:ERC20,
+          decimals:18,
+          tranche:'AA',
+          functions:{
+            stake:'stake',
+            unstake:'exit',
+            rewards:'earned',
+            claim:'getReward',
+            deposit:'depositAA',
+            withdraw:'withdrawAA',
+            rewardsRate:'rewardRate',
+            stakedBalance:'balanceOf',
+            utilizationRate:'getUtilizationRate'
+          },
+          CDORewards:{
+            decimals:18,
+            stakingRewards:[],
+            unstakeWithBalance:false,
+            abi:TrancheStakingRewards,
+            name:'TrancheStakingRewards_clearpool_DAI_AA',
+            address:'0x0000000000000000000000000000000000000000'
+          },
+          blockNumber:15724548,
+          name:'AA_clearpool_DAI',
+          token:'AA_clearpool_DAI',
+          label:'clearpool DAI AA',
+          address:'0x1692F6574a6758ADfbD12544e209146dD4510BD7'
+        },
+        BB:{
+          abi:ERC20,
+          decimals:18,
+          tranche:'BB',
+          functions:{
+            stake:'stake',
+            claim:'claim',
+            unstake:'unstake',
+            deposit:'depositBB',
+            withdraw:'withdrawBB',
+            stakedBalance:'usersStakes',
+            utilizationRate:'getUtilizationRate'
+          },
+          CDORewards:{
+            decimals:18,
+            stakingRewards:[],
+            unstakeWithBalance:true,
+            abi:IdleCDOTrancheRewards,
+            name:'IdleCDOTrancheRewards_clearpool_DAI_BB',
+            address:'0x0000000000000000000000000000000000000000'
+          },
+          blockNumber:15724548,
+          name:'BB_clearpool_DAI',
+          token:'BB_clearpool_DAI',
+          label:'clearpool DAI BB',
+          address:'0xCb980b5A4f5BdB81d0B4b97A9eDe64578ba9D48A'
+        }
       }
     },
     truefi:{

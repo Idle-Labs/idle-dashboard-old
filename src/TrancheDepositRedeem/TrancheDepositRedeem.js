@@ -115,6 +115,8 @@ class TrancheDetails extends Component {
       await this.functionsUtil.initContract(this.props.tokenConfig.Pool.name, this.props.tokenConfig.Pool.address, this.props.tokenConfig.Pool.abi);
     }
 
+    console.log('loadData', this.props.tokenConfig, this.props.trancheConfig, this.props.gaugeConfig);
+
     const [
       unlentAmount,
       tokenBalance,
@@ -157,7 +159,7 @@ class TrancheDetails extends Component {
     // console.log('loadData',this.props.trancheConfig.tranche,blockNumber,cdoCoolingPeriod,latestHarvestBlock,stakeCoolingPeriod,userStakeBlock,canUnstake,canWithdraw);
     // console.log('utilizationRate', this.props.trancheConfig.functions.utilizationRate, poolUtilizationRate);
 
-    const pendingNFTAmounts = pendingNFTs.reduce( (nfts, pendingNFT) => {
+    const pendingNFTAmounts = pendingNFTs ? pendingNFTs.reduce( (nfts, pendingNFT) => {
       // Just keep one available NFT to withdraw at a time
       if (pendingNFT.status === 'available' && nfts[pendingNFT.status]) return nfts;
 
@@ -175,7 +177,7 @@ class TrancheDetails extends Component {
       nfts[pendingNFT.status].tokenIds.push(pendingNFT.tokenId);
       nfts[pendingNFT.status].amount = nfts[pendingNFT.status].amount.plus(pendingNFT.amount);
       return nfts;
-    }, {});
+    }, {}) : null;
 
     const availableTranches = Object.values(this.functionsUtil.getGlobalConfig(['tranches'])).map( trancheInfo => ({
       value: trancheInfo.type,
