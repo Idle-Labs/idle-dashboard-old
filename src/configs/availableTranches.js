@@ -1614,7 +1614,7 @@ const availableTranches = {
           name:'IdleStrategy_clearpool_DAI',
           address:'0xFcA6b0573034BaAca576ea2Ef675032fB8dF6Cec'
         },
-        description:'This strategy deploys funds in the <a href="https://app.clearpool.finance/pool/0xe3D20A721522874D32548B4097d1afc6f024e45b" class="link" rel="nofollow noopener noreferrer" target="_blank">Clearpool Folkvang USDC pool</a>. The APR is dynamically adjusted according to the coverage provided to the counterpart Senior tranche thanks to the <a href="https://medium.com/idle-finance/adaptive-yield-split-foster-pyts-liquidity-scalability-a796fa17ea35" class="link" rel="nofollow noopener noreferrer" target="_blank">Adaptive Yield Split</a>.',
+        description:'This strategy converts 1:1 DAI into USDC via <a href="https://makerdao.world/en/learn/governance/module-psm/" class="link" rel="nofollow noopener noreferrer" target="_blank">Maker DAO PSM</a> and deploys USDC into <a href="https://app.clearpool.finance/pool/0xe3D20A721522874D32548B4097d1afc6f024e45b" class="link" rel="nofollow noopener noreferrer" target="_blank">Clearpool Folkvang USDC pool</a>. The APR is dynamically adjusted according to the coverage provided to the counterpart Senior tranche thanks to the <a href="https://medium.com/idle-finance/adaptive-yield-split-foster-pyts-liquidity-scalability-a796fa17ea35" class="link" rel="nofollow noopener noreferrer" target="_blank">Adaptive Yield Split</a>.',
         AA:{
           abi:ERC20,
           decimals:18,
