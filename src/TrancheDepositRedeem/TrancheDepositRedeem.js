@@ -115,7 +115,7 @@ class TrancheDetails extends Component {
       await this.functionsUtil.initContract(this.props.tokenConfig.Pool.name, this.props.tokenConfig.Pool.address, this.props.tokenConfig.Pool.abi);
     }
 
-    console.log('loadData', this.props.tokenConfig, this.props.trancheConfig, this.props.gaugeConfig);
+    // console.log('loadData', this.props.tokenConfig, this.props.trancheConfig, this.props.gaugeConfig);
 
     const [
       unlentAmount,
