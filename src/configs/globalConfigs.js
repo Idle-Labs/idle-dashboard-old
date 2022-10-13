@@ -1439,6 +1439,7 @@ const globalConfigs = {
           rgb: [130, 71, 229],
           hsl: ['262, 75%, 59%']
         },
+        conversionRateField: "maticDAIPrice",
         address: '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0'
       },
       USD: {
