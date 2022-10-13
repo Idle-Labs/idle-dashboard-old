@@ -1248,6 +1248,8 @@ class FunctionsUtil {
     const strategyConfig = tokenConfig.Strategy;
     let latestHarvestBlock = await this.genericContractCall(strategyConfig.name, 'latestHarvestBlock');
 
+    // console.log('latestHarvestBlock', tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, latestHarvestBlock)
+
     if (!latestHarvestBlock || !parseInt(latestHarvestBlock)){
       latestHarvestBlock =  'latest';
     }
@@ -1258,6 +1260,8 @@ class FunctionsUtil {
       if (transfers && transfers.length > 0) {
         harvestsList[token] = transfers;
       }
+
+      // console.log('harvestsList', tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, harvestsList)
     });
 
     return harvestsList;
@@ -5429,6 +5433,8 @@ class FunctionsUtil {
           customAprFunction ? customAprFunction(tokenConfig, trancheConfig) : (multiCallDisabled ? this.genericContractCallCachedNoMulticall(tokenConfig.CDO.name, 'getApr', [trancheConfig.address]) : this.genericContractCallCached(tokenConfig.CDO.name, 'getApr', [trancheConfig.address]))
         ]);
 
+        // console.log('rewardsTokensInfo', protocol, token, tranche, gaugeRewardsTokens, rewardsTokensInfo, protocolBaseApy, trancheApr)
+
         if (trancheApr){
           let apr = this.fixTokenDecimals(trancheApr, tokenConfig.CDO.decimals);
 
@@ -7686,20 +7692,18 @@ class FunctionsUtil {
   getMaticTrancheAdditionalApy = async (tokenConfig, trancheConfig) => {
     const [
       trancheHarvests,
-      trancheAPRSplitRatio,
       tranchePool,
+      trancheAprRatio,
     ] = await Promise.all([
       this.getTrancheHarvests(tokenConfig, trancheConfig, 1),
-      this.genericContractCall(tokenConfig.CDO.name, 'trancheAPRSplitRatio'),
-      this.loadTrancheFieldRaw('tranchePool',{}, tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, tokenConfig, trancheConfig)
+      this.loadTrancheFieldRaw('tranchePool',{}, tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, tokenConfig, trancheConfig),
+      this.loadTrancheFieldRaw('trancheAPRRatio',{}, tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, tokenConfig, trancheConfig)
     ]);
-
-    const trancheAprRatio = this.fixTokenDecimals(trancheAPRSplitRatio, 5);
 
     const additionalApys = Object.keys(trancheHarvests).reduce( (apys, token) => {
       const lastHarvest = trancheHarvests[token][0];
       const harvestTokenConfig = this.getTokenConfig(token);
-      const harvestedValue = this.fixTokenDecimals(lastHarvest.returnValues.value, harvestTokenConfig.decimals).times(trancheAprRatio);
+      const harvestedValue = this.fixTokenDecimals(lastHarvest.returnValues.value, harvestTokenConfig.decimals).times(trancheAprRatio.div(100));
       const tokenApr = harvestedValue.div(tranchePool).times(this.getGlobalConfig(['network', 'weeksPerYear']));
       const tokenApy = this.apr2apy(tokenApr);
       // console.log(token, harvestedValue.toString(), tranchePool.toString(), tokenApr.toString(), tokenApy.toString());
@@ -7707,7 +7711,7 @@ class FunctionsUtil {
       return apys;
     },{});
 
-    // console.log('getMaticTrancheAdditionalApy', trancheHarvests, trancheAPRSplitRatio, tranchePool.toString(), additionalApys);
+    // console.log('getMaticTrancheAdditionalApy', tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, trancheHarvests, trancheAprRatio.toString(), tranchePool.toString(), additionalApys);
 
     return additionalApys;
   }
