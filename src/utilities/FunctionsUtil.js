@@ -1176,7 +1176,7 @@ class FunctionsUtil {
     return null;
   }
 
-  getEtherscanTokenTransfers = async (tokenName,walletAddr,fromAddress=null,contractAddress,toAddress,fromBlock=0,toBlock='latest',sort='asc',limit=null) => {
+  getEtherscanTokenTransfers = async (tokenName,walletAddr,fromAddress=null,contractAddress,toAddress=null,fromBlock=0,toBlock='latest',sort='asc',limit=null) => {
     const requiredNetwork = this.getRequiredNetwork();
     const requiredNetworkId = requiredNetwork.id;
     const etherscanInfo = this.getGlobalConfig(['network', 'providers', requiredNetwork.explorer]);
@@ -1191,7 +1191,7 @@ class FunctionsUtil {
     const underlyingEventsConfig = this.getGlobalConfig(['events', tokenName, 'fields']) || defaultEventsConfig;
     if (etherscanTxlist && etherscanTxlist.data && etherscanTxlist.data.result && typeof etherscanTxlist.data.result.filter === 'function') {
 
-      const transferEvents = etherscanTxlist.data.result.filter(tx => ((!fromAddress || tx.from.toLowerCase() === fromAddress.toLowerCase()) && tx.to.toLowerCase() === toAddress.toLowerCase()));
+      const transferEvents = etherscanTxlist.data.result.filter(tx => ((!fromAddress || tx.from.toLowerCase() === fromAddress.toLowerCase()) && (!toAddress || tx.to.toLowerCase() === toAddress.toLowerCase())));
       
       transferEvents.forEach( tx => {
         tx.returnValues = {};
@@ -1238,13 +1238,14 @@ class FunctionsUtil {
       autoFarming
     ] = await Promise.all([
       // this.getTrancheStakingRewardsDistributions(tokenConfig,trancheConfig),
-      this.loadTrancheFieldRaw('autoFarming',{}, tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, tokenConfig,trancheConfig)
+      this.loadTrancheFieldRaw('autoFarming', {}, tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, tokenConfig, trancheConfig)
     ])
 
     const harvestsList = {}; //stakingRewardsDistributions || {};
 
     await this.loadTrancheStrategyContract(tokenConfig);
 
+    const cdoConfig = tokenConfig.CDO;
     const strategyConfig = tokenConfig.Strategy;
     let latestHarvestBlock = await this.genericContractCall(strategyConfig.name, 'latestHarvestBlock');
 
@@ -1255,13 +1256,27 @@ class FunctionsUtil {
     }
     
     await this.asyncForEach(Object.keys(autoFarming), async (token) => {
-      const transfers = await this.getEtherscanTokenTransfers(tokenConfig.token, strategyConfig.address, null, tokenConfig.address, strategyConfig.address, tokenConfig.blockNumber, latestHarvestBlock, 'desc', limit);
+      const farmTokenConfig = this.getTokenConfig(token);
+      const [
+        farmTokenTransfers_cdo,
+        farmTokenTransfers_strategy
+      ] = await Promise.all([
+        this.getEtherscanTokenTransfers(tokenConfig.token, cdoConfig.address, null, farmTokenConfig.address, null, tokenConfig.blockNumber, latestHarvestBlock, 'desc'),
+        this.getEtherscanTokenTransfers(tokenConfig.token, strategyConfig.address, null, farmTokenConfig.address, null, tokenConfig.blockNumber, latestHarvestBlock, 'desc')
+      ])
 
-      if (transfers && transfers.length > 0) {
-        harvestsList[token] = transfers;
+      const farmTokenTransfers = farmTokenTransfers_cdo.concat(farmTokenTransfers_strategy)
+
+      // console.log('transfers', token, farmTokenTransfers);
+
+      const harvests = await this.getEtherscanTokenTransfers(tokenConfig.token, strategyConfig.address, null, tokenConfig.address, strategyConfig.address, tokenConfig.blockNumber, latestHarvestBlock, 'desc');
+
+      if (harvests && harvests.length > 0) {
+        const farmTokenTransfersHash = farmTokenTransfers.map( transfer => transfer.hash.toLowerCase() );
+        harvestsList[token] = harvests.filter( harvest => farmTokenTransfersHash.includes(harvest.hash.toLowerCase()) ).splice(0, limit);
       }
 
-      // console.log('harvestsList', tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, harvestsList)
+      // console.log('harvestsList', token, tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, farmTokenTransfers, harvests, harvestsList)
     });
 
     return harvestsList;
@@ -1276,6 +1291,31 @@ class FunctionsUtil {
     return false;
   }
   getTrancheLastHarvest = async (tokenConfig,trancheConfig) => {
+
+    const trancheHarvests = await this.getTrancheHarvests(tokenConfig, trancheConfig, 1);
+
+    // console.log('trancheHarvests', trancheHarvests)
+
+    const lastHarvest = Object.keys(trancheHarvests).reduce( (lastHarvest, token) => {
+      const harvests = trancheHarvests[token];
+      harvests.forEach( harvest => {
+        if (!lastHarvest || harvest.timeStamp>lastHarvest.timestamp){
+          lastHarvest = {
+            timestamp:harvest.timeStamp,
+            transactionHash:harvest.hash,
+            blockNumber:harvest.blockNumber,
+            amount:this.BNify(harvest.returnValues.value),
+          }
+        }
+      })
+      return lastHarvest;
+    }, null);
+
+    // console.log('getTrancheLastHarvest', trancheHarvests, lastHarvest);
+
+    return lastHarvest;
+  }
+  getTrancheLastHarvest_old = async (tokenConfig,trancheConfig) => {
     const strategyConfig = tokenConfig.Strategy;
     const harvestEnabled = strategyConfig.harvestEnabled === undefined ? true : strategyConfig.harvestEnabled;
     const autoFarming = await this.loadTrancheFieldRaw('autoFarming',{},tokenConfig.protocol,tokenConfig.token,trancheConfig.tranche,tokenConfig,trancheConfig);
@@ -7702,11 +7742,12 @@ class FunctionsUtil {
 
     const additionalApys = Object.keys(trancheHarvests).reduce( (apys, token) => {
       const lastHarvest = trancheHarvests[token][0];
+      if (!lastHarvest) return apys;
       const harvestTokenConfig = this.getTokenConfig(token);
       const harvestedValue = this.fixTokenDecimals(lastHarvest.returnValues.value, harvestTokenConfig.decimals).times(trancheAprRatio.div(100));
       const tokenApr = harvestedValue.div(tranchePool).times(this.getGlobalConfig(['network', 'weeksPerYear']));
       const tokenApy = this.apr2apy(tokenApr);
-      // console.log(token, harvestedValue.toString(), tranchePool.toString(), tokenApr.toString(), tokenApy.toString());
+      // console.log('getMaticTrancheAdditionalApy', tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, token, lastHarvest, this.fixTokenDecimals(lastHarvest.returnValues.value, harvestTokenConfig.decimals).toString(), trancheAprRatio.toString(), harvestedValue.toString(), tranchePool.toString(), tokenApr.toString(), tokenApy.toString());
       apys[token] = tokenApy;
       return apys;
     },{});
