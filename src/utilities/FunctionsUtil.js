@@ -1574,7 +1574,7 @@ class FunctionsUtil {
       ] = await Promise.all([
         this.getBlockInfo(trancheTokenTransferEvent.blockNumber),
         this.convertTrancheTokenBalance(1,tokenConfig,trancheTokenTransferEvent.blockNumber),
-        this.genericContractCallCached(tokenConfig.CDO.name, 'virtualPrice', [trancheConfig.address], {}, trancheTokenTransferEvent.blockNumber)
+        this.genericContractCall(tokenConfig.CDO.name, 'virtualPrice', [trancheConfig.address], {}, trancheTokenTransferEvent.blockNumber)
       ]);
 
       blocksInfo[trancheTokenTransferEvent.blockNumber] = {
@@ -5052,7 +5052,7 @@ class FunctionsUtil {
                   trancheTokenPrice
                 ] = await Promise.all([
                   this.getTokenTotalSupply(gaugeConfig.name),
-                  this.genericContractCallCached(cdoConfig.CDO.name, 'virtualPrice', [trancheConfig.address])
+                  this.genericContractCall(cdoConfig.CDO.name, 'virtualPrice', [trancheConfig.address])
                 ]);
 
                 const tokensPerSecond = this.fixTokenDecimals(rewardData.rewardRate,18);
@@ -5266,7 +5266,7 @@ class FunctionsUtil {
         }
       break;
       case 'tranchePrice':
-        output = await this.genericContractCallCached(tokenConfig.CDO.name, 'virtualPrice', [trancheConfig.address]);
+        output = await this.genericContractCall(tokenConfig.CDO.name, 'virtualPrice', [trancheConfig.address]);
         if (output) {
           output = this.fixTokenDecimals(output, tokenConfig.decimals);
         }
