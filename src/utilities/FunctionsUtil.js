@@ -1273,7 +1273,10 @@ class FunctionsUtil {
 
       if (harvests && harvests.length > 0) {
         const farmTokenTransfersHash = farmTokenTransfers.map( transfer => transfer.hash.toLowerCase() );
-        harvestsList[token] = harvests.filter( harvest => farmTokenTransfersHash.includes(harvest.hash.toLowerCase()) ).splice(0, limit);
+        harvestsList[token] = harvests.filter( harvest => farmTokenTransfersHash.includes(harvest.hash.toLowerCase()) )
+        if (parseInt(limit)) {
+          harvestsList[token] = harvestsList[token].splice(0, limit);
+        }
       }
 
       // console.log('harvestsList', token, tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, farmTokenTransfers, harvests, harvestsList)
@@ -1290,7 +1293,7 @@ class FunctionsUtil {
     }
     return false;
   }
-  getTrancheLastHarvest = async (tokenConfig,trancheConfig) => {
+  getTrancheLastHarvest = async (tokenConfig, trancheConfig) => {
 
     const trancheHarvests = await this.getTrancheHarvests(tokenConfig, trancheConfig, 1);
 
@@ -5552,13 +5555,13 @@ class FunctionsUtil {
           this.loadTrancheFieldRaw(`earningsPerc`, fieldProps, protocol, token, tranche, tokenConfig, trancheConfig, account, addGovTokens)
         ]);
 
-        // console.log('realizedApy',earningsPerc.toString(),firstDepositTx);
+        // console.log('realizedApy', earningsPerc.toString(), firstDepositTx);
 
         if (earningsPerc && firstDepositTx) {
-          const secondsFromFirstTx = parseInt(Date.now() / 1000) - parseInt(firstDepositTx.timeStamp);
-          output = this.BNify(earningsPerc).times(31536000).div(secondsFromFirstTx);
+          const elapsedSecondsFromFirstDeposit = parseInt(Date.now() / 1000) - parseInt(firstDepositTx.timeStamp);
+          output = this.apr2apy(this.BNify(earningsPerc).times(31536000).div(elapsedSecondsFromFirstDeposit).div(100)).times(100);
 
-          // console.log('realizedApy2',firstDepositTx,earningsPerc.toString(),output.toString());
+          // console.log('realizedApy', firstDepositTx, elapsedSecondsFromFirstDeposit, earningsPerc.toString(), output.toString());
 
           if (formatValue) {
             output = output.toFixed(2) + '%';
