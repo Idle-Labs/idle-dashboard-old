@@ -5476,7 +5476,7 @@ class FunctionsUtil {
           customAprFunction ? customAprFunction(tokenConfig, trancheConfig) : (multiCallDisabled ? this.genericContractCallCachedNoMulticall(tokenConfig.CDO.name, 'getApr', [trancheConfig.address]) : this.genericContractCallCached(tokenConfig.CDO.name, 'getApr', [trancheConfig.address]))
         ]);
 
-        // console.log('rewardsTokensInfo', protocol, token, tranche, gaugeRewardsTokens, rewardsTokensInfo, protocolBaseApy, trancheApr)
+        // console.log('rewardsTokensInfo', protocol, token, tranche, customAprFunction, trancheApr)
 
         if (trancheApr){
           let apr = this.fixTokenDecimals(trancheApr, tokenConfig.CDO.decimals);
@@ -5536,7 +5536,6 @@ class FunctionsUtil {
           }
         }
 
-
         if (field === 'trancheApyWithTooltip'){
           const formattedApy = output;
           output = {
@@ -5544,6 +5543,8 @@ class FunctionsUtil {
             tokensApy,
             formattedApy
           };
+
+          // console.log(field, protocol, token, tranche, output)
         }
       break;
       case 'realizedApy':
@@ -5561,7 +5562,7 @@ class FunctionsUtil {
           const elapsedSecondsFromFirstDeposit = parseInt(Date.now() / 1000) - parseInt(firstDepositTx.timeStamp);
           output = this.apr2apy(this.BNify(earningsPerc).times(31536000).div(elapsedSecondsFromFirstDeposit).div(100)).times(100);
 
-          // console.log('realizedApy', firstDepositTx, elapsedSecondsFromFirstDeposit, earningsPerc.toString(), output.toString());
+          console.log('realizedApy', firstDepositTx, elapsedSecondsFromFirstDeposit, parseFloat(elapsedSecondsFromFirstDeposit/86400), earningsPerc.toString(), this.BNify(earningsPerc).times(31536000).div(elapsedSecondsFromFirstDeposit), output.toString());
 
           if (formatValue) {
             output = output.toFixed(2) + '%';
@@ -7751,7 +7752,7 @@ class FunctionsUtil {
       const tokenApr = harvestedValue.div(tranchePool).times(this.getGlobalConfig(['network', 'weeksPerYear']));
       const tokenApy = this.apr2apy(tokenApr);
       // console.log('getMaticTrancheAdditionalApy', tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, token, lastHarvest, this.fixTokenDecimals(lastHarvest.returnValues.value, harvestTokenConfig.decimals).toString(), trancheAprRatio.toString(), harvestedValue.toString(), tranchePool.toString(), tokenApr.toString(), tokenApy.toString());
-      apys[token] = tokenApy;
+      apys[token] = tokenApy.times(100);
       return apys;
     },{});
 
