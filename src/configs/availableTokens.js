@@ -7,6 +7,7 @@ import ERC20 from '../abis/tokens/ERC20.js';
 import fToken from '../abis/fuse/fToken.json';
 import aToken from '../abis/aave/AToken.json';
 import yToken from '../abis/dydx/yToken.json';
+import IdleCDO from '../contracts/IdleCDO.json';
 import iToken from '../abis/fulcrum/iToken.json';
 import crToken from '../abis/cream/crToken.json';
 import IdleTokenV3 from '../contracts/IdleTokenV3.json';
@@ -1709,6 +1710,20 @@ const availableTokens = {
               exchangeRate: {
                 name: 'exchangeRateStored',
                 params: []
+              }
+            },
+          },
+          {
+            abi: IdleCDO,
+            enabled: true,
+            name: 'clearpool',
+            token: 'AA_clearpool_USDC',
+            address: '0xb86264c21418aa75f7c337b1821ccb4ff4d57673',
+            decimals: 18,
+            functions: {
+              exchangeRate: {
+                name: 'virtualPrice',
+                params: ['0xb86264c21418aa75f7c337b1821ccb4ff4d57673']
               }
             },
           },

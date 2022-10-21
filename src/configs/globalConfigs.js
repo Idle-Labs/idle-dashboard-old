@@ -1858,6 +1858,7 @@ const globalConfigs = {
         legend: false,
         enabled: true,
         label: "Clearpool",
+        startTimestamp: "2022-10-10 00:00:00",
         color: {
           rgb: [95, 115, 244],
           hsl: ["232", "87%", "66%"]

@@ -1668,24 +1668,29 @@ class StatsChart extends Component {
             date
           };
 
+          const idleTokens = this.functionsUtil.fixTokenDecimals(d.idleSupply, 18);
+          const idlePrice = this.functionsUtil.fixTokenDecimals(d.idlePrice, this.props.tokenConfig.decimals);
+          const aum = idleTokens.times(idlePrice);
+
           d.protocolsData.forEach((protocolData) => {
             const protocolPaused = this.functionsUtil.BNify(protocolData.rate).eq(0);
             const foundProtocol = this.props.tokenConfig.protocols.find((p) => { return p.address.toLowerCase() === protocolData.protocolAddr.toLowerCase() });
             if (foundProtocol){
               const protocolInfo = globalConfigs.stats.protocols[foundProtocol.name];
               if (!protocolPaused){
-                let allocation = parseFloat(this.functionsUtil.fixTokenDecimals(protocolData.allocation,this.props.tokenConfig.decimals));
+                const allocation = parseFloat(this.functionsUtil.fixTokenDecimals(protocolData.allocation, this.props.tokenConfig.decimals));
                 keys[protocolInfo.label] = 1;
                 row[protocolInfo.label] = allocation;
                 row[`${protocolInfo.label}Color`] = 'hsl('+protocolInfo.color.hsl.join(',')+')';
-                // console.log(protocolInfo.label,this.functionsUtil.BNify(protocolData.allocation).toString(),this.props.tokenConfig.decimals,allocation);
-                maxChartValue = Math.max(maxChartValue,allocation);
+                maxChartValue = Math.max(maxChartValue, allocation);
+                // } else {
+                //   console.log('SKIP', date, protocolInfo.label, this.props.tokenConfig.decimals, allocation.toString(), aum.toString())
+                // }
               } else {
                 row[protocolInfo.label] = 0;
               }
             }
           });
-
 
           tempData[date] = row;
         });
@@ -2409,7 +2414,7 @@ class StatsChart extends Component {
             }
           }
 
-          const apr = this.functionsUtil.fixTokenDecimals(idleRate,18).div(100);
+          const apr = this.functionsUtil.fixTokenDecimals(idleRate, 18).div(100);
           // const apy = this.functionsUtil.apr2apy(apr);
           
           avgApy = avgApy.plus(apr.times(100));
@@ -2437,12 +2442,14 @@ class StatsChart extends Component {
             firstIdleBlock = parseInt(d.blocknumber);
           }
 
-          maxChartValue = Math.max(maxChartValue,y);
+          maxChartValue = Math.max(maxChartValue, y);
 
           const itemPos = Math.floor(itemIndex/totalItems*100);
           const blocknumber = d.blocknumber;
 
           itemIndex++;
+
+          // console.log(x, y, apy, i, d)
 
           if (apy>0){
             idleChartData.push({ x, y, apy, blocknumber, itemPos });

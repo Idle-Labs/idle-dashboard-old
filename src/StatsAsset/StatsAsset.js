@@ -340,8 +340,6 @@ class StatsAsset extends Component {
         const firstResult = apiResults[0];
         const lastResult = Object.values(apiResults).pop();
     
-        window.moment = moment;
-    
         let days = (lastResult.timestamp-firstResult.timestamp)/86400;
         if (days === 0){
           days = 1;
@@ -350,27 +348,51 @@ class StatsAsset extends Component {
         let apr = null;
         let delta = 'N/A';
     
-        const idleTokens = this.functionsUtil.fixTokenDecimals(lastResult.idleSupply,18);
-        const firstIdlePrice = this.functionsUtil.fixTokenDecimals(firstResult.idlePrice,this.props.tokenConfig.decimals);
-        const lastIdlePrice = this.functionsUtil.fixTokenDecimals(lastResult.idlePrice,this.props.tokenConfig.decimals);
+        const idleTokens = this.functionsUtil.fixTokenDecimals(lastResult.idleSupply, 18);
+        const firstIdlePrice = this.functionsUtil.fixTokenDecimals(firstResult.idlePrice, this.props.tokenConfig.decimals);
+        const lastIdlePrice = this.functionsUtil.fixTokenDecimals(lastResult.idlePrice, this.props.tokenConfig.decimals);
     
         // Calculate AUM
         let aum = idleTokens.times(lastIdlePrice);
     
         // Convert Token balance
-        aum = await this.functionsUtil.convertTokenBalance(aum,this.props.selectedToken,this.props.tokenConfig,isRisk);
+        aum = await this.functionsUtil.convertTokenBalance(aum,this.props.selectedToken, this.props.tokenConfig,isRisk);
     
         const compoundInfo = this.props.tokenConfig.protocols.filter((p) => { return p.name === 'compound' })[0];
         const firstCompoundData = compoundInfo ? firstResult.protocolsData.filter((p) => { return p.protocolAddr.toLowerCase() === compoundInfo.address.toLowerCase() })[0] : null;
         const lastCompoundData = compoundInfo ? lastResult.protocolsData.filter((p) => { return p.protocolAddr.toLowerCase() === compoundInfo.address.toLowerCase() })[0] : null;
     
         if (this.state.idleVersion === 'v4') {
+
+          // Clearpool wrong rate FIX
+          if (this.props.selectedToken === 'USDC') {
+            const clearpoolProtocolInfo = this.props.tokenConfig.protocols.find( p => p.name === 'clearpool' );
+            apiResults.forEach((d,i) => {
+              const idleTokens = this.functionsUtil.fixTokenDecimals(d.idleSupply, 18);
+              const idlePrice = this.functionsUtil.fixTokenDecimals(d.idlePrice, this.props.tokenConfig.decimals);
+              const aum = idleTokens.times(idlePrice);
+
+              if (d.blocknumber>=15697787 && d.blocknumber<=15716753){
+                const weightedApr = d.protocolsData.reduce( (apr, pData) => {
+                  if (pData.protocolAddr.toLowerCase() === clearpoolProtocolInfo.address.toLowerCase()){
+                    pData.allocation = this.functionsUtil.fixTokenDecimals(pData.allocation, 12)
+                  }
+                  const protocolRate = this.functionsUtil.fixTokenDecimals(pData.rate, 18);
+                  const protocolAllocation = this.functionsUtil.fixTokenDecimals(pData.allocation, this.props.tokenConfig.decimals);
+                  apr = apr.plus(protocolAllocation.times(protocolRate))
+
+                  return apr
+                }, this.functionsUtil.BNify(0))
+
+                d.idleRate = this.functionsUtil.normalizeTokenAmount(weightedApr.div(aum), 18)
+              }
+            })
+          }
     
           apr = apiResults.reduce( (sum,r) => {
             const idleRate = this.functionsUtil.fixTokenDecimals(r.idleRate,18);
             return this.functionsUtil.BNify(sum).plus(idleRate);
           },0);
-    
           // Calculate average
           apr = apr.div(apiResults.length);
     
@@ -956,7 +978,7 @@ class StatsAsset extends Component {
                         width={[1, this.state.idleVersion === this.state.latestVersion ? 2/3 : 1]}
                         >
                         <Flex alignItems={'flex-start'} justifyContent={'flex-start'} flexDirection={'column'} width={1}>
-                            <Heading.h4
+                          <Heading.h4
                             mb={2}
                             ml={3}
                             mt={[3,4]}
@@ -965,10 +987,10 @@ class StatsAsset extends Component {
                             textAlign={'left'}
                             color={'dark-gray'}
                             lineHeight={'initial'}
-                            >
+                          >
                             Allocations over time
-                            </Heading.h4>
-                            <StatsChart
+                          </Heading.h4>
+                          <StatsChart
                             height={350}
                             {...this.state}
                             chartMode={'ALL'}
@@ -980,9 +1002,9 @@ class StatsAsset extends Component {
                             apiResults={this.state.apiResults}
                             idleVersion={this.state.idleVersion}
                             apiResults_unfiltered={this.state.apiResults_unfiltered}
-                            />
+                          />
                         </Flex>
-                        </Flex>
+                      </Flex>
                     </Flex>
                     </DashboardCard>
     
