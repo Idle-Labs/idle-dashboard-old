@@ -7756,8 +7756,6 @@ class FunctionsUtil {
       return apys;
     },{});
 
-    // console.log('getMaticTrancheAdditionalApy', tokenConfig.protocol, tokenConfig.token, trancheConfig.tranche, trancheHarvests, trancheAprRatio.toString(), tranchePool.toString(), additionalApys);
-
     return additionalApys;
   }
 
