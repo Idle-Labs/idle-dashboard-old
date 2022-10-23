@@ -973,7 +973,7 @@ class FunctionsUtil {
   getDashboardSectionUrl = (section, env = null) => {
     const envUrl = this.getGlobalConfig(['environments', env, 'url']);
     const baseUrl = env && envUrl ? envUrl : window.location.origin;
-    return `${baseUrl}/#${this.getGlobalConfig(['dashboard', 'baseRoute'])}/${section}`;
+    return `${baseUrl}/#${this.getGlobalConfig(['dashboard', 'baseRoute'])}/${section.replace(/^\//,'')}`;
   }
   asyncTimeout = (ms) => {
     return new Promise(resolve => setTimeout(resolve, ms));

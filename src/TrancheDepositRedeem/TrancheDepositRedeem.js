@@ -1781,7 +1781,7 @@ class TrancheDetails extends Component {
                 tokenName={this.props.selectedToken}
                 isOpen={this.state.activeModal === 'share'}
                 text={`You have successfully ${this.state.modalAction} in Idle!<br />Enjoy <strong>${this.state.modalApy ? this.state.modalApy.toFixed(2) : '0.00'}% APY</strong> on your <strong>${this.props.selectedToken}</strong>!`+(this.props.gaugeConfig ? `<br />Stake your tranche tokens in the <a href="${this.functionsUtil.getDashboardSectionUrl(`gauges/${this.props.selectedToken}`)}" class="link">${this.functionsUtil.capitalize(this.props.tokenConfig.protocol)} ${this.props.selectedToken} Gauge</a> to get additional rewards!` : ``)}
-                tweet={`I'm earning ${this.state.modalApy ? this.state.modalApy.toFixed(2) : '0.00'}% APY on my ${this.props.selectedToken} with @idlefinance tranches! Go to ${this.functionsUtil.getGlobalConfig(['baseURL'])}${this.props.selectedSection.route} and start earning now from your idle tokens!`}
+                tweet={`I'm earning ${this.state.modalApy ? this.state.modalApy.toFixed(2) : '0.00'}% APY on my ${this.props.selectedToken} with @idlefinance tranches! Go to ${this.functionsUtil.getDashboardSectionUrl(this.props.selectedSection.route)} and start earning now from your idle tokens!`}
               />
               {
                 modalEnabled && (
