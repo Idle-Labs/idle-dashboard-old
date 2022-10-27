@@ -399,6 +399,9 @@ class TrancheField extends Component {
           } else if (this.state.statusBadge === 'paused'){
             badgeText = 'Deposits Paused';
             badgeColor = 'paused';
+          } else if (this.props.tokenConfig.enabledEnvs.includes('beta')) {
+            badgeText = 'Beta';
+            badgeColor = 'experimental';
           } else {
             badgeText = 'Production';
             badgeColor = 'production';
