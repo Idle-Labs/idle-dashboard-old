@@ -1430,6 +1430,18 @@ const globalConfigs = {
         },
         address: '0x66761fa41377003622aee3c7675fc7b5c1c2fac5'
       },
+      RBN: {
+        decimals: 18,
+        enabled: true,
+        label: 'RBN',
+        token: 'RBN',
+        color: {
+          hex: '#FC0A54',
+          rgb: [252, 10, 84],
+          hsl: ["342", "98%", "51%"]
+        },
+        address: '0x6123B0049F904d730dB3C36a31167D9d4121fA6B'
+      },
       MATIC: {
         decimals: 18,
         enabled: true,
@@ -1862,6 +1874,15 @@ const globalConfigs = {
         color: {
           rgb: [95, 115, 244],
           hsl: ["232", "87%", "66%"]
+        }
+      },
+      ribbon: {
+        legend: false,
+        enabled: true,
+        label: "Ribbon",
+        color: {
+          rgb: [252, 10, 84],
+          hsl: ["342", "98%", "51%"]
         }
       },
       truefi: {
