@@ -1471,7 +1471,7 @@ const globalConfigs = {
       USDCBB: {
         decimals: 6,
         token: 'USDC',
-        enabled: true,
+        enabled: false, // Stats disabled
         label: 'USDC (Junior)',
         color: {
           hex: "#2875C8",
