@@ -1468,6 +1468,18 @@ const globalConfigs = {
         address: null,
         startTimestamp: "2020-02-04"
       },
+      USDCBB: {
+        decimals: 6,
+        token: 'USDC',
+        enabled: true,
+        label: 'USDC (Junior)',
+        color: {
+          hex: "#2875C8",
+          rgb: [40, 117, 200],
+          hsl: ["211", "67%", "47%"]
+        },
+        address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      },
       USDC: {
         decimals: 6,
         token: 'USDC',

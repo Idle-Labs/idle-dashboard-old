@@ -854,6 +854,8 @@ class FunctionsUtil {
     const output = {};
     const etherscanTxs = await this.getEtherscanTxs(account, 0, 'latest', enabledTokens);
 
+    // console.log('etherscanTxs', etherscanTxs)
+
     enabledTokens.forEach(selectedToken => {
 
       output[selectedToken] = [];
@@ -1753,8 +1755,17 @@ class FunctionsUtil {
       this.genericContractCallCached(tokenConfig.idle.token, 'userAvgPrices', [account])
     ]);
 
-    if (tokenBalance && userAvgPrice) {
+    if (this.BNify(userAvgPrice).isNaN()) {
+      const tokenKey = tokenConfig.tokenKey || tokenConfig.token;
+      userAvgPrice = await this.getAvgBuyPrice([tokenKey], account);
+      userAvgPrice = userAvgPrice[tokenKey] || this.BNify(1);
+    } else {
       userAvgPrice = this.fixTokenDecimals(userAvgPrice, tokenConfig.decimals);
+    }
+
+    // console.log('getAmountDeposited', tokenConfig.idle.token, tokenBalance.toString(), userAvgPrice.toString())
+
+    if (tokenBalance) {
       const amountDeposited = tokenBalance.times(userAvgPrice);
       return this.setCachedDataWithLocalStorage(cachedDataKey, amountDeposited);
     }
@@ -9656,13 +9667,22 @@ class FunctionsUtil {
   getAvgAPYStats = async (address, isRisk, startTimestamp = null, endTimestamp = null) => {
     const apiResults = await this.getTokenApiData(address, isRisk, startTimestamp, endTimestamp, true, 7200);
     if (apiResults && apiResults.length) {
-      const apr = apiResults.reduce((sum, r) => {
+      const aprs = apiResults.reduce((sum, r, index) => {
+
+        // Fix Clearpool wrong rates (USDC)
+        if (address.toLowerCase() === '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' && r.blocknumber>=15697787 && r.blocknumber<=15716753){
+          return sum
+        }
+
         const idleRate = this.fixTokenDecimals(r.idleRate, 18);
-        return sum.plus(idleRate);
-      }, this.BNify(0));
+        sum.push(idleRate);
+        return sum
+      }, []);
+
+      // console.log('apr', apr.toString());
 
       // Calculate average
-      return apr.div(apiResults.length);
+      return aprs.reduce( (apr, v) => apr.plus(v), this.BNify(0) ).div(aprs.length);
     }
 
     return this.BNify(0);

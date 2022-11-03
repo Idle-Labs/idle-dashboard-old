@@ -97,7 +97,7 @@ class AssetField extends Component {
     const addGovTokens = typeof this.props.addGovTokens !== 'undefined' ? this.props.addGovTokens : true;
     // const addCurveApy = typeof this.props.addCurveApy !== 'undefined' ? this.props.addCurveApy : false;
     const decimals = fieldProps && fieldProps.decimals ? fieldProps.decimals : ( this.props.isMobile ? 2 : 3 );
-    const tokenConfigStats = this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.token.toUpperCase()]);
+    const tokenConfigStats = this.functionsUtil.getTokenConfig(this.props.tokenConfig.token);
 
     let output = null;
     if (this.props.token){
@@ -499,7 +499,7 @@ class AssetField extends Component {
           const cachedData = this.functionsUtil.getCachedData(cachedDataKey);
 
           aprChartData = [{
-            id:this.props.token,
+            id: this.props.token,
             color: this.props.color ? this.props.color : 'hsl('+tokenConfigStats.color.hsl.join(',')+')',
             data: []
           }];
@@ -835,14 +835,14 @@ class AssetField extends Component {
       fieldProps.color = 'primary';
     }
 
-    const tokenConfigStats = this.props.token ? this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.token.toUpperCase()]) : null;
+    const tokenConfigStats = this.props.token ? this.functionsUtil.getTokenConfig(this.props.token) : null;
     const tokenConfig = this.props.tokenConfig || tokenConfigStats;
       
     const maxPrecision = fieldProps && fieldProps.maxPrecision ? fieldProps.maxPrecision : 5;
     const decimals = fieldProps && fieldProps.decimals ? fieldProps.decimals : ( this.props.isMobile ? 2 : 3 );
     const minPrecision = fieldProps && fieldProps.minPrecision ? fieldProps.minPrecision : ( this.props.isMobile ? 3 : 4 );
 
-    const tokenIcon = tokenConfigStats && tokenConfigStats.icon ? tokenConfigStats.icon : (tokenConfig && tokenConfig.icon ? tokenConfig.icon : `images/tokens/${this.props.token}.svg`);
+    const tokenIcon = tokenConfigStats && tokenConfigStats.icon ? tokenConfigStats.icon : (tokenConfig && tokenConfig.icon ? tokenConfig.icon : `images/tokens/${(this.props.tokenConfig ? this.props.tokenConfig.token : this.props.token)}.svg`);
 
     switch (fieldInfo.name){
       case 'iconTooltip':
@@ -862,7 +862,7 @@ class AssetField extends Component {
         );
       break;
       case 'tokenName':
-        const tokenName = tokenConfigStats && tokenConfigStats.label ? tokenConfigStats.label : this.props.token;
+        const tokenName = tokenConfigStats && tokenConfigStats.label ? tokenConfigStats.label : (this.props.tokenConfig ? this.props.tokenConfig.token : this.props.token);
         output = (
           <Text {...fieldProps}>{tokenName}</Text>
         );

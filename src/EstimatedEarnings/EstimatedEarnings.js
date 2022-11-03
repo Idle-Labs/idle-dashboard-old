@@ -61,42 +61,46 @@ class EstimatedEarnings extends Component {
     const amount6Months = parseFloat(earningsYear.div(2));
     const amountYear = parseFloat(earningsYear.div(1));
 
+    const tokenConfig = this.functionsUtil.getTokenConfig(this.props.tokenConfig.token);
+    const color = tokenConfig ? tokenConfig.color.rgb.join(',') : '95, 115, 244';
+    const hslColor = tokenConfig ? `hsl(${tokenConfig.color.hsl.join(',')})` : "hsl(232, 87%, 66%)";
+
     const chartData = [
       {
         perc:1/12,
         label:'MONTH',
         value:amountMonth,
         month:amountMonth,
-        color:this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken.toUpperCase(),'color','rgb']).join(','),
-        monthColor:'hsl('+this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken.toUpperCase(),'color','hsl']).join(',')+')',
+        color,
+        monthColor: hslColor,
       },
       {
         perc:3/12,
         label:'3 MONTHS',
         value:amount3Months,
         month3:amount3Months,
-        color:this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken.toUpperCase(),'color','rgb']).join(','),
-        month3Color:'hsl('+this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken.toUpperCase(),'color','hsl']).join(',')+')',
+        color,
+        month3Color: hslColor,
       },
       {
         perc:6/12,
         label:'6 MONTHS',
         value:amount6Months,
         month6:amount6Months,
-        color:this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken.toUpperCase(),'color','rgb']).join(','),
-        month6Color:'hsl('+this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken.toUpperCase(),'color','hsl']).join(',')+')',
+        color,
+        month6Color: hslColor,
       },
       {
         perc:1,
         label:'YEAR',
         year:amountYear,
         value:amountYear,
-        color:this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken.toUpperCase(),'color','rgb']).join(','),
-        yearColor:'hsl('+this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken.toUpperCase(),'color','hsl']).join(',')+')',
+        color:color,
+        yearColor: hslColor,
       }
     ];
 
-    let labelTextColorModifiers = this.functionsUtil.getGlobalConfig(['stats','tokens',this.props.selectedToken.toUpperCase(),'chart','labelTextColorModifiers']);
+    let labelTextColorModifiers = tokenConfig ? this.functionsUtil.getArrayPath(['chart','labelTextColorModifiers'], tokenConfig) : null
 
     const maxGridLines = 4;
     const gridYStep = amountYear/maxGridLines;

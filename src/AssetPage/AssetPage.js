@@ -142,7 +142,10 @@ class AssetPage extends Component {
   render() {
 
     const currentNetwork = this.functionsUtil.getRequiredNetwork();
+    const tokenConfig = this.functionsUtil.getTokenConfig(this.props.selectedToken)
     const nexusMutualConfig = this.functionsUtil.getGlobalConfig(['tools','nexusMutual']);
+
+    const tokenLabel = tokenConfig ? tokenConfig.label || tokenConfig.token : this.props.selectedToken;
 
     return (
       <Box
@@ -161,7 +164,7 @@ class AssetPage extends Component {
             <Breadcrumb
               {...this.props}
               isMobile={this.props.isMobile}
-              path={[this.props.selectedToken]}
+              path={[tokenLabel]}
               handleClick={ e => this.props.goToSection(this.props.selectedStrategy) }
               text={this.functionsUtil.getGlobalConfig(['strategies',this.props.selectedStrategy,'title'])}
             />

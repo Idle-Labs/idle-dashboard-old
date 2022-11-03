@@ -1636,6 +1636,52 @@ const availableTokens = {
           }
         ]
       },
+      USDCBB: {
+        abi: USDC,
+        decimals: 6,
+        token: 'USDC',
+        enabled: true,
+        tokenKey: 'USDCBB',
+        enabledEnvs: ['beta'],
+        govTokensDisabled: true,
+        color: 'hsl(211, 67%, 47%)',
+        address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+        idle: {
+          abi: IdleTokenV4,
+          token: 'idleUSDCYieldBB',
+          address: '0x1440469fba56ea663de7c29bbe8bca7ad5158647',
+        },
+        protocols: [
+          {
+            abi: IdleCDO,
+            enabled: true,
+            name: 'clearpool',
+            token: 'BB_clearpool_USDC',
+            address: '0x4D9d9AA17c3fcEA05F20a87fc1991A045561167d',
+            decimals: 18,
+            functions: {
+              exchangeRate: {
+                name: 'virtualPrice',
+                params: ['0x4D9d9AA17c3fcEA05F20a87fc1991A045561167d']
+              }
+            },
+          },
+          {
+            abi: IdleCDO,
+            enabled: true,
+            name: 'ribbon',
+            token: 'BB_ribbon_USDC',
+            address: '0x982E46e81E99fbBa3Fb8Af031A7ee8dF9041bb0C',
+            decimals: 18,
+            functions: {
+              exchangeRate: {
+                name: 'virtualPrice',
+                params: ['0x982E46e81E99fbBa3Fb8Af031A7ee8dF9041bb0C']
+              }
+            },
+          },
+        ]
+      },
       USDC: {
         abi: USDC,
         decimals: 6,

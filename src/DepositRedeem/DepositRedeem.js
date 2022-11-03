@@ -3163,7 +3163,7 @@ class DepositRedeem extends Component {
                 {...this.props}
                 showInline={true}
                 availableMethods={[]}
-                buyToken={this.props.selectedToken}
+                buyToken={this.props.tokenConfig.token}
               />
             </Flex>
           ) : showPolygonBridge && (

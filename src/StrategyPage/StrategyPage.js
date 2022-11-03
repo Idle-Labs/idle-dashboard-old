@@ -125,6 +125,8 @@ class StrategyPage extends Component {
         this.functionsUtil.getAccountPortfolio(availableTokens,this.props.account),
       ]);
 
+      // console.log('portfolio', portfolio)
+
       newState.portfolio = portfolio;
 
       newState.batchedDeposits = batchedDeposits && Object.keys(batchedDeposits).length>0 ? batchedDeposits : null;

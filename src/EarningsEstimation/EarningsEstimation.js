@@ -253,9 +253,10 @@ class EarningsEstimation extends Component {
           </Flex>
         </Flex>
         {
-          Object.keys(this.state.tokensEarnings).map((token,tokenIndex) => {
-            const tokenConfig = this.props.availableTokens[token];
-            const tokenEarnings = this.state.tokensEarnings[token];
+          Object.keys(this.state.tokensEarnings).map((tokenKey,tokenIndex) => {
+            const tokenConfig = this.props.availableTokens[tokenKey];
+            const tokenEarnings = this.state.tokensEarnings[tokenKey];
+            const token = tokenConfig ? tokenConfig.token : tokenKey;
             const estimationStepPerc = this.functionsUtil.BNify(Object.values(estimationSteps).pop().perc);
             const finalEarnings = tokenEarnings.earningsYear.times(estimationStepPerc);
             const cursorPerc = finalEarnings.gt(0) ? Math.min(1,parseFloat(tokenEarnings.earnings.div(finalEarnings))) : 1;
@@ -264,9 +265,9 @@ class EarningsEstimation extends Component {
             // console.log(tokenEarnings.earnings.toFixed(10),tokenEarnings.earningsYear.toFixed(10),finalEarnings.toFixed(10),cursorPerc.toFixed(10),estimationStepPerc.toFixed(10));
             return (
               <Flex
-                id={`asset-${token}`}
+                id={`asset-${tokenKey}`}
                 flexDirection={'row'}
-                key={`asset-${token}`}
+                key={`asset-${tokenKey}`}
                 borderTop={ token === 'USD' ? `1px solid ${this.props.theme.colors.divider}` : null }
               >
                 <Flex
@@ -295,7 +296,7 @@ class EarningsEstimation extends Component {
                           const estimationStep = estimationSteps[label];
                           const estimationStepEarnings = tokenEarnings.earningsYear.times(this.functionsUtil.BNify(estimationStep.perc));
                           let estimationStepEarningsFormatted = this.functionsUtil.formatMoney(estimationStepEarnings,this.props.isMobile ? 2 : estimationStepEarnings.lt(1) ? 3 : 2);
-                          const conversionRateField = this.functionsUtil.getGlobalConfig(['stats','tokens',token.toUpperCase(),'conversionRateField']);
+                          const conversionRateField = this.functionsUtil.getGlobalConfig(['stats','tokens', token.toUpperCase(),'conversionRateField']);
                           if (conversionRateField){
                             estimationStepEarningsFormatted = '$ '+estimationStepEarningsFormatted;
                           }
@@ -305,7 +306,7 @@ class EarningsEstimation extends Component {
                               justifyContent={'flex-end'}
                               width={estimationStep.width}
                               pt={ token === 'USD' ? 2 : null }
-                              key={`asset-estimate-${token}-${estimateIndex}`}
+                              key={`asset-estimate-${tokenKey}-${estimateIndex}`}
                               borderRight={`1px solid ${this.props.theme.colors.divider}`}
                             >
                               {
