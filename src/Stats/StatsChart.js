@@ -1668,9 +1668,9 @@ class StatsChart extends Component {
             date
           };
 
-          const idleTokens = this.functionsUtil.fixTokenDecimals(d.idleSupply, 18);
-          const idlePrice = this.functionsUtil.fixTokenDecimals(d.idlePrice, this.props.tokenConfig.decimals);
-          const aum = idleTokens.times(idlePrice);
+          // const idleTokens = this.functionsUtil.fixTokenDecimals(d.idleSupply, 18);
+          // const idlePrice = this.functionsUtil.fixTokenDecimals(d.idlePrice, this.props.tokenConfig.decimals);
+          // const aum = idleTokens.times(idlePrice);
 
           d.protocolsData.forEach((protocolData) => {
             const protocolPaused = this.functionsUtil.BNify(protocolData.rate).eq(0);
