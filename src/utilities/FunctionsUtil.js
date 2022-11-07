@@ -5573,7 +5573,7 @@ class FunctionsUtil {
           const elapsedSecondsFromFirstDeposit = parseInt(Date.now() / 1000) - parseInt(firstDepositTx.timeStamp);
           output = this.apr2apy(this.BNify(earningsPerc).times(31536000).div(elapsedSecondsFromFirstDeposit).div(100)).times(100);
 
-          console.log('realizedApy', firstDepositTx, elapsedSecondsFromFirstDeposit, parseFloat(elapsedSecondsFromFirstDeposit/86400), earningsPerc.toString(), this.BNify(earningsPerc).times(31536000).div(elapsedSecondsFromFirstDeposit), output.toString());
+          // console.log('realizedApy', firstDepositTx, elapsedSecondsFromFirstDeposit, parseFloat(elapsedSecondsFromFirstDeposit/86400), earningsPerc.toString(), this.BNify(earningsPerc).times(31536000).div(elapsedSecondsFromFirstDeposit), output.toString());
 
           if (formatValue) {
             output = output.toFixed(2) + '%';

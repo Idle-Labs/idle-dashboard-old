@@ -1648,8 +1648,8 @@ const availableTokens = {
         address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
         idle: {
           abi: IdleTokenV4,
-          token: 'idleUSDCYieldBB',
-          address: '0x1440469fba56ea663de7c29bbe8bca7ad5158647',
+          token: 'idleUSDBB',
+          address: '0xf6954b03d6a94ba9e8c80cbe5824f22a401ee5d2',
         },
         protocols: [
           {
