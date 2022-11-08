@@ -1668,6 +1668,7 @@ class FunctionsUtil {
         hash: trancheTokenTransferEvent.transactionHash,
         timeStamp: blockInfo ? blockInfo.timestamp : null,
         blockNumber: trancheTokenTransferEvent.blockNumber,
+        tokenKey: tokenConfig.tokenKey || tokenConfig.token
       };
 
       const tokenAmountConverted = this.BNify(tokenAmount).times(blocksInfo[trancheTokenTransferEvent.blockNumber].tokenConversionRate);

@@ -73,7 +73,7 @@ class PortfolioEquityTranches extends Component {
     let tokensBalance = {};
     let firstTxTimestamp = null;
 
-    await this.functionsUtil.asyncForEach(enabledTokens,async (selectedToken) => {
+    await this.functionsUtil.asyncForEach(enabledTokens, async (selectedToken) => {
 
       tokensBalance[selectedToken] = [];
 
@@ -115,6 +115,7 @@ class PortfolioEquityTranches extends Component {
           const balance = amountLent;
           const tranche = tx.tranche;
           const protocol = tx.protocol;
+          const tokenKey = tx.tokenKey;
           const blockNumber = tx.blockNumber;
           const tranchePrice = this.functionsUtil.BNify(tx.tranchePrice);
           const trancheTokens = this.functionsUtil.BNify(tx.trancheTokens);
@@ -124,6 +125,7 @@ class PortfolioEquityTranches extends Component {
               balance,
               tranche,
               protocol,
+              tokenKey,
               timeStamp,
               tokenAmount,
               blockNumber,
@@ -188,12 +190,12 @@ class PortfolioEquityTranches extends Component {
         const firstTokenTx = tokensBalance[token][0];
         const firstAATokenTx = tokensBalance[token].find( tx => tx.tranche==='AA' ) || null;
         const firstBBTokenTx = tokensBalance[token].find( tx => tx.tranche==='BB' ) || null;
-        const tokenDecimals = this.functionsUtil.getGlobalConfig(['stats','tokens',token.toUpperCase(),'decimals']);
+        const tokenDecimals = this.functionsUtil.getGlobalConfig(['stats','tokens', token.toUpperCase(), 'decimals']);
 
         // const firstBlockNumber = firstTokenTx.blockNumber;
 
         const conversionRateField = this.functionsUtil.getTokenConversionRateField(token);
-        const tokenConfig = this.props.availableTranches[tokenBalanceConfig.protocol.toLowerCase()][token];
+        const tokenConfig = this.props.availableTranches[tokenBalanceConfig.protocol.toLowerCase()][tokenBalanceConfig.tokenKey];
 
         const [
           lastConversionRate,

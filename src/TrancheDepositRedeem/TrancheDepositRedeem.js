@@ -8,12 +8,12 @@ import RoundButton from '../RoundButton/RoundButton';
 import FunctionsUtil from '../utilities/FunctionsUtil';
 // import BuyModal from '../utilities/components/BuyModal';
 import TrancheField from '../TrancheField/TrancheField';
-import { Flex, Text, Image, Box, Icon } from "rimble-ui";
 import DashboardCard from '../DashboardCard/DashboardCard';
 import ShareModal from '../utilities/components/ShareModal';
 import CardIconButton from '../CardIconButton/CardIconButton';
 import GenericModal from '../utilities/components/GenericModal';
 import GenericSelector from '../GenericSelector/GenericSelector';
+import { Flex, Text, Image, Box, Icon, Checkbox } from "rimble-ui";
 import SendTxWithBalance from '../SendTxWithBalance/SendTxWithBalance';
 import LimitReachedModal from '../utilities/components/LimitReachedModal';
 import ExecuteTransaction from '../ExecuteTransaction/ExecuteTransaction';
@@ -61,7 +61,8 @@ class TrancheDetails extends Component {
     selectedTrancheOption:null,
     selectedStakeAction:'stake',
     userHasAvailableFunds:false,
-    maxPoolUtilizationRateReached:null
+    maxPoolUtilizationRateReached:null,
+    acceptMaxPoolUtilizationRateReached:false
   }
 
   // Utils
@@ -207,6 +208,8 @@ class TrancheDetails extends Component {
 
     const maxPoolUtilizationRateReached = this.props.tokenConfig.maxUtilizationRate && !this.functionsUtil.BNify(poolUtilizationRate).isNaN() && this.functionsUtil.fixTokenDecimals(poolUtilizationRate, 18).gte(this.props.tokenConfig.maxUtilizationRate);
 
+    // console.log('maxPoolUtilizationRateReached', maxPoolUtilizationRateReached, poolUtilizationRate)
+
     this.setState({
       trancheAPY,
       trancheFee,
@@ -260,7 +263,7 @@ class TrancheDetails extends Component {
         approveEnabled = true;
         contractInfo = this.props.cdoConfig;
         tokenConfig = this.props.tokenConfig;
-        balanceProp = this.state.tokenBalance;
+        balanceProp = this.state.tokenBalance; //.plus(10);
 
         // Set data for ga custom event
         eventData.eventCategory = 'Deposit';
@@ -463,6 +466,12 @@ class TrancheDetails extends Component {
     return true;
   }
 
+  toggleAcceptMaxPoolUtilizationRate = (acceptMaxPoolUtilizationRateReached) => {
+    this.setState({
+      acceptMaxPoolUtilizationRateReached
+    })
+  }
+
   claimNFTSucceeded(tx){
     const eventConfig = this.props.tokenConfig.ClaimNFT.event;
 
@@ -543,11 +552,16 @@ class TrancheDetails extends Component {
 
     const unlentAmount = this.state.unlentAmount || this.functionsUtil.BNify(0);
 
-    let maxPoolUtilizationRateReachedText = `This pool has reached the maximum utilization rate (${(this.props.tokenConfig.maxUtilizationRate*100).toFixed(0)}%), `;
-    if (unlentAmount.gt(0)){
-      maxPoolUtilizationRateReachedText = maxPoolUtilizationRateReachedText.concat(`you can withdraw up to ${unlentAmount.toFixed(4)} ${this.props.tokenConfig.token}`);
-    } else {
-      maxPoolUtilizationRateReachedText = maxPoolUtilizationRateReachedText.concat(`therefore ${this.state.selectedAction}s are temporarily unavailable.`);
+    let maxPoolUtilizationRateReachedText = `This pool has reached the maximum utilization rate (${(this.props.tokenConfig.maxUtilizationRate*100).toFixed(0)}%).`;
+
+    if (isDeposit) {
+        maxPoolUtilizationRateReachedText = maxPoolUtilizationRateReachedText.concat(`<br />Check the flag to deposit at your own risk.`);
+    } else if (isWithdraw) {
+      if (unlentAmount.gt(0)){
+        maxPoolUtilizationRateReachedText = maxPoolUtilizationRateReachedText.concat(`<br />Withdrawals are available up to ${unlentAmount.toFixed(4)} ${this.props.tokenConfig.token}.`);
+      } else {
+        maxPoolUtilizationRateReachedText = maxPoolUtilizationRateReachedText.concat(`<br />Withdrawals are temporarily suspended.`);
+      }
     }
 
     const withdrawEnabled = ((this.props.trancheConfig.tranche === 'AA' && this.state.allowAAWithdraw) || (this.props.trancheConfig.tranche === 'BB' && this.state.allowBBWithdraw));
@@ -1503,14 +1517,26 @@ class TrancheDetails extends Component {
                 )
               }
               {
-                this.state.maxPoolUtilizationRateReached && unlentAmount.gt(0) && (
+                this.state.maxPoolUtilizationRateReached && (
                   <IconBox
                     cardProps={{
-                      mt: 2
+                      my: 2
                     }}
                     icon={'Warning'}
                     text={maxPoolUtilizationRateReachedText}
-                  />
+                  >
+                    {
+                      this.state.selectedAction === 'deposit' && (
+                        <Checkbox
+                          mt={2}
+                          required={false}
+                          checked={this.state.acceptMaxPoolUtilizationRateReached}
+                          onChange={e => this.toggleAcceptMaxPoolUtilizationRate(e.target.checked)}
+                          label={`Enable deposits in warning mode`}
+                        />
+                      )
+                    }
+                  </IconBox>
                 )
               }
               <Flex
@@ -1528,15 +1554,19 @@ class TrancheDetails extends Component {
                       icon={'Warning'}
                       text={`Deposits${!withdrawEnabled ? '/Withdraws' : '' } for this tranche are temporarily suspended due to Smart-Contract maintenance.${withdrawEnabled && ' Withdrawals remain enabled.'}`}
                     />
-                  ) : this.state.maxPoolUtilizationRateReached && (this.state.selectedAction !== 'withdraw' || unlentAmount.lte(0)) ? (
+                  ) : this.state.maxPoolUtilizationRateReached && ((this.state.selectedAction === 'deposit' && !this.state.acceptMaxPoolUtilizationRateReached) || (this.state.selectedAction === 'withdraw' && unlentAmount.lte(0))) ?
+                    null
+                  :
+                  /* : this.state.maxPoolUtilizationRateReached && ((this.state.selectedAction === 'deposit' && !this.state.acceptMaxPoolUtilizationRateReached) || (this.state.selectedAction === 'withdraw' && unlentAmount.lte(0))) ? (
                     <IconBox
                       cardProps={{
                         mt: 2
                       }}
-                      icon={'Warning'}
-                      text={maxPoolUtilizationRateReachedText}
+                      icon={'InfoOutline'}
+                      text={this.state.selectedAction === 'deposit' ? 'Flag the checkbox to deposit while the maximum pool utilization rate is reached' : 'Withdrawals are temporarily unavailable due to maximum pool utilization rate has been reached.'}
                     />
-                  ) : isDisabled && (isDeposit || (isStake && this.state.selectedStakeAction === 'stake')) ? (
+                  )*/
+                  isDisabled && (isDeposit || (isStake && this.state.selectedStakeAction === 'stake')) ? (
                     <IconBox
                       cardProps={{
                         mt: 2

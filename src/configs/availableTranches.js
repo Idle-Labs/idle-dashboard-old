@@ -1504,13 +1504,15 @@ const availableTranches = {
       }
     },
     clearpool:{
-      USDC:{
+      USDCWin:{
         abi:USDC,
         decimals:6,
         token:'USDC',
         enabledEnvs:[],
-        blockNumber:15044679,
+        tokenKey:'USDCWin',
+        lender:'wintermute',
         protocol:'clearpool',
+        blockNumber:15044679,
         autoFarming:['CPOOL'],
         maxUtilizationRate:0.99,
         adaptiveYieldSplitEnabled:true,
@@ -1518,17 +1520,17 @@ const availableTranches = {
         CDO:{
           abi:IdleCDO,
           decimals:18,
-          name:'IdleCDO_clearpool_USDC',
+          name:'IdleCDO_clearpool_wintermute_USDC',
           address:'0xDBCEE5AE2E9DAf0F5d93473e08780C9f45DfEb93'
         },
         Pool:{
           abi:Clearpool,
-          name:'Pool_clearpool_USDC',
+          name:'Pool_clearpool_wintermute_USDC',
           address:'0xcb288b6d30738db7e3998159d192615769794b5b'
         },
         Strategy:{
           abi:IdleStrategy,
-          name:'IdleStrategy_clearpool_USDC',
+          name:'IdleStrategy_clearpool_wintermute_USDC',
           address:'0x54ae90be2dee0a960953c724839541e75bb1f471'
         },
         description:'This strategy deploys funds in the <a href="https://app.clearpool.finance/pool/0xCb288b6d30738db7E3998159d192615769794B5b" class="link" rel="nofollow noopener noreferrer" target="_blank">Clearpool Wintermute USDC pool</a>. The APR is dynamically adjusted according to the coverage provided to the counterpart Senior tranche thanks to the <a href="https://medium.com/idle-finance/adaptive-yield-split-foster-pyts-liquidity-scalability-a796fa17ea35" class="link" rel="nofollow noopener noreferrer" target="_blank">Adaptive Yield Split</a>.',
@@ -1552,13 +1554,13 @@ const availableTranches = {
             stakingRewards:[],
             unstakeWithBalance:false,
             abi:TrancheStakingRewards,
-            name:'TrancheStakingRewards_clearpool_USDC_AA',
+            name:'TrancheStakingRewards_clearpool_wintermute_USDC_AA',
             address:'0x0000000000000000000000000000000000000000'
           },
           blockNumber:15044679,
-          name:'AA_clearpool_USDC',
-          token:'AA_clearpool_USDC',
-          label:'clearpool USDC AA',
+          name:'AA_clearpool_wintermute_USDC',
+          token:'AA_clearpool_wintermute_USDC',
+          label:'clearpool Wintermute USDC AA',
           address:'0xb86264c21418aA75F7c337B1821CcB4Ff4d57673'
         },
         BB:{
@@ -1579,14 +1581,101 @@ const availableTranches = {
             stakingRewards:[],
             unstakeWithBalance:true,
             abi:IdleCDOTrancheRewards,
-            name:'IdleCDOTrancheRewards_clearpool_USDC_BB',
+            name:'IdleCDOTrancheRewards_clearpool_wintermute_USDC_BB',
             address:'0x0000000000000000000000000000000000000000'
           },
           blockNumber:15044679,
-          name:'BB_clearpool_USDC',
-          token:'BB_clearpool_USDC',
-          label:'clearpool USDC BB',
+          name:'BB_clearpool_wintermute_USDC',
+          token:'BB_clearpool_wintermute_USDC',
+          label:'clearpool Wintermute USDC BB',
           address:'0x4D9d9AA17c3fcEA05F20a87fc1991A045561167d'
+        }
+      },
+      USDCFolk:{
+        abi:USDC,
+        decimals:6,
+        token:'USDC',
+        lender:'folkvang',
+        tokenKey: 'USDCFolk',
+        protocol:'clearpool',
+        enabledEnvs:['beta'],
+        blockNumber:15924815,
+        autoFarming:['CPOOL'],
+        maxUtilizationRate:0.99,
+        adaptiveYieldSplitEnabled:true,
+        address:'0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+        CDO:{
+          abi:IdleCDO,
+          decimals:18,
+          name:'IdleCDO_clearpool_folkvang_USDC',
+          address:'0xDBd47989647Aa73f4A88B51f2B5Ff4054De1276a'
+        },
+        Pool:{
+          abi:Clearpool,
+          name:'Pool_clearpool_folkvang_USDC',
+          address:'0xe3d20a721522874d32548b4097d1afc6f024e45b'
+        },
+        Strategy:{
+          abi:IdleStrategy,
+          name:'IdleStrategy_clearpool_folkvang_USDC',
+          address:'0x84B2dEaF87A398F25ec5833000F72B6a4906b5AC'
+        },
+        description:'This strategy deploys funds in the <a href="https://app.clearpool.finance/pool/0xe3d20a721522874d32548b4097d1afc6f024e45b" class="link" rel="nofollow noopener noreferrer" target="_blank">Clearpool Folkvang USDC pool</a>. The APR is dynamically adjusted according to the coverage provided to the counterpart Senior tranche thanks to the <a href="https://medium.com/idle-finance/adaptive-yield-split-foster-pyts-liquidity-scalability-a796fa17ea35" class="link" rel="nofollow noopener noreferrer" target="_blank">Adaptive Yield Split</a>.',
+        AA:{
+          abi:ERC20,
+          decimals:18,
+          tranche:'AA',
+          functions:{
+            stake:'stake',
+            unstake:'exit',
+            rewards:'earned',
+            claim:'getReward',
+            deposit:'depositAA',
+            withdraw:'withdrawAA',
+            rewardsRate:'rewardRate',
+            stakedBalance:'balanceOf',
+            utilizationRate:'getUtilizationRate'
+          },
+          CDORewards:{
+            decimals:18,
+            stakingRewards:[],
+            unstakeWithBalance:false,
+            abi:TrancheStakingRewards,
+            address:'0x0000000000000000000000000000000000000000',
+            name:'TrancheStakingRewards_clearpool_folkvang_USDC_AA',
+          },
+          blockNumber:15924815,
+          label:'clearpool USDC AA',
+          name:'AA_clearpool_folkvang_USDC',
+          token:'AA_clearpool_folkvang_USDC',
+          address:'0xa0154A44C1C45bD007743FA622fd0Da4f6d67D57'
+        },
+        BB:{
+          abi:ERC20,
+          decimals:18,
+          tranche:'BB',
+          functions:{
+            stake:'stake',
+            claim:'claim',
+            unstake:'unstake',
+            deposit:'depositBB',
+            withdraw:'withdrawBB',
+            stakedBalance:'usersStakes',
+            utilizationRate:'getUtilizationRate'
+          },
+          CDORewards:{
+            decimals:18,
+            stakingRewards:[],
+            unstakeWithBalance:true,
+            abi:IdleCDOTrancheRewards,
+            name:'IdleCDOTrancheRewards_clearpool_folkvang_USDC_BB',
+            address:'0x0000000000000000000000000000000000000000'
+          },
+          blockNumber:15924815,
+          label:'clearpool USDC BB',
+          name:'BB_clearpool_folkvang_USDC',
+          token:'BB_clearpool_folkvang_USDC',
+          address:'0x7a625a2882C9Fc8DF1463d5E538a3F39B5DBD073'
         }
       },
       DAI:{
@@ -1676,13 +1765,15 @@ const availableTranches = {
       }
     },
     ribbon:{
-      USDC:{
+      USDCFolk:{
         abi:USDC,
         decimals:6,
         token:'USDC',
+        lender:'folkvang',
         protocol:'ribbon',
         autoFarming:['RBN'],
         enabledEnvs:['beta'],
+        tokenKey: 'USDCFolk',
         blockNumber:15831531,
         maxUtilizationRate:0.99,
         adaptiveYieldSplitEnabled:true,
@@ -1690,17 +1781,17 @@ const availableTranches = {
         CDO:{
           abi:IdleCDO,
           decimals:18,
-          name:'IdleCDO_ribbon_USDC',
+          name:'IdleCDO_ribbon_folkvang_USDC',
           address:'0x4bC5E595d2e0536Ea989a7a9741e9EB5c3CAea33'
         },
         Pool:{
           abi:RibbonPool,
-          name:'Pool_ribbon_USDC',
+          name:'Pool_ribbon_folkvang_USDC',
           address:'0x3cd0ecf1552d135b8da61c7f44cefe93485c616d'
         },
         Strategy:{
           abi:IdleStrategy,
-          name:'IdleStrategy_ribbon_USDC',
+          name:'IdleStrategy_ribbon_folkvang_USDC',
           address:'0x25e7337037817DD9Bddd0334Ca1591f370518893'
         },
         description:'This strategy deploys funds in the <a href="https://lend.ribbon.finance/app/pool/folkvang" class="link" rel="nofollow noopener noreferrer" target="_blank">Ribbon Folkvang USDC pool</a>. The APR is dynamically adjusted according to the coverage provided to the counterpart Senior tranche thanks to the <a href="https://medium.com/idle-finance/adaptive-yield-split-foster-pyts-liquidity-scalability-a796fa17ea35" class="link" rel="nofollow noopener noreferrer" target="_blank">Adaptive Yield Split</a>.',
@@ -1724,13 +1815,13 @@ const availableTranches = {
             stakingRewards:[],
             unstakeWithBalance:false,
             abi:TrancheStakingRewards,
-            name:'TrancheStakingRewards_ribbon_USDC_AA',
+            name:'TrancheStakingRewards_ribbon_folkvang_USDC_AA',
             address:'0x0000000000000000000000000000000000000000'
           },
           blockNumber:15831531,
-          name:'AA_ribbon_USDC',
-          token:'AA_ribbon_USDC',
-          label:'ribbon USDC AA',
+          name:'AA_ribbon_folkvang_USDC',
+          token:'AA_ribbon_folkvang_USDC',
+          label:'ribbon Folkvang USDC AA',
           address:'0x5f45A578491A23AC5AEE218e2D405347a0FaFa8E'
         },
         BB:{
@@ -1751,14 +1842,101 @@ const availableTranches = {
             stakingRewards:[],
             unstakeWithBalance:true,
             abi:IdleCDOTrancheRewards,
-            name:'IdleCDOTrancheRewards_ribbon_USDC_BB',
+            name:'IdleCDOTrancheRewards_ribbon_folkvang_USDC_BB',
             address:'0x0000000000000000000000000000000000000000'
           },
           blockNumber:15831531,
-          name:'BB_ribbon_USDC',
-          token:'BB_ribbon_USDC',
-          label:'ribbon USDC BB',
+          name:'BB_ribbon_folkvang_USDC',
+          token:'BB_ribbon_folkvang_USDC',
+          label:'ribbon Folkvang USDC BB',
           address:'0x982E46e81E99fbBa3Fb8Af031A7ee8dF9041bb0C'
+        }
+      },
+      USDCWin:{
+        abi:USDC,
+        decimals:6,
+        token:'USDC',
+        protocol:'ribbon',
+        tokenKey:'USDCWin',
+        autoFarming:['RBN'],
+        lender:'wintermute',
+        enabledEnvs:['beta'],
+        blockNumber:15925109,
+        maxUtilizationRate:0.99,
+        adaptiveYieldSplitEnabled:true,
+        address:'0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+        CDO:{
+          abi:IdleCDO,
+          decimals:18,
+          name:'IdleCDO_ribbon_wintermute_USDC',
+          address:'0xf6B692CC9A5421E4C66D32511d65F94c64fbD043'
+        },
+        Pool:{
+          abi:RibbonPool,
+          name:'Pool_ribbon_wintermute_USDC',
+          address:'0x0Aea75705Be8281f4c24c3E954D1F8b1D0f8044C'
+        },
+        Strategy:{
+          abi:IdleStrategy,
+          name:'IdleStrategy_ribbon_wintermute_USDC',
+          address:'0x73f3fb86cb579eeea9d482df2e91b6770a42fd6a'
+        },
+        description:'This strategy deploys funds in the <a href="https://lend.ribbon.finance/app/pool/wintermute" class="link" rel="nofollow noopener noreferrer" target="_blank">Ribbon Wintermute USDC pool</a>. The APR is dynamically adjusted according to the coverage provided to the counterpart Senior tranche thanks to the <a href="https://medium.com/idle-finance/adaptive-yield-split-foster-pyts-liquidity-scalability-a796fa17ea35" class="link" rel="nofollow noopener noreferrer" target="_blank">Adaptive Yield Split</a>.',
+        AA:{
+          abi:ERC20,
+          decimals:18,
+          tranche:'AA',
+          functions:{
+            stake:'stake',
+            unstake:'exit',
+            rewards:'earned',
+            claim:'getReward',
+            deposit:'depositAA',
+            withdraw:'withdrawAA',
+            rewardsRate:'rewardRate',
+            stakedBalance:'balanceOf',
+            utilizationRate:'getUtilizationRate'
+          },
+          CDORewards:{
+            decimals:18,
+            stakingRewards:[],
+            unstakeWithBalance:false,
+            abi:TrancheStakingRewards,
+            name:'TrancheStakingRewards_ribbon_wintermute_USDC_AA',
+            address:'0x0000000000000000000000000000000000000000'
+          },
+          blockNumber:15925109,
+          name:'AA_ribbon_wintermute_USDC',
+          token:'AA_ribbon_wintermute_USDC',
+          label:'Ribbon Wintermute USDC AA',
+          address:'0x3e041C9980Bc03011cc30491d0c4ccD53602F89B'
+        },
+        BB:{
+          abi:ERC20,
+          decimals:18,
+          tranche:'BB',
+          functions:{
+            stake:'stake',
+            claim:'claim',
+            unstake:'unstake',
+            deposit:'depositBB',
+            withdraw:'withdrawBB',
+            stakedBalance:'usersStakes',
+            utilizationRate:'getUtilizationRate'
+          },
+          CDORewards:{
+            decimals:18,
+            stakingRewards:[],
+            unstakeWithBalance:true,
+            abi:IdleCDOTrancheRewards,
+            name:'IdleCDOTrancheRewards_ribbon_wintermute_USDC_BB',
+            address:'0x0000000000000000000000000000000000000000'
+          },
+          blockNumber:15925109,
+          name:'BB_ribbon_wintermute_USDC',
+          token:'BB_ribbon_wintermute_USDC',
+          label:'Ribbon Wintermute USDC BB',
+          address:'0x65237B6Fc6E62B05B62f1EbE53eDAadcCd1684Ad'
         }
       },
       DAI:{

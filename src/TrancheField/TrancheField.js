@@ -330,12 +330,26 @@ class TrancheField extends Component {
     const flexProps = fieldProps.flexProps;
     delete fieldProps.flexProps;
 
+    const protocolConfig = this.functionsUtil.getGlobalConfig(['stats', 'protocols', this.props.protocol]);
+
     switch (fieldInfo.name){
       case 'protocolIcon':
-        const protocolConfig = this.functionsUtil.getGlobalConfig(['stats', 'protocols', this.props.protocol]);
         const protocolIcon = protocolConfig && protocolConfig.icon ? protocolConfig.icon : `${this.props.protocol}.svg`;
         output = (
           <Image src={`images/protocols/${protocolIcon}`} {...fieldProps} />
+        );
+      break;
+      case 'lenderIcon':
+        if (!this.props.tokenConfig.lender) return null
+        const lenderConfig = this.functionsUtil.getGlobalConfig(['stats', 'protocols', this.props.tokenConfig.lender]);
+        const lenderIcon = lenderConfig && lenderConfig.icon ? lenderConfig.icon : `${this.props.tokenConfig.lender}.svg`;
+        output = (
+          <Tooltip
+            placement={'top'}
+            message={`${protocolConfig.label} deploys funds into ${lenderConfig.label}`}
+          >
+            <Image src={`images/protocols/${lenderIcon}`} {...fieldProps} />
+          </Tooltip>
         );
       break;
       case 'statusIcon':

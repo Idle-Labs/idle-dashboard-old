@@ -1001,6 +1001,13 @@ class Tranches extends Component {
                               name:'protocolName'
                             },
                             {
+                              name:'lenderIcon',
+                              props:{
+                                ml:2,
+                                height:['1.2em','1.4em']
+                              }
+                            },
+                            {
                               mobile:false,
                               name:'statusIcon',
                               props:{
@@ -1225,6 +1232,13 @@ class Tranches extends Component {
                           },
                           {
                             name:'protocolName'
+                          },
+                          {
+                            name:'lenderIcon',
+                            props:{
+                              ml:2,
+                              height:['1.2em','1.4em']
+                            }
                           },
                           {
                             mobile:false,

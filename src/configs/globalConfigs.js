@@ -1878,6 +1878,15 @@ const globalConfigs = {
           hsl: ["82", "84%", "54%"]
         }
       },
+      folkvang: {
+        legend: false,
+        enabled: true,
+        label: "Folkvang",
+        color: {
+          rgb: [20, 29, 41],
+          hsl: ["214", "34%", "12%"]
+        }
+      },
       clearpool: {
         legend: false,
         enabled: true,
