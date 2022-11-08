@@ -1533,6 +1533,9 @@ const availableTranches = {
           name:'IdleStrategy_clearpool_wintermute_USDC',
           address:'0x54ae90be2dee0a960953c724839541e75bb1f471'
         },
+        links:{
+          default:'https://docs.clearpool.finance/clearpool/how-it-works/protocol/default',
+        },
         description:'This strategy deploys funds in the <a href="https://app.clearpool.finance/pool/0xCb288b6d30738db7E3998159d192615769794B5b" class="link" rel="nofollow noopener noreferrer" target="_blank">Clearpool Wintermute USDC pool</a>. The APR is dynamically adjusted according to the coverage provided to the counterpart Senior tranche thanks to the <a href="https://medium.com/idle-finance/adaptive-yield-split-foster-pyts-liquidity-scalability-a796fa17ea35" class="link" rel="nofollow noopener noreferrer" target="_blank">Adaptive Yield Split</a>.',
         AA:{
           abi:ERC20,
@@ -1619,6 +1622,9 @@ const availableTranches = {
           abi:IdleStrategy,
           name:'IdleStrategy_clearpool_folkvang_USDC',
           address:'0x84B2dEaF87A398F25ec5833000F72B6a4906b5AC'
+        },
+        links:{
+          default:'https://docs.clearpool.finance/clearpool/how-it-works/protocol/default',
         },
         description:'This strategy deploys funds in the <a href="https://app.clearpool.finance/pool/0xe3d20a721522874d32548b4097d1afc6f024e45b" class="link" rel="nofollow noopener noreferrer" target="_blank">Clearpool Folkvang USDC pool</a>. The APR is dynamically adjusted according to the coverage provided to the counterpart Senior tranche thanks to the <a href="https://medium.com/idle-finance/adaptive-yield-split-foster-pyts-liquidity-scalability-a796fa17ea35" class="link" rel="nofollow noopener noreferrer" target="_blank">Adaptive Yield Split</a>.',
         AA:{
@@ -1794,6 +1800,9 @@ const availableTranches = {
           name:'IdleStrategy_ribbon_folkvang_USDC',
           address:'0x25e7337037817DD9Bddd0334Ca1591f370518893'
         },
+        links:{
+          default:'https://docs.ribbon.finance/ribbon-lend/introduction-to-ribbon-lend/no-lockups/pool-status',
+        },
         description:'This strategy deploys funds in the <a href="https://lend.ribbon.finance/app/pool/folkvang" class="link" rel="nofollow noopener noreferrer" target="_blank">Ribbon Folkvang USDC pool</a>. The APR is dynamically adjusted according to the coverage provided to the counterpart Senior tranche thanks to the <a href="https://medium.com/idle-finance/adaptive-yield-split-foster-pyts-liquidity-scalability-a796fa17ea35" class="link" rel="nofollow noopener noreferrer" target="_blank">Adaptive Yield Split</a>.',
         AA:{
           abi:ERC20,
@@ -1880,6 +1889,9 @@ const availableTranches = {
           abi:IdleStrategy,
           name:'IdleStrategy_ribbon_wintermute_USDC',
           address:'0x73f3fb86cb579eeea9d482df2e91b6770a42fd6a'
+        },
+        links:{
+          default:'https://docs.ribbon.finance/ribbon-lend/introduction-to-ribbon-lend/no-lockups/pool-status',
         },
         description:'This strategy deploys funds in the <a href="https://lend.ribbon.finance/app/pool/wintermute" class="link" rel="nofollow noopener noreferrer" target="_blank">Ribbon Wintermute USDC pool</a>. The APR is dynamically adjusted according to the coverage provided to the counterpart Senior tranche thanks to the <a href="https://medium.com/idle-finance/adaptive-yield-split-foster-pyts-liquidity-scalability-a796fa17ea35" class="link" rel="nofollow noopener noreferrer" target="_blank">Adaptive Yield Split</a>.',
         AA:{

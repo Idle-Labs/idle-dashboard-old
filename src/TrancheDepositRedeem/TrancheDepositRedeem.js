@@ -552,7 +552,7 @@ class TrancheDetails extends Component {
 
     const unlentAmount = this.state.unlentAmount || this.functionsUtil.BNify(0);
 
-    let maxPoolUtilizationRateReachedText = `This pool has reached the maximum utilization rate (${(this.props.tokenConfig.maxUtilizationRate*100).toFixed(0)}%).`;
+    let maxPoolUtilizationRateReachedText = `This pool has reached the maximum utilization rate (${(this.props.tokenConfig.maxUtilizationRate*100).toFixed(0)}%). <a href="${this.props.tokenConfig.links.default}" target="_blank" rel="nofollow noopener noreferrer" class="link">Read more</a>.`;
 
     if (isDeposit) {
         maxPoolUtilizationRateReachedText = maxPoolUtilizationRateReachedText.concat(`<br />Check the flag to deposit at your own risk.`);
